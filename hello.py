@@ -3,6 +3,10 @@ from llama_cpp import Llama
 
 app = Flask(__name__)
 
+
+### TUT: use the following (flask --app hello run) to start the server
+
+
 # Initialize your Llama model
 llm = Llama(
     model_path="/Users/velocity/Documents/Holder/Project/CodingStuff/VICUNA/llama.cpp/models/Mistral/mistral-7b-instruct-v0.2.Q6_K.gguf",
