@@ -1,0 +1,44 @@
+{
+  "command_type": {
+    "value": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  },
+  "event_task_type": {
+    "value": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  },
+  "title": {
+    "value": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  },
+  "date_time": {
+    "start": {
+      "value": {
+        "type": "array",
+        "items": {"type": "string"}
+      }
+    },
+    "end": {
+      "value": {
+        "type": "array",
+        "items": {"type": "string"}
+      }
+    },
+    "due": {
+      "value": {
+        "type": "array",
+        "items": {"type": "string"}
+      }
+    },
+    "recurrence": {
+      "value": {"type": "boolean"}
+    }
+  }
+}
+
