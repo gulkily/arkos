@@ -38,10 +38,12 @@ def subtract_tool(expression: str) -> str:
 
 
 # Bind the tools to the model
-chat_model = chat_model.bind(tools=[multiply_tool, subtract_tool])
+chat_model = chat_model.bind_tools(tools=[multiply_tool, subtract_tool])
 
 
-chat_model = chat_model.bind(tools=chat_model.kwargs['tools']+["another_tool"])
+chat_model = chat_model.bind_tools(tools=chat_model.kwargs['tools']+["another_tool"])
+
+#note: need to c
 print(chat_model)
 exit()
 
