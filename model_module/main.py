@@ -39,7 +39,6 @@ if end_point_type == "LlamaCpp":
 if end_point_type == "OpenAI":
     
 
-
     chat_model = ChatOpenAI(temperature=0.5,
                 # model="models/mistral-7b-openorca.Q8_0.gguff", 
                 base_url=model_url, 
