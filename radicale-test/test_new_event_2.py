@@ -1,3 +1,6 @@
+# creates a new event on local radicale server
+# if there is no default calendar, creates a default calendar first
+
 import caldav
 import sys
 import subprocess
