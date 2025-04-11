@@ -1,0 +1,20 @@
+url = "http://localhost:5232"  # Default Radicale URL - adjust if needed
+username = "ilyag"     # Your Radicale username
+password = "admin"     # Your Radicale password
+
+
+To configure radicale for easy auth, edit this file: /etc/radicale/config
+
+It should have this:
+
+[auth]
+# Authentication method
+# Value: none | htpasswd | remote_user | http_x_remote_user
+type = htpasswd
+# Htpasswd filename
+htpasswd_filename = /etc/radicale/users
+
+Then do this to add a new user:
+
+sudo apt-get install apache2-utils
+sudo htpasswd -B /etc/radicale/users your_username
