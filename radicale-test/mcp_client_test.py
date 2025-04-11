@@ -1,3 +1,5 @@
+# used for testing mcp_radicale_bridge.py
+
 import asyncio
 import websockets
 import json
