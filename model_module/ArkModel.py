@@ -78,8 +78,9 @@ class ArkModelLink(BaseChatModel):
         response = output.choices[0].message.content
         return response
     
-    def bind_tools(self,tool):
-        self.bind(tool)
+    def bind_tools(self,tools):
+        self.bind(tools)
+
 
         pass
 
