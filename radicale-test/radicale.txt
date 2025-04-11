@@ -1,0 +1,4 @@
+url = "http://localhost:5232"  # Default Radicale URL - adjust if needed
+username = "ilyag"     # Your Radicale username
+password = "admin"     # Your Radicale password
+
