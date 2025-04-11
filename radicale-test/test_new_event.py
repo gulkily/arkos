@@ -1,3 +1,6 @@
+# create a test event on local radicale instance
+# a default calendar needs to already exist for this script to work
+
 import caldav
 from datetime import datetime, timedelta
 
