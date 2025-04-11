@@ -79,10 +79,18 @@ class ArkModelLink(BaseChatModel):
         return response
     
     def bind_tools(self,tools):
-        self.bind(tools)
+        '''
+
+        input: tools [array of tools]
+
+        '''
+        if not self.kwargs: 
+            self.bind_tools(tools=tools)
+        else:
+            self.bind_tools(tools=chat_model.kwargs['tools']+tools)
 
 
-        pass
+        
 
     @property
     def _llm_type(self) -> str:
