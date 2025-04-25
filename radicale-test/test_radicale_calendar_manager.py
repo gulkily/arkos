@@ -1,3 +1,21 @@
+"""
+Test suite for the RadicaleCalendarManager class.
+
+This module contains comprehensive tests for the RadicaleCalendarManager class,
+which provides an interface to interact with a Radicale CalDAV server.
+The tests cover basic connectivity, calendar operations, and event CRUD operations.
+
+Requirements:
+- A running Radicale server
+- Valid credentials in a .env file (RADICALE_URL, RADICALE_USERNAME, RADICALE_PASSWORD)
+- At least one calendar available on the server
+
+Usage:
+    python test_radicale_calendar_manager.py
+
+The test suite will output detailed results including passed, failed, and error tests.
+"""
+
 import unittest
 import os
 from dotenv import load_dotenv
@@ -7,24 +25,34 @@ import uuid
 import sys
 from io import StringIO
 from radicale_calendar_manager import RadicaleCalendarManager
+from test_radicale_calendar_manager_edge_cases import RadicaleCalendarManagerEdgeTests
 
 class TestResults:
-    """Helper class to track test results."""
+    """
+    Helper class to track test results.
+    
+    This class collects information about test successes, failures, and errors,
+    and provides methods to display a summary of the test run.
+    """
     def __init__(self):
         self.passed = []
         self.failed = []
         self.errors = []
 
     def add_success(self, test):
+        """Record a successful test."""
         self.passed.append(test)
 
     def add_failure(self, test, err):
+        """Record a test failure with the error information."""
         self.failed.append((test, err))
 
     def add_error(self, test, err):
+        """Record a test error with the error information."""
         self.errors.append((test, err))
 
     def print_summary(self):
+        """Print a formatted summary of all test results."""
         print("\n======= TEST RESULTS SUMMARY =======")
         print(f"PASSED: {len(self.passed)} tests")
         for test in self.passed:
@@ -47,28 +75,50 @@ class TestResults:
         print("====================================")
 
 class CustomTestResult(unittest.TestResult):
+    """
+    Custom TestResult class that forwards results to a TestResults collector.
+    
+    This class extends unittest.TestResult to capture test outcomes and
+    forward them to a TestResults instance for tracking.
+    """
     def __init__(self, results_collector):
         super().__init__()
         self.results_collector = results_collector
 
     def addSuccess(self, test):
+        """Record a test success."""
         super().addSuccess(test)
         self.results_collector.add_success(test._testMethodName)
 
     def addFailure(self, test, err):
+        """Record a test failure."""
         super().addFailure(test, err)
         self.results_collector.add_failure(test._testMethodName, err[1])
 
     def addError(self, test, err):
+        """Record a test error."""
         super().addError(test, err)
         self.results_collector.add_error(test._testMethodName, err[1])
 
 class TestRadicaleCalendarManager(unittest.TestCase):
-    """Tests for the RadicaleCalendarManager class."""
+    """
+    Tests for the RadicaleCalendarManager class.
+    
+    This test suite verifies the functionality of the RadicaleCalendarManager,
+    including connection, calendar operations, and event CRUD operations.
+    """
 
     @classmethod
     def setUpClass(cls):
-        """Set up the test environment once before all tests."""
+        """
+        Set up the test environment once before all tests.
+        
+        This method:
+        1. Loads credentials from .env file
+        2. Initializes the calendar manager
+        3. Connects to the Radicale server
+        4. Selects a test calendar
+        """
         # Load credentials from .env file
         load_dotenv()
         cls.url = os.getenv("RADICALE_URL")
@@ -104,7 +154,12 @@ class TestRadicaleCalendarManager(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        """Clean up after all tests have run."""
+        """
+        Clean up after all tests have run.
+        
+        This method deletes all events created during testing to leave
+        the calendar in its original state.
+        """
         print(f"Cleaning up {len(cls.events_to_cleanup)} test events...")
         for event_id in cls.events_to_cleanup:
             try:
@@ -113,19 +168,38 @@ class TestRadicaleCalendarManager(unittest.TestCase):
                 print(f"Failed to clean up event ID: {event_id}")
 
     def generate_unique_summary(self):
-        """Generate a unique event summary for testing."""
+        """
+        Generate a unique event summary for testing.
+        
+        Returns:
+            str: A unique event summary with timestamp and random ID
+        """
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         random_id = str(uuid.uuid4())[:8]
         return f"Test Event {timestamp}-{random_id}"
 
     def test_connection(self):
-        """Test that we can connect to the Radicale server."""
+        """
+        Test that we can connect to the Radicale server.
+        
+        Verifies that:
+        1. Connection is successful
+        2. Principal is retrieved
+        3. Calendars are available
+        """
         self.assertTrue(self.manager.connect())
         self.assertIsNotNone(self.manager.principal)
         self.assertTrue(len(self.manager.calendars) > 0)
 
     def test_get_calendar(self):
-        """Test retrieving calendars."""
+        """
+        Test retrieving calendars.
+        
+        Tests:
+        1. Getting the default calendar
+        2. Getting a specific calendar by name
+        3. Handling non-existent calendars
+        """
         # Get the default calendar
         calendar = self.manager.get_calendar()
         self.assertIsNotNone(calendar)
@@ -140,7 +214,15 @@ class TestRadicaleCalendarManager(unittest.TestCase):
         self.assertIsNone(calendar)
 
     def test_create_and_find_event(self):
-        """Test creating an event and finding it."""
+        """
+        Test creating an event and finding it.
+        
+        This test:
+        1. Creates a new event with a unique summary
+        2. Verifies the event was created successfully
+        3. Retrieves events and confirms the test event is present
+        4. Verifies the event properties match what was created
+        """
         # Create a unique event summary
         test_summary = self.generate_unique_summary()
 
@@ -179,7 +261,14 @@ class TestRadicaleCalendarManager(unittest.TestCase):
         self.assertEqual(test_event.get("description"), "This is a test event created by the unit test")
 
     def test_date_filtering(self):
-        """Test filtering events by date range."""
+        """
+        Test filtering events by date range.
+        
+        This test:
+        1. Creates events with different dates (today, tomorrow, next week)
+        2. Tests various date range filters to ensure proper filtering
+        3. Verifies events are correctly included or excluded based on date ranges
+        """
         # Create events with different dates
         # Event 1: Today
         today = datetime.now().replace(microsecond=0)
@@ -283,7 +372,15 @@ class TestRadicaleCalendarManager(unittest.TestCase):
         self.assertFalse(found_next_week, "Next week's event found in 3-day range (should not be)")
 
     def test_event_update(self):
-        """Test updating an event."""
+        """
+        Test updating an event.
+        
+        This test:
+        1. Creates a test event
+        2. Retrieves the event to confirm it exists
+        3. Updates the event with new data
+        4. Retrieves the event again to verify the updates were applied
+        """
         # Create a test event
         test_summary = self.generate_unique_summary()
         now = datetime.now().replace(microsecond=0)
@@ -476,6 +573,11 @@ class TestRadicaleCalendarManager(unittest.TestCase):
         self.assertIsNotNone(found_event, "Minimal event not found")
         # Default end time should be present
         self.assertIsNotNone(found_event.get("end"), "End time should be auto-set")
+
+    def test_edge_cases(self):
+        """Run all edge case tests."""
+        edge_tests = RadicaleCalendarManagerEdgeTests(self)
+        edge_tests.run_all_edge_tests()
 
     def test_event_with_special_characters(self):
         """Test creating events with special characters in fields."""
