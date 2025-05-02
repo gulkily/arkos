@@ -6,8 +6,10 @@ from langchain_core.messages import (
     HumanMessage,
     SystemMessage,
 )
+from langchain_core.tools import tool
 
-from ArkModel import ArkModelLink
+
+from ArkModelOAI import ArkModelLink
 import yaml
 # loads configuration for model
 with open("../config_module/config.yaml", 'r') as file:
@@ -18,43 +20,29 @@ model_url = configuration["model_url"]
 
 chat_model = ArkModelLink()
 
+@tool
+def multiply_tool(number_1: int, number_2: int) -> str:
+    """Multiplies two numbers."""
 
-def multiply_tool(expression: str) -> str:
-    """Multiplies two numbers given in the format 'a*b'."""
-    try:
-        num1, num2 = map(int, expression.split('*'))
-        return str(num1 * num2)
-    except Exception:
-        return "Invalid input. Please use the format 'number*number'."
-
-def subtract_tool(expression: str) -> str:
-    """Multiplies two numbers given in the format 'a*b'."""
-    try:
-        num1, num2 = map(int, expression.split('*'))
-        return str(num1 * num2)
-    except Exception:
-        return "Invalid input. Please use the format 'number*number'."
-
+    return number_1 * number_2
 
 
 # Bind the tools to the model
-chat_model = chat_model.bind_tools(tools=[multiply_tool, subtract_tool])
+chat_model = chat_model.bind_tools([multiply_tool])
 
 
-chat_model = chat_model.bind_tools(tools=chat_model.kwargs['tools']+["another_tool"])
 
 #note: need to c
-print(chat_model)
-exit()
 
 prompt_template = ChatPromptTemplate.from_messages(
 
     [
-        ("system", "you are a helpful AI assitant who gives funny answers to questions"),
+        ("system", "you are a helpful AI assitant who gives funny answers to questions. You have tool calling functionality. If you recieve something that appears odd, it was a tool call you made. Give back the tool call and a response to it."),
         ("human", "{prompt}"), 
     ]
 )
 chain =  prompt_template | chat_model | StrOutputParser()
-result = chain.invoke({"prompt": "Who is Trump"})
-print("******* \n\n ****** \n\n")
+result = chain.invoke({"prompt": "What is 51  * 90123 "})
+print("******* \n\n **HERE**** \n\n")
 print(result)
+print("FINISHED")
