@@ -6,7 +6,9 @@ from langchain_core.callbacks import CallbackManagerForLLMRun
 from langchain_core.messages import BaseMessage, AIMessage
 from langchain_core.outputs import ChatGeneration, ChatGenerationChunk, ChatResult
 from langchain_core.tools import BaseTool
+from langchain_core.utils.function_calling import convert_to_openai_function
 from huggingface_hub import InferenceClient
+from openai import OpenAI
 import pprint 
 pp = pprint.PrettyPrinter()
 
@@ -22,116 +24,99 @@ class ArkModelLink(BaseChatModel, BaseModel):
     temperature: float = Field(default=0.7)
     tools: Optional[List[BaseTool]] = Field(default_factory=list)
 
+
     def _convert_tools(self) -> Optional[List[Dict[str, Any]]]:
         if not self.tools:
             return None
 
         def convert_tool(tool: BaseTool) -> Dict[str, Any]:
-            properties = {'properties': {}}
-            required = []
-            for arg in tool.args:
-                # print(tool.args[arg])
-                title = tool.args[arg]['title']
-                var_type = tool.args[arg]['type']
-                properties['properties'][title] = {}
-                properties['properties'][title]["type"] = str(var_type)
-                required.append(title)
-            
-
-            converted_tool =  {
+            tool_as_dict = convert_to_openai_function(tool)
+            return {
                 "type": "function",
-                "function": {
-                    "name": tool.name,
-                    "description": tool.description or "",
-                    "parameters": {
-                        "type": "object" ,
-                        
-                        "properties": properties,
-                       }, 
-                    "required" : required, 
-                },
-
+                "function": tool_as_dict
             }
-
-
-            pp.pprint(converted_tool)
-
-
-            exit()
-
-            return converted_tool
-        converted  =  [convert_tool(tool) for tool in self.tools]
-        
-        return converted 
+            
+        converted = [convert_tool(tool) for tool in self.tools]
+        return converted
     def _get_tool_by_name(self, name: str) -> Optional[BaseTool]:
         return next((tool for tool in self.tools if tool.name == name), None)
 
     def make_llm_call(self, messages: List[BaseMessage], tools: Optional[List[Dict[str, Any]]] = None) -> Union[str, Dict[str, Any]]:
-        client = InferenceClient(base_url=self.base_url)
-
-        payload = {
-            "model": self.model_name,
-            "messages": [
-                {"role": "system", "content": messages[0].content},
-                {"role": "user", "content": messages[-1].content},
-            ],
-            "stream": False,
-            "max_tokens": self.max_tokens,
-        }
-
-        if tools:
-            payload["tools"] = tools
-        print("********************PAYLOAD******************")
-        pp.pprint(payload)
-        print("********************PAYLOAD******************")
-
-        output = client.chat.completions.create(**payload)
-        choice = output.choices[0]
-        print(choice)
-        exit()
-        tool_calls = getattr(choice.message, "tool_calls", None)
-        if tool_calls:
-            tool_call = tool_calls[0]
-            function_call = getattr(tool_call, "function", {})
-
-            if isinstance(function_call, dict):
-                name = function_call.get("name", "")
-                arguments = function_call.get("arguments", function_call.get("parameters", {}))
-            else:
-                name = getattr(function_call, "name", "")
-                arguments = getattr(function_call, "arguments", getattr(function_call, "parameters", {}))
-
-            return {
-                "tool_name": name,
-                "arguments": arguments,
-                "tool_call_id": getattr(tool_call, "id", "tool_call_1")
-            }
-
-        return choice.message.content
-
-    def _generate(
-        self,
-        messages: List[BaseMessage],
-        stop: Optional[List[str]] = None,
-        run_manager: Optional[CallbackManagerForLLMRun] = None,
-        **kwargs: Any
-    ) -> ChatResult:
-
-        tool_schemas = self._convert_tools()
-        response = self.make_llm_call(messages, tools=tool_schemas)
-
-
-
-        if isinstance(response, dict) and "tool_name" in response:
-
+        client = OpenAI(
+            base_url="http://localhost:8080/v1",
+            api_key="_",
+        )
         
-            tool = self._get_tool_by_name(response["tool_name"])
-            if not tool:
-                raise ValueError(f"Tool '{response['tool_name']}' was requested but not found")
-
-            tool_output = tool.invoke(response["arguments"])
-            content = str(tool_output)
+        chat_completion = client.chat.completions.create(
+            model="tgi",
+            messages=[
+                {
+                    "role": "system",
+                    "content": messages[0].content,
+                },
+                {
+                    "role": "user",
+                    "content": messages[-1].content,
+                },
+            ],
+            tools=tools,
+            tool_choice="auto",  # tool selected by model
+            max_tokens=self.max_tokens,
+        )
+        message = chat_completion.choices[0].message
+        if hasattr(message, "tool_calls") and message.tool_calls:
+            # Return full message object if there are tool calls
+            return {"tool_calls": message.tool_calls}
         else:
+            return {"tool_calls": None, "message": message.content}
+        
+    
+    def _generate(
+    self,
+    messages: List[BaseMessage],
+    stop: Optional[List[str]] = None,
+    run_manager: Optional[CallbackManagerForLLMRun] = None,
+    **kwargs: Any
+) -> ChatResult:
+        tool_schemas = self._convert_tools()
+
+        # Step 1: Make initial LLM call
+        response = self.make_llm_call(messages, tools=tool_schemas)
+        if response["tool_calls"]: 
+            tool_messages = [] 
+            
+            for tool_call in response["tool_calls"]:
+                tool_name = tool_call.function.name
+                arguments = tool_call.function.arguments
+
+                tool = self._get_tool_by_name(tool_name)
+                if not tool:
+                    raise ValueError(f"Tool '{tool_name}' was requested but not found")
+
+                tool_args = arguments
+
+                
+
+                tool_output = tool.invoke(tool_args)
+                tool_message = {
+                    "type" : "message",
+                    "role": "tool",
+                    "tool_call_id": tool_call.id,
+                    "content": str(tool_output),
+                }
+                tool_messages.append(tool_message)
+
+                # Step 2: Make SECOND LLM call, feeding back tool results
+                
+                second_response = self.make_llm_call(
+                    messages + [BaseMessage(**tool_messages[0])],  # feed back the tool result
+                    tools=tool_schemas,
+                )
+
+                content = str(second_response)
+
+        else:
+            # No tool used, just regular model output
             content = str(response)
 
         message = AIMessage(
@@ -147,6 +132,8 @@ class ArkModelLink(BaseChatModel, BaseModel):
         return ChatResult(generations=[generation], llm_output=None)
 
     def bind_tools(self, tools: List[BaseTool]) -> "ArkModelLink":
+
+        
         return self.copy(update={"tools": self.tools + tools})
 
     @property
