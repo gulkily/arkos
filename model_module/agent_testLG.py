@@ -5,8 +5,7 @@ from langgraph.graph.message import add_messages
 from langchain_openai import ChatOpenAI
 from langchain_huggingface import HuggingFaceEndpoint, ChatHuggingFace
 from langchain_core.utils.function_calling import convert_to_openai_function
-
-
+from ArkModelOAI import ArkModelLink
 import json
 import traceback
 
@@ -84,7 +83,7 @@ chat_model = ChatOpenAI(temperature=0.5,
 # )
 
 # chat_model = ChatHuggingFace(llm=llm)
-
+chat_model = ArkModelLink()
 # Create tools 
 
 @tool
@@ -124,9 +123,7 @@ def multiply(a: int, b: int) -> int:
 
 
 tools = [multiply, get_weather, get_ai_status]
-tools_new = [convert_to_openai_function(x) for x in tools]
 tool_node = ToolNode(tools)
-
 
 ####### ISOLATED TEST
 # conn = sqlite3.connect("database_temp/checkpints.sqlite", check_same_thread=False)
