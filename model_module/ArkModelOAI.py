@@ -83,6 +83,8 @@ class ArkModelLink(BaseChatModel, BaseModel):
         # Step 1: Make initial LLM call
         response = self.make_llm_call(messages, tools=tool_schemas)
         if response["tool_calls"]: 
+
+            print("***** IM USING TOOLS ******")
             tool_messages = [] 
             
             for tool_call in response["tool_calls"]:
@@ -107,15 +109,18 @@ class ArkModelLink(BaseChatModel, BaseModel):
                 tool_messages.append(tool_message)
 
                 # Step 2: Make SECOND LLM call, feeding back tool results
-                
+
+                hinter = "the answer to the tool you called is: "
                 second_response = self.make_llm_call(
-                    messages + [BaseMessage(**tool_messages[0])],  # feed back the tool result
+                    messages + [BaseMessage(type="unknown", content=hinter + tool_messages[0]['content'])],  # feed back the tool result
                     tools=tool_schemas,
                 )
 
+                
                 content = str(second_response)
 
         else:
+            print("*****NO TOOL CALL USED****")
             # No tool used, just regular model output
             content = str(response)
 
@@ -127,6 +132,7 @@ class ArkModelLink(BaseChatModel, BaseModel):
                 "total_tokens": 579
             }
         )
+
 
         generation = ChatGeneration(message=message)
         return ChatResult(generations=[generation], llm_output=None)
@@ -186,4 +192,10 @@ class ArkModelLink(BaseChatModel, BaseModel):
                     )
             except Exception:
                 continue
+
+if __name__ == "__main__":
+    chat_model = ArkModelLink()
+
+
+
 
