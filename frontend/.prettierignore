@@ -1,0 +1,7 @@
+# reformatting package-lock.json is fine actually, makes it easier to read
+
+# no reformatting the README!
+README.md
+
+# can't use prettier for images anyways
+**/*.png
