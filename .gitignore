@@ -2,3 +2,6 @@
 
 /model_module/models/*
 /model_module/data/*
+
+/frontend/node_modules/*
+/frontend/.svelte-kit/*
