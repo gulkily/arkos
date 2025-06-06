@@ -19,6 +19,10 @@ Then do this to add a new user:
 sudo apt-get install apache2-utils
 sudo htpasswd -B /etc/radicale/users your_username
 
+To run Radicale:
+
+sudo radicale
+
 #####
 
 To test the manager class:
@@ -35,3 +39,5 @@ python3 mcp_radicale_bridge.py
 To test MCP interface:
 
 python3 test_mcp_client.py
+
+
