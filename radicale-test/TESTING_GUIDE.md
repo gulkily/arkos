@@ -10,6 +10,11 @@ python test_radicale_calendar_manager.py
 ```
 This tests all CRUD operations, event creation, updates, deletions.
 
+**Note: After running this, run the cleanup script:**
+```bash
+python cleanup_calendar.py
+```
+
 ### 2. **MCP WebSocket Integration** (Enhanced client)
 ```bash
 # Terminal 1: Start the WebSocket bridge
