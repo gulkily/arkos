@@ -322,14 +322,18 @@ class CalendarMCPIntegration:
                 from datetime import datetime
                 import re
                 
-                # Parse input parameters from string
-                calendar_match = re.search(r'calendar[_\s]*name[:\s]*["\']?([^"\']+)["\']?', input_str, re.IGNORECASE)
-                start_match = re.search(r'start[_\s]*date[:\s]*["\']?([^"\']+)["\']?', input_str, re.IGNORECASE)
-                end_match = re.search(r'end[_\s]*date[:\s]*["\']?([^"\']+)["\']?', input_str, re.IGNORECASE)
+                # Parse input parameters from string - handle comma-separated values
+                calendar_match = re.search(r'calendar[_\s]*name[:\s]*["\']?([^"\',:]+)["\']?', input_str, re.IGNORECASE)
+                start_match = re.search(r'start[_\s]*date[:\s]*["\']?([^"\',:]+)["\']?', input_str, re.IGNORECASE)
+                end_match = re.search(r'end[_\s]*date[:\s]*["\']?([^"\',:]+)["\']?', input_str, re.IGNORECASE)
                 
-                calendar_name = calendar_match.group(1) if calendar_match else None
-                start_date = start_match.group(1) if start_match else None
-                end_date = end_match.group(1) if end_match else None
+                calendar_name = calendar_match.group(1).strip() if calendar_match else None
+                start_date = start_match.group(1).strip() if start_match else None
+                end_date = end_match.group(1).strip() if end_match else None
+                
+                # If no explicit parameters found, treat whole string as start_date
+                if not calendar_name and not start_date and not end_date:
+                    start_date = input_str.strip()
                 
                 start_dt = None
                 end_dt = None
@@ -340,11 +344,25 @@ class CalendarMCPIntegration:
                 if end_date:
                     end_dt = parse_natural_date(end_date)
                 
+                # If no calendar specified, use first available
+                if not calendar_name and server.calendar_manager.calendars:
+                    calendar_name = server.calendar_manager.calendars[0].name
+                
                 events = server.calendar_manager.get_events(calendar_name, start_dt, end_dt)
                 
-                used_calendar = calendar_name
-                if not used_calendar and server.calendar_manager.calendars:
-                    used_calendar = server.calendar_manager.calendars[0].name
+                # If looking for events "after" a specific time, filter them
+                if "after" in input_str.lower() and start_dt:
+                    filtered_events = []
+                    for event in events:
+                        try:
+                            event_start = datetime.fromisoformat(event['start'].replace('Z', '+00:00'))
+                            if event_start >= start_dt:
+                                filtered_events.append(event)
+                        except:
+                            filtered_events.append(event)  # Include if can't parse
+                    events = filtered_events
+                
+                used_calendar = calendar_name or "Default Calendar"
                 
                 return json.dumps({
                     "status": "success",
