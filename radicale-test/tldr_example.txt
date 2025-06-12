@@ -1,0 +1,102 @@
+wsl@Lenovo:~/ARK2.0/radicale-test$ python langchain_example_mcp.py
+🗓️  MCP Calendar Agent
+====================
+Choose a mode:
+1. Run interactive session
+2. Run predefined examples
+3. Quick test
+
+Enter your choice (1, 2, or 3): 1
+INFO:langchain-mcp-example:Initializing MCP calendar agent...
+INFO:langchain-mcp-integration:Initializing LangChain MCP integration for calendar operations
+WARNING:langchain-mcp-integration:langchain-mcp-tools not available: langchain-mcp-tools package not installed
+INFO:langchain-mcp-integration:Using langchain-mcp-adapters for MCP integration
+ERROR:langchain-mcp-integration:Failed to initialize with langchain-mcp-adapters: '_io.TextIOWrapper' object has no attribute 'command'
+INFO:langchain-mcp-integration:Creating manual MCP tools as fallback
+INFO:radicale-calendar-manager:Connected to Radicale, found 1 calendars
+INFO:mcp-radicale-server:Successfully connected to Radicale server at http://localhost:5232
+INFO:langchain-mcp-integration:Created 3 manual MCP tools
+INFO:langchain-mcp-integration:Successfully initialized with manual tools: 3 tools loaded
+INFO:langchain-mcp-example:Loaded 3 MCP tools: ['list_calendars', 'get_events', 'create_event']
+INFO:langchain-mcp-example:MCP calendar agent initialized successfully
+
+🗓️  Welcome to the MCP Calendar Assistant!
+Type your calendar requests in natural language.
+Examples: 'What meetings do I have today?', 'Schedule a meeting with John tomorrow at 2pm'
+Type 'quit', 'exit', or 'bye' to end the session.
+
+You: What meetings do I have tomorrow?
+🤔 Processing your request...
+INFO:langchain-mcp-example:Processing operation: What meetings do I have tomorrow?
+
+
+> Entering new AgentExecutor chain...
+INFO:httpx:HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+
+Invoking: `get_events` with `start_date: tomorrow`
+responded: Sure, let me check your calendar for tomorrow.
+
+INFO:root:DEPRECATION NOTICE: The calendar.date_search method may be removed in release 2.0 of the caldav library.  Use calendar.search instead
+INFO:httpx:HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+{"status": "success", "calendar": "Default Calendar", "events": [{"id": "0a384707-f831-41b0-8266-64379c31f88f", "summary": "Dentist appointment", "start": "2025-06-13T14:00:00+00:00", "end": "2025-06-13T15:00:00+00:00", "location": "", "description": ""}, {"id": "b94bde33-9dab-42ed-8c57-5820a7331393", "summary": "Dentist appointment", "start": "2025-06-13T14:00:00+00:00", "end": "2025-06-13T15:00:00+00:00", "location": "", "description": ""}, {"id": "f3d678ab-3ef0-440c-8469-89d88aea6a70", "summary": "Dentist appointment", "start": "2025-06-13T14:00:00+00:00", "end": "2025-06-13T15:00:00+00:00", "location": "", "description": ""}, {"id": "8cdbb5e1-352a-4ee2-8f27-2ed51b2329c3", "summary": "Test Event from LangChain Test", "start": "2025-06-13T21:12:56+00:00", "end": "2025-06-13T22:12:56+00:00", "location": "", "description": ""}, {"id": "3d3682b9-c6e9-465b-a098-d72f8a6767ab", "summary": "Dentist Appointment", "start": "2025-06-13T14:00:00+00:00", "end": "2025-06-13T15:00:00+00:00", "location": "", "description": ""}], "count": 5}You have the following meetings scheduled for tomorrow:
+1. Dentist appointment at 2:00 PM - 3:00 PM
+2. Dentist appointment at 2:00 PM - 3:00 PM
+3. Dentist appointment at 2:00 PM - 3:00 PM
+4. Test Event from LangChain Test at 9:12 PM - 10:12 PM
+5. Dentist Appointment at 2:00 PM - 3:00 PM
+
+Is there anything else you would like to know or do?
+
+> Finished chain.
+INFO:langchain-mcp-example:Operation completed successfully
+Assistant: You have the following meetings scheduled for tomorrow:
+1. Dentist appointment at 2:00 PM - 3:00 PM
+2. Dentist appointment at 2:00 PM - 3:00 PM
+3. Dentist appointment at 2:00 PM - 3:00 PM
+4. Test Event from LangChain Test at 9:12 PM - 10:12 PM
+5. Dentist Appointment at 2:00 PM - 3:00 PM
+
+Is there anything else you would like to know or do?
+
+You: Schedule a meeting with John for tomorrow, please
+🤔 Processing your request...
+INFO:langchain-mcp-example:Processing operation: Schedule a meeting with John for tomorrow, please
+
+
+> Entering new AgentExecutor chain...
+INFO:httpx:HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+Sure! What time would you like to schedule the meeting with John for tomorrow?
+
+> Finished chain.
+INFO:langchain-mcp-example:Operation completed successfully
+Assistant: Sure! What time would you like to schedule the meeting with John for tomorrow?
+
+You: 3pm
+🤔 Processing your request...
+INFO:langchain-mcp-example:Processing operation: 3pm
+
+
+> Entering new AgentExecutor chain...
+INFO:httpx:HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+
+Invoking: `create_event` with `{'calendar_name': 'Work', 'summary': 'Meeting with John', 'start': 'tomorrow at 3pm', 'duration': 60}`
+
+
+INFO:httpx:HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+{"status": "error", "message": "Calendar not found"}
+Invoking: `list_calendars` with `list`
+
+
+INFO:httpx:HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+{"status": "success", "calendars": ["Default Calendar"], "count": 1}
+Invoking: `create_event` with `{'calendar_name': 'Default Calendar', 'summary': 'Meeting with John', 'start': 'tomorrow at 3pm', 'duration': 60}`
+
+
+INFO:httpx:HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+{"status": "success", "message": "Event 'Meeting with John' created successfully", "event_id": "c75fc068-e4e5-4c30-88bc-463d52295b9f", "calendar": "Default Calendar", "start": "2025-06-13T15:00:00", "duration": 60}The meeting with John has been successfully scheduled for tomorrow at 3:00 PM in the Default Calendar. Is there anything else you would like to do?
+
+> Finished chain.
+INFO:langchain-mcp-example:Operation completed successfully
+Assistant: The meeting with John has been successfully scheduled for tomorrow at 3:00 PM in the Default Calendar. Is there anything else you would like to do?
+
+You:
