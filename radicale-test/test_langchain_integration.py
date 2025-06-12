@@ -210,6 +210,7 @@ class TestMCPCalendarAgent:
                         mock_llm_class.assert_called_once_with(
                             model="gpt-3.5-turbo",
                             temperature=0,
+                            max_tokens=4000,
                             api_key="test-key"
                         )
                         
@@ -336,18 +337,15 @@ class TestToolFunctionality:
             
             assert create_tool is not None
             
-            # Create event with JSON input
+            # Create event with structured input (new format)
             event_data = {
                 "calendar_name": "Default Calendar",
                 "summary": "Test Event from LangChain Test",
                 "start": (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%S"),
-                "end": (datetime.now() + timedelta(days=1, hours=1)).strftime("%Y-%m-%dT%H:%M:%S"),
-                "description": "Created by LangChain integration test",
-                "location": "Test Location"
+                "duration": 60
             }
             
-            json_input = json.dumps(event_data)
-            result = create_tool.run(json_input)
+            result = create_tool.run(event_data)
             parsed_result = json.loads(result)
             
             assert "status" in parsed_result
@@ -380,9 +378,13 @@ class TestErrorHandling:
             
             assert create_tool is not None
             
-            # Test with invalid JSON
-            result = create_tool.run("invalid json {")
-            parsed_result = json.loads(result)
+            # Test with invalid structured input
+            try:
+                result = create_tool.run({"invalid": "data"})
+                parsed_result = json.loads(result)
+            except Exception as e:
+                # Structured tools may raise validation errors directly
+                parsed_result = {"status": "error", "message": str(e)}
             
             # Should handle error gracefully
             assert "status" in parsed_result
