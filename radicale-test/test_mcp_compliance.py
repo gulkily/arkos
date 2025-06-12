@@ -308,19 +308,22 @@ class TestToolFunctionality:
             
             # Format input based on tool interface
             if integration._integration_method == "manual":
-                input_str = json.dumps({
-                    "calendar_name": "test",
+                # Use structured input for StructuredTool
+                input_data = {
+                    "calendar_name": "Default Calendar",  # Use existing calendar
                     "summary": test_summary,
-                    "start": start_time
-                })
+                    "start": start_time,
+                    "duration": 60  # Add required duration field
+                }
             else:
-                input_str = json.dumps({
-                    "calendar_name": "test",
+                # Fallback for other integration methods
+                input_data = json.dumps({
+                    "calendar_name": "Default Calendar",
                     "summary": test_summary,
                     "start": start_time
                 })
             
-            result = create_tool.run(input_str)
+            result = create_tool.run(input_data)
             assert isinstance(result, str), "Tool should return string"
             
             # Parse result (may fail due to connection issues, but should be valid JSON)
