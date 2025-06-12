@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARK Calendar API Documentation</title>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui.css" />
+    <style>
+        html {
+            box-sizing: border-box;
+            overflow: -moz-scrollbars-vertical;
+            overflow-y: scroll;
+        }
+        *, *:before, *:after {
+            box-sizing: inherit;
+        }
+        body {
+            margin:0;
+            background: #fafafa;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .swagger-ui .topbar {
+            background-color: #2c3e50;
+        }
+        .swagger-ui .topbar .download-url-wrapper .select-label {
+            color: #ecf0f1;
+        }
+        .swagger-ui .topbar .download-url-wrapper input[type="text"] {
+            border: 2px solid #34495e;
+        }
+        .header-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .header-container h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 300;
+        }
+        .header-container p {
+            margin: 1rem 0 0;
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        .info-section {
+            max-width: 1200px;
+            margin: 0 auto 2rem;
+            padding: 0 1rem;
+        }
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .info-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid #3498db;
+        }
+        .info-card h3 {
+            margin: 0 0 1rem;
+            color: #2c3e50;
+            font-size: 1.3rem;
+        }
+        .info-card p {
+            margin: 0;
+            color: #7f8c8d;
+            line-height: 1.6;
+        }
+        .endpoint-examples {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .endpoint-examples h3 {
+            margin: 0 0 1rem;
+            color: #2c3e50;
+        }
+        .endpoint {
+            display: flex;
+            align-items: center;
+            margin: 0.5rem 0;
+            padding: 0.75rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        }
+        .method {
+            font-weight: bold;
+            margin-right: 1rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+            color: white;
+            min-width: 60px;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+        .method.get { background: #61affe; }
+        .method.post { background: #49cc90; }
+        .method.put { background: #fca130; }
+        .method.delete { background: #f93e3e; }
+        .url-select {
+            margin: 1rem 0;
+            padding: 0.5rem;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        #swagger-ui {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header-container">
+        <h1>🗓️ ARK Calendar API</h1>
+        <p>Comprehensive Calendar Management API with Radicale Integration</p>
+    </div>
+
+    <div class="info-section">
+        <div class="info-cards">
+            <div class="info-card">
+                <h3>🚀 Features</h3>
+                <p>Full CRUD operations for calendar events, natural language processing, CalDAV integration, and real-time async operations.</p>
+            </div>
+            <div class="info-card">
+                <h3>🔧 Integration</h3>
+                <p>Seamlessly integrates with Radicale CalDAV server, supporting multiple calendars and standard iCalendar formats.</p>
+            </div>
+            <div class="info-card">
+                <h3>💬 Chat Interface</h3>
+                <p>Natural language calendar operations powered by MCP integration and LangChain tools for conversational event management.</p>
+            </div>
+        </div>
+
+        <div class="endpoint-examples">
+            <h3>🎯 Quick API Reference</h3>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span>/api/events</span>
+                <span style="margin-left: auto; color: #7f8c8d;">List calendar events</span>
+            </div>
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span>/api/events</span>
+                <span style="margin-left: auto; color: #7f8c8d;">Create new event</span>
+            </div>
+            <div class="endpoint">
+                <span class="method put">PUT</span>
+                <span>/api/events/{id}</span>
+                <span style="margin-left: auto; color: #7f8c8d;">Update existing event</span>
+            </div>
+            <div class="endpoint">
+                <span class="method delete">DELETE</span>
+                <span>/api/events/{id}</span>
+                <span style="margin-left: auto; color: #7f8c8d;">Delete event</span>
+            </div>
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span>/api/chat/message</span>
+                <span style="margin-left: auto; color: #7f8c8d;">Natural language operations</span>
+            </div>
+        </div>
+
+        <div style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h3>🌐 API Server</h3>
+            <p>Select the API server you want to test against:</p>
+            <select id="server-select" class="url-select">
+                <option value="http://localhost:8000">Development Server (localhost:8000)</option>
+                <option value="https://api.ark-calendar.com">Production Server</option>
+                <option value="custom">Custom URL...</option>
+            </select>
+            <input type="text" id="custom-url" placeholder="Enter custom API URL..." style="display: none; width: 100%; margin-top: 0.5rem; padding: 0.5rem; border: 2px solid #ddd; border-radius: 4px;">
+        </div>
+    </div>
+
+    <div id="swagger-ui"></div>
+
+    <script src="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui-standalone-preset.js"></script>
+    <script>
+        // OpenAPI specification embedded directly
+        const spec = {
+            "openapi": "3.0.3",
+            "info": {
+                "title": "ARK Calendar API",
+                "description": "Comprehensive calendar management API integrating Radicale CalDAV server with ARK backend.\n\n## Features\n- **Event Management**: Create, read, update, and delete calendar events\n- **Calendar Operations**: Manage multiple calendars and their properties\n- **Date Range Filtering**: Query events within specific date ranges\n- **Natural Language Processing**: Chat-based event management\n- **CalDAV Integration**: Full compatibility with Radicale CalDAV server\n- **Real-time Operations**: Async support for all operations",
+                "version": "2.0.0",
+                "contact": {
+                    "name": "ARK Development Team",
+                    "email": "dev@ark-calendar.com"
+                },
+                "license": {
+                    "name": "MIT",
+                    "url": "https://opensource.org/licenses/MIT"
+                }
+            },
+            "servers": [
+                {
+                    "url": "http://localhost:8000",
+                    "description": "Development server"
+                },
+                {
+                    "url": "https://api.ark-calendar.com",
+                    "description": "Production server"
+                }
+            ],
+            "tags": [
+                {"name": "events", "description": "Calendar event operations"},
+                {"name": "calendars", "description": "Calendar management operations"},
+                {"name": "chat", "description": "Natural language calendar operations"},
+                {"name": "health", "description": "API health and status endpoints"}
+            ],
+            "paths": {
+                "/": {
+                    "get": {
+                        "tags": ["health"],
+                        "summary": "API health check",
+                        "description": "Basic health check endpoint to verify API availability",
+                        "operationId": "healthCheck",
+                        "responses": {
+                            "200": {
+                                "description": "API is healthy and operational",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "message": {"type": "string", "example": "ARK Calendar API"},
+                                                "version": {"type": "string", "example": "2.0.0"},
+                                                "status": {"type": "string", "example": "healthy"},
+                                                "timestamp": {"type": "string", "format": "date-time"}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "/api/calendars": {
+                    "get": {
+                        "tags": ["calendars"],
+                        "summary": "List available calendars",
+                        "description": "Retrieve a list of all calendars accessible to the current user",
+                        "operationId": "listCalendars",
+                        "responses": {
+                            "200": {
+                                "description": "Successfully retrieved calendar list",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "calendars": {
+                                                    "type": "array",
+                                                    "items": {"$ref": "#/components/schemas/Calendar"}
+                                                },
+                                                "count": {"type": "integer", "example": 3}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "/api/events": {
+                    "get": {
+                        "tags": ["events"],
+                        "summary": "List calendar events",
+                        "description": "Retrieve events from calendars with optional filtering by date range and calendar",
+                        "operationId": "listEvents",
+                        "parameters": [
+                            {
+                                "name": "calendar_name",
+                                "in": "query",
+                                "description": "Filter events by specific calendar name",
+                                "required": false,
+                                "schema": {"type": "string", "example": "Work Calendar"}
+                            },
+                            {
+                                "name": "start_date",
+                                "in": "query",
+                                "description": "Start date for event filtering (ISO 8601 format)",
+                                "required": false,
+                                "schema": {"type": "string", "format": "date-time", "example": "2025-01-01T00:00:00Z"}
+                            },
+                            {
+                                "name": "end_date",
+                                "in": "query",
+                                "description": "End date for event filtering (ISO 8601 format)",
+                                "required": false,
+                                "schema": {"type": "string", "format": "date-time", "example": "2025-12-31T23:59:59Z"}
+                            }
+                        ],
+                        "responses": {
+                            "200": {
+                                "description": "Events retrieved successfully",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "events": {
+                                                    "type": "array",
+                                                    "items": {"$ref": "#/components/schemas/Event"}
+                                                },
+                                                "total_count": {"type": "integer"},
+                                                "calendar": {"type": "string"},
+                                                "date_range": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "start": {"type": "string", "format": "date-time"},
+                                                        "end": {"type": "string", "format": "date-time"}
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "post": {
+                        "tags": ["events"],
+                        "summary": "Create a new calendar event",
+                        "description": "Create a new event in the specified calendar",
+                        "operationId": "createEvent",
+                        "requestBody": {
+                            "required": true,
+                            "content": {
+                                "application/json": {
+                                    "schema": {"$ref": "#/components/schemas/EventCreate"},
+                                    "examples": {
+                                        "basic_event": {
+                                            "summary": "Basic meeting event",
+                                            "value": {
+                                                "calendar_name": "Work Calendar",
+                                                "summary": "Project Review Meeting",
+                                                "description": "Weekly project status review with stakeholders",
+                                                "start": "2025-06-15T14:00:00Z",
+                                                "end": "2025-06-15T15:00:00Z",
+                                                "location": "Conference Room B"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "responses": {
+                            "201": {
+                                "description": "Event created successfully",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "event": {"$ref": "#/components/schemas/Event"},
+                                                "message": {"type": "string", "example": "Event created successfully"},
+                                                "event_id": {"type": "string", "example": "550e8400-e29b-41d4-a716-446655440000"}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "/api/events/{event_id}": {
+                    "get": {
+                        "tags": ["events"],
+                        "summary": "Get event details",
+                        "description": "Retrieve detailed information about a specific event by its ID",
+                        "operationId": "getEvent",
+                        "parameters": [
+                            {
+                                "name": "event_id",
+                                "in": "path",
+                                "required": true,
+                                "description": "Unique event identifier",
+                                "schema": {"type": "string", "example": "550e8400-e29b-41d4-a716-446655440000"}
+                            }
+                        ],
+                        "responses": {
+                            "200": {
+                                "description": "Event details retrieved successfully",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {"$ref": "#/components/schemas/Event"}
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "put": {
+                        "tags": ["events"],
+                        "summary": "Update an existing event",
+                        "description": "Update an existing calendar event with new information",
+                        "operationId": "updateEvent",
+                        "parameters": [
+                            {
+                                "name": "event_id",
+                                "in": "path",
+                                "required": true,
+                                "description": "Unique event identifier",
+                                "schema": {"type": "string", "example": "550e8400-e29b-41d4-a716-446655440000"}
+                            }
+                        ],
+                        "requestBody": {
+                            "required": true,
+                            "content": {
+                                "application/json": {
+                                    "schema": {"$ref": "#/components/schemas/EventUpdate"}
+                                }
+                            }
+                        },
+                        "responses": {
+                            "200": {
+                                "description": "Event updated successfully",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "event": {"$ref": "#/components/schemas/Event"},
+                                                "message": {"type": "string", "example": "Event updated successfully"}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "delete": {
+                        "tags": ["events"],
+                        "summary": "Delete an event",
+                        "description": "Permanently delete a calendar event",
+                        "operationId": "deleteEvent",
+                        "parameters": [
+                            {
+                                "name": "event_id",
+                                "in": "path",
+                                "required": true,
+                                "description": "Unique event identifier",
+                                "schema": {"type": "string", "example": "550e8400-e29b-41d4-a716-446655440000"}
+                            }
+                        ],
+                        "responses": {
+                            "200": {
+                                "description": "Event deleted successfully",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "message": {"type": "string", "example": "Event deleted successfully"},
+                                                "deleted_event_id": {"type": "string", "example": "550e8400-e29b-41d4-a716-446655440000"}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "/api/chat/message": {
+                    "post": {
+                        "tags": ["chat"],
+                        "summary": "Process natural language calendar requests",
+                        "description": "Process natural language requests for calendar operations",
+                        "operationId": "processChatMessage",
+                        "requestBody": {
+                            "required": true,
+                            "content": {
+                                "application/json": {
+                                    "schema": {"$ref": "#/components/schemas/ChatMessage"},
+                                    "examples": {
+                                        "create_event": {
+                                            "summary": "Request to create a new event",
+                                            "value": {
+                                                "message": "Schedule a team meeting tomorrow at 2pm for 1 hour"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "responses": {
+                            "200": {
+                                "description": "Message processed successfully",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {"$ref": "#/components/schemas/ChatResponse"}
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "/api/chat/suggestions": {
+                    "get": {
+                        "tags": ["chat"],
+                        "summary": "Get suggested chat commands",
+                        "description": "Retrieve a list of suggested natural language commands",
+                        "operationId": "getChatSuggestions",
+                        "responses": {
+                            "200": {
+                                "description": "Suggestions retrieved successfully",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "suggestions": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "text": {"type": "string"},
+                                                            "category": {"type": "string"},
+                                                            "description": {"type": "string"}
+                                                        }
+                                                    }
+                                                },
+                                                "categories": {
+                                                    "type": "array",
+                                                    "items": {"type": "string"}
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "components": {
+                "schemas": {
+                    "Calendar": {
+                        "type": "object",
+                        "required": ["id", "name", "url"],
+                        "properties": {
+                            "id": {"type": "string", "example": "work-calendar-123"},
+                            "name": {"type": "string", "example": "Work Calendar"},
+                            "description": {"type": "string", "example": "Professional meetings and work events"},
+                            "url": {"type": "string", "format": "uri", "example": "http://localhost:5232/user/work-calendar/"},
+                            "color": {"type": "string", "pattern": "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$", "example": "#007bff"},
+                            "timezone": {"type": "string", "example": "America/New_York"}
+                        }
+                    },
+                    "Event": {
+                        "type": "object",
+                        "required": ["id", "summary", "start", "end"],
+                        "properties": {
+                            "id": {"type": "string", "format": "uuid", "example": "550e8400-e29b-41d4-a716-446655440000"},
+                            "summary": {"type": "string", "example": "Team Standup Meeting"},
+                            "description": {"type": "string", "example": "Daily team synchronization meeting"},
+                            "start": {"type": "string", "format": "date-time", "example": "2025-06-15T09:00:00Z"},
+                            "end": {"type": "string", "format": "date-time", "example": "2025-06-15T09:30:00Z"},
+                            "location": {"type": "string", "example": "Conference Room A"},
+                            "calendar": {"type": "string", "example": "Work Calendar"},
+                            "status": {"type": "string", "enum": ["confirmed", "tentative", "cancelled"], "default": "confirmed"},
+                            "visibility": {"type": "string", "enum": ["public", "private", "confidential"], "default": "public"},
+                            "created_at": {"type": "string", "format": "date-time"},
+                            "updated_at": {"type": "string", "format": "date-time"}
+                        }
+                    },
+                    "EventCreate": {
+                        "type": "object",
+                        "required": ["calendar_name", "summary", "start"],
+                        "properties": {
+                            "calendar_name": {"type": "string", "example": "Work Calendar"},
+                            "summary": {"type": "string", "example": "Project Review Meeting"},
+                            "description": {"type": "string", "example": "Weekly project status review"},
+                            "start": {"type": "string", "format": "date-time", "example": "2025-06-15T14:00:00Z"},
+                            "end": {"type": "string", "format": "date-time", "example": "2025-06-15T15:00:00Z"},
+                            "location": {"type": "string", "example": "Conference Room B"}
+                        }
+                    },
+                    "EventUpdate": {
+                        "type": "object",
+                        "properties": {
+                            "summary": {"type": "string"},
+                            "description": {"type": "string"},
+                            "start": {"type": "string", "format": "date-time"},
+                            "end": {"type": "string", "format": "date-time"},
+                            "location": {"type": "string"}
+                        }
+                    },
+                    "ChatMessage": {
+                        "type": "object",
+                        "required": ["message"],
+                        "properties": {
+                            "message": {"type": "string", "example": "Schedule a meeting tomorrow at 2pm"}
+                        }
+                    },
+                    "ChatResponse": {
+                        "type": "object",
+                        "required": ["response"],
+                        "properties": {
+                            "response": {"type": "string", "example": "I'll help you schedule a meeting. What would you like to call it?"},
+                            "action": {"type": "string", "enum": ["create_event", "list_events", "update_event", "delete_event", "request_clarification", "none"]},
+                            "confidence": {"type": "number", "minimum": 0, "maximum": 1, "example": 0.95},
+                            "suggestions": {"type": "array", "items": {"type": "string"}}
+                        }
+                    }
+                }
+            }
+        };
+
+        let currentServerUrl = 'http://localhost:8000';
+
+        // Initialize Swagger UI
+        function initSwaggerUI(serverUrl) {
+            // Update the server URL in the spec
+            spec.servers[0].url = serverUrl;
+            
+            const ui = SwaggerUIBundle({
+                url: null,
+                spec: spec,
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                layout: "StandaloneLayout",
+                requestInterceptor: (request) => {
+                    // Add any authentication headers here if needed
+                    return request;
+                },
+                responseInterceptor: (response) => {
+                    return response;
+                }
+            });
+
+            window.ui = ui;
+        }
+
+        // Handle server selection
+        document.getElementById('server-select').addEventListener('change', function(e) {
+            const value = e.target.value;
+            const customUrlInput = document.getElementById('custom-url');
+            
+            if (value === 'custom') {
+                customUrlInput.style.display = 'block';
+                customUrlInput.focus();
+            } else {
+                customUrlInput.style.display = 'none';
+                currentServerUrl = value;
+                initSwaggerUI(currentServerUrl);
+            }
+        });
+
+        // Handle custom URL input
+        document.getElementById('custom-url').addEventListener('change', function(e) {
+            const customUrl = e.target.value.trim();
+            if (customUrl) {
+                currentServerUrl = customUrl;
+                initSwaggerUI(currentServerUrl);
+            }
+        });
+
+        // Initialize with default server
+        initSwaggerUI(currentServerUrl);
+
+        // Add some custom styling after load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add custom CSS for better appearance
+            const style = document.createElement('style');
+            style.textContent = `
+                .swagger-ui .topbar {
+                    display: none;
+                }
+                .swagger-ui .info {
+                    margin: 20px 0;
+                }
+                .swagger-ui .scheme-container {
+                    background: #f8f9fa;
+                    border: 1px solid #dee2e6;
+                    border-radius: 6px;
+                    margin: 20px 0;
+                    padding: 15px;
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>
