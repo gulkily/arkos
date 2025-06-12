@@ -1,0 +1,185 @@
+{
+  "name": "radicale-calendar",
+  "version": "1.0.0",
+  "description": "MCP server for Radicale calendar operations",
+  "author": "ARK2.0 Team",
+  "license": "MIT",
+  "transport": {
+    "stdio": {
+      "description": "Standard input/output transport for local MCP communication"
+    },
+    "http": {
+      "port": 8765,
+      "description": "HTTP transport with WebSocket upgrade for remote MCP communication"
+    }
+  },
+  "capabilities": {
+    "tools": true,
+    "resources": false,
+    "prompts": false
+  },
+  "tools": [
+    {
+      "name": "list_calendars",
+      "description": "List all available calendars in the Radicale server",
+      "parameters": {},
+      "returns": "JSON string containing list of calendar names"
+    },
+    {
+      "name": "get_events",
+      "description": "Get events from a calendar within a specified date range",
+      "parameters": {
+        "calendar_name": {
+          "type": "string",
+          "description": "Name of the calendar (optional, uses first available if not specified)",
+          "required": false
+        },
+        "start_date": {
+          "type": "string",
+          "description": "Start date in ISO format (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS)",
+          "required": false
+        },
+        "end_date": {
+          "type": "string", 
+          "description": "End date in ISO format (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS)",
+          "required": false
+        }
+      },
+      "returns": "JSON string containing list of events with their details"
+    },
+    {
+      "name": "create_event",
+      "description": "Create a new calendar event",
+      "parameters": {
+        "calendar_name": {
+          "type": "string",
+          "description": "Name of the calendar to create the event in",
+          "required": true
+        },
+        "summary": {
+          "type": "string",
+          "description": "Event title/summary",
+          "required": true
+        },
+        "start": {
+          "type": "string",
+          "description": "Start datetime in ISO format (YYYY-MM-DDTHH:MM:SS)",
+          "required": true
+        },
+        "end": {
+          "type": "string",
+          "description": "End datetime in ISO format (optional, defaults to start + 1 hour)",
+          "required": false
+        },
+        "location": {
+          "type": "string",
+          "description": "Event location",
+          "required": false
+        },
+        "description": {
+          "type": "string",
+          "description": "Event description",
+          "required": false
+        }
+      },
+      "returns": "JSON string with created event details and ID"
+    },
+    {
+      "name": "update_event",
+      "description": "Update an existing calendar event",
+      "parameters": {
+        "calendar_name": {
+          "type": "string",
+          "description": "Name of the calendar containing the event",
+          "required": true
+        },
+        "event_id": {
+          "type": "string",
+          "description": "ID of the event to update",
+          "required": true
+        },
+        "summary": {
+          "type": "string",
+          "description": "New event title/summary",
+          "required": false
+        },
+        "start": {
+          "type": "string",
+          "description": "New start datetime in ISO format",
+          "required": false
+        },
+        "end": {
+          "type": "string",
+          "description": "New end datetime in ISO format",
+          "required": false
+        },
+        "location": {
+          "type": "string",
+          "description": "New event location",
+          "required": false
+        },
+        "description": {
+          "type": "string",
+          "description": "New event description",
+          "required": false
+        }
+      },
+      "returns": "JSON string with update status"
+    },
+    {
+      "name": "delete_event",
+      "description": "Delete a calendar event",
+      "parameters": {
+        "calendar_name": {
+          "type": "string",
+          "description": "Name of the calendar containing the event",
+          "required": true
+        },
+        "event_id": {
+          "type": "string",
+          "description": "ID of the event to delete",
+          "required": true
+        }
+      },
+      "returns": "JSON string with deletion status"
+    }
+  ],
+  "environment": {
+    "required_variables": [
+      "RADICALE_URL",
+      "RADICALE_USERNAME", 
+      "RADICALE_PASSWORD"
+    ],
+    "optional_variables": []
+  },
+  "examples": [
+    {
+      "description": "List all calendars",
+      "tool": "list_calendars",
+      "parameters": {},
+      "expected_result": "List of available calendar names"
+    },
+    {
+      "description": "Get events for the next 7 days",
+      "tool": "get_events",
+      "parameters": {
+        "start_date": "2023-06-01T00:00:00",
+        "end_date": "2023-06-08T23:59:59"
+      },
+      "expected_result": "List of events in the specified date range"
+    },
+    {
+      "description": "Create a meeting event",
+      "tool": "create_event",
+      "parameters": {
+        "calendar_name": "Work",
+        "summary": "Team Meeting",
+        "start": "2023-06-01T10:00:00",
+        "end": "2023-06-01T11:00:00",
+        "location": "Conference Room",
+        "description": "Weekly team sync-up"
+      },
+      "expected_result": "Event created successfully with generated ID"
+    }
+  ]
+}
