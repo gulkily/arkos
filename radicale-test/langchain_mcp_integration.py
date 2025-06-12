@@ -272,6 +272,50 @@ class CalendarMCPIntegration:
             description="List all available calendars in the Radicale server"
         ))
         
+        def parse_natural_date(date_str: str):
+            """Parse natural language dates into datetime objects"""
+            from datetime import datetime, timedelta
+            import re
+            
+            if not date_str:
+                return None
+                
+            date_str = date_str.strip().lower()
+            now = datetime.now()
+            
+            # Handle specific natural language patterns
+            if date_str == 'today':
+                return now.replace(hour=0, minute=0, second=0, microsecond=0)
+            elif date_str == 'tomorrow':
+                return (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+            elif date_str == 'yesterday':
+                return (now - timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+            elif 'next friday' in date_str or 'friday' in date_str:
+                # Find next Friday
+                days_ahead = 4 - now.weekday()  # Friday is 4
+                if days_ahead <= 0:  # Today is Friday or past Friday
+                    days_ahead += 7
+                return (now + timedelta(days=days_ahead)).replace(hour=0, minute=0, second=0, microsecond=0)
+            elif 'next week' in date_str:
+                return (now + timedelta(weeks=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+            elif '+7 days' in date_str or 'next 7 days' in date_str:
+                return (now + timedelta(days=7)).replace(hour=0, minute=0, second=0, microsecond=0)
+            
+            # Try to parse as ISO format
+            try:
+                return datetime.fromisoformat(date_str.replace('Z', '+00:00'))
+            except ValueError:
+                pass
+            
+            # Try to parse as simple date format YYYY-MM-DD
+            try:
+                return datetime.strptime(date_str, '%Y-%m-%d')
+            except ValueError:
+                pass
+                
+            # If all else fails, raise error
+            raise ValueError(f"Could not parse date: {date_str}")
+        
         def get_events_sync(input_str: str) -> str:
             """Get events from calendar with parameter parsing"""
             try:
@@ -290,10 +334,11 @@ class CalendarMCPIntegration:
                 start_dt = None
                 end_dt = None
                 
+                # Use natural date parsing
                 if start_date:
-                    start_dt = datetime.fromisoformat(start_date.replace('Z', '+00:00'))
+                    start_dt = parse_natural_date(start_date)
                 if end_date:
-                    end_dt = datetime.fromisoformat(end_date.replace('Z', '+00:00'))
+                    end_dt = parse_natural_date(end_date)
                 
                 events = server.calendar_manager.get_events(calendar_name, start_dt, end_dt)
                 
@@ -316,37 +361,77 @@ class CalendarMCPIntegration:
             description="Get events from a calendar within a date range. Provide parameters as text like 'calendar_name: Work, start_date: 2023-06-01'"
         ))
         
-        def create_event_sync(input_str: str) -> str:
-            """Create a new event with parameter parsing"""
-            try:
-                # Parse input parameters from string - this is a simplified parser
-                import re
-                import json as json_module
+        def parse_natural_datetime(datetime_str: str) -> str:
+            """Parse natural language datetime into ISO format"""
+            from datetime import datetime, timedelta
+            import re
+            
+            if not datetime_str:
+                return None
                 
-                # Try to parse as JSON first
+            datetime_str = datetime_str.strip().lower()
+            now = datetime.now()
+            
+            # Handle relative times like "tomorrow at 2pm", "next Friday at 10am"
+            time_match = re.search(r'at (\d{1,2})(?::(\d{2}))?\s*(am|pm)?', datetime_str)
+            hour = 0
+            minute = 0
+            
+            if time_match:
+                hour = int(time_match.group(1))
+                minute = int(time_match.group(2) or 0)
+                ampm = time_match.group(3)
+                
+                if ampm == 'pm' and hour != 12:
+                    hour += 12
+                elif ampm == 'am' and hour == 12:
+                    hour = 0
+            
+            # Get the base date
+            if 'today' in datetime_str:
+                base_date = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+            elif 'tomorrow' in datetime_str:
+                base_date = (now + timedelta(days=1)).replace(hour=hour, minute=minute, second=0, microsecond=0)
+            elif 'next friday' in datetime_str or 'friday' in datetime_str:
+                days_ahead = 4 - now.weekday()  # Friday is 4
+                if days_ahead <= 0:
+                    days_ahead += 7
+                base_date = (now + timedelta(days=days_ahead)).replace(hour=hour, minute=minute, second=0, microsecond=0)
+            else:
+                # Try to parse as ISO format first
                 try:
-                    params = json_module.loads(input_str)
-                    calendar_name = params.get("calendar_name", "")
-                    summary = params.get("summary", "")
-                    start = params.get("start", "")
-                    kwargs = {k: v for k, v in params.items() if k not in ["calendar_name", "summary", "start"]}
-                except:
-                    # Fallback to regex parsing
-                    calendar_match = re.search(r'calendar[_\s]*name[:\s]*["\']?([^"\']+)["\']?', input_str, re.IGNORECASE)
-                    summary_match = re.search(r'summary[:\s]*["\']?([^"\']+)["\']?', input_str, re.IGNORECASE)
-                    start_match = re.search(r'start[:\s]*["\']?([^"\']+)["\']?', input_str, re.IGNORECASE)
-                    
-                    calendar_name = calendar_match.group(1) if calendar_match else ""
-                    summary = summary_match.group(1) if summary_match else ""
-                    start = start_match.group(1) if start_match else ""
-                    kwargs = {}
+                    return datetime.fromisoformat(datetime_str.replace('Z', '+00:00')).isoformat()
+                except ValueError:
+                    # Default to parsing as date only
+                    base_date = parse_natural_date(datetime_str)
+                    if base_date and (hour or minute):
+                        base_date = base_date.replace(hour=hour, minute=minute)
+                    elif not base_date:
+                        base_date = now.replace(hour=hour or 0, minute=minute or 0, second=0, microsecond=0)
+            
+            return base_date.isoformat()
+
+        def create_event_structured(calendar_name: str, summary: str, start: str, duration: int = 60) -> str:
+            """Create a new event with structured parameters"""
+            try:
+                # Parse natural language datetime
+                start_iso = parse_natural_datetime(start)
+                
+                # Calculate end time from duration (in minutes)
+                from datetime import datetime, timedelta
+                start_dt = datetime.fromisoformat(start_iso)
+                end_dt = start_dt + timedelta(minutes=duration)
+                
+                # If no calendar name provided, use first available
+                if not calendar_name and server.calendar_manager.calendars:
+                    calendar_name = server.calendar_manager.calendars[0].name
                 
                 # Create the event
                 event_data = {
                     "summary": summary,
-                    "start": start
+                    "start": start_iso,
+                    "end": end_dt.isoformat()
                 }
-                event_data.update(kwargs)
                 
                 event_id = server.calendar_manager.add_event(calendar_name, event_data)
                 
@@ -354,15 +439,27 @@ class CalendarMCPIntegration:
                     "status": "success",
                     "message": f"Event '{summary}' created successfully",
                     "event_id": event_id,
-                    "calendar": calendar_name
+                    "calendar": calendar_name,
+                    "start": start_iso,
+                    "duration": duration
                 })
             except Exception as e:
                 return json.dumps({"status": "error", "message": str(e)})
         
-        tools.append(Tool(
+        from langchain_core.tools import StructuredTool
+        from pydantic import BaseModel, Field
+        
+        class CreateEventInput(BaseModel):
+            calendar_name: str = Field(description="Name of the calendar to add event to")
+            summary: str = Field(description="Event title/summary")
+            start: str = Field(description="Start time - can be natural language like 'tomorrow at 2pm' or ISO format")
+            duration: int = Field(default=60, description="Duration in minutes (default 60)")
+        
+        tools.append(StructuredTool(
             name="create_event",
-            func=create_event_sync,
-            description="Create a new calendar event. Provide parameters as JSON or text like '{\"calendar_name\": \"Work\", \"summary\": \"Meeting\", \"start\": \"2023-06-01T10:00:00\"}'"
+            func=create_event_structured,
+            description="Create a new calendar event with natural language date/time support",
+            args_schema=CreateEventInput
         ))
         
         logger.info(f"Created {len(tools)} manual MCP tools")
