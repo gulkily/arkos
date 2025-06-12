@@ -6,3 +6,5 @@
 /frontend/node_modules/*
 /frontend/.svelte-kit/*
 radicale-test/.env
+radicale-test/__pycache__/
+radicale-test/*.json
