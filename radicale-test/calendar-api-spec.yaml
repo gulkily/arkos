@@ -1,0 +1,1108 @@
+openapi: 3.0.3
+info:
+  title: ARK Calendar API
+  description: |
+    Comprehensive calendar management API integrating Radicale CalDAV server with ARK backend.
+    
+    This API provides full CRUD operations for calendar events, calendar management,
+    and natural language processing capabilities for calendar operations.
+    
+    ## Features
+    - **Event Management**: Create, read, update, and delete calendar events
+    - **Calendar Operations**: Manage multiple calendars and their properties
+    - **Date Range Filtering**: Query events within specific date ranges
+    - **Natural Language Processing**: Chat-based event management
+    - **CalDAV Integration**: Full compatibility with Radicale CalDAV server
+    - **Real-time Operations**: Async support for all operations
+    
+    ## Authentication
+    This API uses simple token-based authentication for development.
+    Production deployments should implement OAuth2 or similar secure authentication.
+    
+    ## Data Models
+    Events follow the iCalendar standard with additional metadata for API convenience.
+    All datetime fields use ISO 8601 format with timezone information.
+  version: 2.0.0
+  contact:
+    name: ARK Development Team
+    email: dev@ark-calendar.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: https://ark-calendar.com/terms
+
+servers:
+  - url: http://localhost:8000
+    description: Development server
+  - url: https://api.ark-calendar.com
+    description: Production server
+
+security:
+  - ApiKeyAuth: []
+  - BearerAuth: []
+
+tags:
+  - name: events
+    description: Calendar event operations
+    externalDocs:
+      description: Event management guide
+      url: https://ark-calendar.com/docs/events
+  - name: calendars
+    description: Calendar management operations
+  - name: chat
+    description: Natural language calendar operations
+  - name: health
+    description: API health and status endpoints
+
+paths:
+  # Health and Status Endpoints
+  /:
+    get:
+      tags: [health]
+      summary: API health check
+      description: Basic health check endpoint to verify API availability
+      operationId: healthCheck
+      responses:
+        '200':
+          description: API is healthy and operational
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "ARK Calendar API"
+                  version:
+                    type: string
+                    example: "2.0.0"
+                  status:
+                    type: string
+                    example: "healthy"
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  # Calendar Management Endpoints
+  /api/calendars:
+    get:
+      tags: [calendars]
+      summary: List available calendars
+      description: |
+        Retrieve a list of all calendars accessible to the current user.
+        This endpoint connects to the Radicale CalDAV server to fetch calendar information.
+      operationId: listCalendars
+      responses:
+        '200':
+          description: Successfully retrieved calendar list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  calendars:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Calendar'
+                  count:
+                    type: integer
+                    description: Total number of calendars
+                    example: 3
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '503':
+          description: CalDAV server unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/calendars/{calendar_id}:
+    get:
+      tags: [calendars]
+      summary: Get calendar details
+      description: Retrieve detailed information about a specific calendar
+      operationId: getCalendar
+      parameters:
+        - name: calendar_id
+          in: path
+          required: true
+          description: Unique calendar identifier
+          schema:
+            type: string
+            example: "work-calendar"
+      responses:
+        '200':
+          description: Calendar details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Calendar'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  # Event Management Endpoints
+  /api/events:
+    get:
+      tags: [events]
+      summary: List calendar events
+      description: |
+        Retrieve events from calendars with optional filtering by date range and calendar.
+        
+        **Features:**
+        - Date range filtering with start_date and end_date
+        - Calendar-specific filtering
+        - Pagination support for large result sets
+        - Sorting by start time (ascending by default)
+        
+        **Date Handling:**
+        - All dates should be in ISO 8601 format
+        - Timezone information is preserved and returned
+        - If no date range is specified, returns events for the next 30 days
+      operationId: listEvents
+      parameters:
+        - name: calendar_name
+          in: query
+          description: Filter events by specific calendar name
+          required: false
+          schema:
+            type: string
+            example: "Work Calendar"
+        - name: start_date
+          in: query
+          description: Start date for event filtering (ISO 8601 format)
+          required: false
+          schema:
+            type: string
+            format: date-time
+            example: "2025-01-01T00:00:00Z"
+        - name: end_date
+          in: query
+          description: End date for event filtering (ISO 8601 format)
+          required: false
+          schema:
+            type: string
+            format: date-time
+            example: "2025-12-31T23:59:59Z"
+        - name: limit
+          in: query
+          description: Maximum number of events to return
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 100
+        - name: offset
+          in: query
+          description: Number of events to skip for pagination
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Events retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  events:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Event'
+                  total_count:
+                    type: integer
+                    description: Total number of events matching criteria
+                  calendar:
+                    type: string
+                    description: Calendar name used for filtering
+                  date_range:
+                    type: object
+                    properties:
+                      start:
+                        type: string
+                        format: date-time
+                      end:
+                        type: string
+                        format: date-time
+              examples:
+                successful_response:
+                  summary: Example events list response
+                  value:
+                    events:
+                      - id: "550e8400-e29b-41d4-a716-446655440000"
+                        summary: "Team Standup"
+                        description: "Daily team synchronization meeting"
+                        start: "2025-06-15T09:00:00Z"
+                        end: "2025-06-15T09:30:00Z"
+                        location: "Conference Room A"
+                        calendar: "Work Calendar"
+                        created_at: "2025-06-01T10:00:00Z"
+                        updated_at: "2025-06-01T10:00:00Z"
+                    total_count: 1
+                    calendar: "Work Calendar"
+                    date_range:
+                      start: "2025-06-01T00:00:00Z"
+                      end: "2025-06-30T23:59:59Z"
+        '400':
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                invalid_date_format:
+                  summary: Invalid date format error
+                  value:
+                    error: "ValidationError"
+                    message: "Invalid date format. Please use ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ)"
+                    details:
+                      field: "start_date"
+                      provided_value: "2025/06/01"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+    post:
+      tags: [events]
+      summary: Create a new calendar event
+      description: |
+        Create a new event in the specified calendar.
+        
+        **Event Creation Rules:**
+        - Summary (title) is required
+        - Start time is required
+        - End time defaults to start time + 1 hour if not provided
+        - Event ID is automatically generated
+        - All datetime fields must include timezone information
+        
+        **Validation:**
+        - End time must be after start time
+        - Event duration cannot exceed 24 hours for single-day events
+        - Summary cannot be empty or only whitespace
+      operationId: createEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventCreate'
+            examples:
+              basic_event:
+                summary: Basic meeting event
+                value:
+                  calendar_name: "Work Calendar"
+                  summary: "Project Review Meeting"
+                  description: "Weekly project status review with stakeholders"
+                  start: "2025-06-15T14:00:00Z"
+                  end: "2025-06-15T15:00:00Z"
+                  location: "Conference Room B"
+              minimal_event:
+                summary: Minimal event with defaults
+                value:
+                  calendar_name: "Personal"
+                  summary: "Doctor Appointment"
+                  start: "2025-06-20T10:00:00Z"
+      responses:
+        '201':
+          description: Event created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  event:
+                    $ref: '#/components/schemas/Event'
+                  message:
+                    type: string
+                    example: "Event created successfully"
+                  event_id:
+                    type: string
+                    description: Generated unique event identifier
+                    example: "550e8400-e29b-41d4-a716-446655440000"
+        '400':
+          description: Invalid event data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                missing_required_field:
+                  summary: Missing required field
+                  value:
+                    error: "ValidationError"
+                    message: "Event summary is required"
+                    details:
+                      field: "summary"
+                invalid_datetime:
+                  summary: Invalid datetime format
+                  value:
+                    error: "ValidationError"
+                    message: "Invalid datetime format: time data '2025-06-15' does not match format '%Y-%m-%dT%H:%M:%S'"
+                    details:
+                      field: "start"
+                      provided_value: "2025-06-15"
+        '404':
+          description: Calendar not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/events/{event_id}:
+    get:
+      tags: [events]
+      summary: Get event details
+      description: |
+        Retrieve detailed information about a specific event by its ID.
+        
+        **Event Lookup:**
+        - Searches across all accessible calendars
+        - Returns full event details including metadata
+        - Includes calendar information where event is stored
+      operationId: getEvent
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          description: Unique event identifier
+          schema:
+            type: string
+            format: uuid
+            example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        '200':
+          description: Event details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+    put:
+      tags: [events]
+      summary: Update an existing event
+      description: |
+        Update an existing calendar event with new information.
+        
+        **Update Behavior:**
+        - Only provided fields are updated (partial updates supported)
+        - Original values are preserved for omitted fields
+        - Updated timestamp is automatically set
+        - Calendar cannot be changed via update (use move operation instead)
+        
+        **Validation:**
+        - Same validation rules as event creation apply
+        - Event ID cannot be changed
+        - Must maintain data consistency
+      operationId: updateEvent
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          description: Unique event identifier
+          schema:
+            type: string
+            format: uuid
+            example: "550e8400-e29b-41d4-a716-446655440000"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventUpdate'
+            examples:
+              partial_update:
+                summary: Update only description and location
+                value:
+                  description: "Updated: Now includes Q4 planning discussion"
+                  location: "Large Conference Room (changed due to attendance)"
+              time_change:
+                summary: Reschedule event time
+                value:
+                  start: "2025-06-15T15:00:00Z"
+                  end: "2025-06-15T16:00:00Z"
+      responses:
+        '200':
+          description: Event updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  event:
+                    $ref: '#/components/schemas/Event'
+                  message:
+                    type: string
+                    example: "Event updated successfully"
+        '400':
+          description: Invalid update data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          description: Update conflict (concurrent modification)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags: [events]
+      summary: Delete an event
+      description: |
+        Permanently delete a calendar event.
+        
+        **Deletion Behavior:**
+        - Event is permanently removed from the calendar
+        - Operation cannot be undone
+        - Related recurring event instances are handled according to deletion policy
+        - Cleanup of any associated resources is performed
+      operationId: deleteEvent
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          description: Unique event identifier
+          schema:
+            type: string
+            format: uuid
+            example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        '200':
+          description: Event deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Event deleted successfully"
+                  deleted_event_id:
+                    type: string
+                    example: "550e8400-e29b-41d4-a716-446655440000"
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  # Natural Language Processing Endpoints
+  /api/chat/message:
+    post:
+      tags: [chat]
+      summary: Process natural language calendar requests
+      description: |
+        Process natural language requests for calendar operations.
+        
+        **Supported Operations:**
+        - Event creation: "Schedule a meeting tomorrow at 2pm"
+        - Event listing: "Show my events for today"
+        - Event deletion: "Delete my 3pm meeting"
+        - Event updates: "Move my meeting to 4pm"
+        - Calendar queries: "What's on my calendar this week?"
+        
+        **Response Types:**
+        - Confirmation requests for ambiguous commands
+        - Direct action execution for clear commands
+        - Clarification questions for incomplete information
+        - Suggested actions for complex requests
+      operationId: processChatMessage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatMessage'
+            examples:
+              create_event_request:
+                summary: Request to create a new event
+                value:
+                  message: "Schedule a team meeting tomorrow at 2pm for 1 hour"
+                  context:
+                    user_timezone: "America/New_York"
+                    default_calendar: "Work Calendar"
+              list_events_request:
+                summary: Request to list events
+                value:
+                  message: "What meetings do I have today?"
+                  context:
+                    user_timezone: "America/New_York"
+      responses:
+        '200':
+          description: Message processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+              examples:
+                event_creation_response:
+                  summary: Response for event creation
+                  value:
+                    response: "I'll schedule a team meeting for tomorrow at 2pm. The meeting will be 1 hour long. Should I create this event?"
+                    action: "create_event"
+                    data:
+                      suggested_event:
+                        summary: "Team Meeting"
+                        start: "2025-06-16T14:00:00-04:00"
+                        end: "2025-06-16T15:00:00-04:00"
+                        calendar_name: "Work Calendar"
+                    confidence: 0.95
+                clarification_response:
+                  summary: Response requesting clarification
+                  value:
+                    response: "I'd be happy to help you schedule a meeting. Could you please specify the date and time?"
+                    action: "request_clarification"
+                    data:
+                      missing_fields: ["date", "time"]
+                    confidence: 0.3
+        '400':
+          description: Invalid message format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/chat/suggestions:
+    get:
+      tags: [chat]
+      summary: Get suggested chat commands
+      description: |
+        Retrieve a list of suggested natural language commands that users can try.
+        
+        **Suggestion Categories:**
+        - Common event creation patterns
+        - Frequently used queries
+        - Time-based operations
+        - Calendar management commands
+      operationId: getChatSuggestions
+      responses:
+        '200':
+          description: Suggestions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  suggestions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        text:
+                          type: string
+                          description: Suggested command text
+                        category:
+                          type: string
+                          description: Command category
+                          enum: [create, query, update, delete, general]
+                        description:
+                          type: string
+                          description: What this command does
+                  categories:
+                    type: array
+                    items:
+                      type: string
+                    description: Available suggestion categories
+              example:
+                suggestions:
+                  - text: "Schedule a meeting tomorrow at 2pm"
+                    category: "create"
+                    description: "Create a new calendar event"
+                  - text: "Show my events for today"
+                    category: "query"  
+                    description: "List today's events"
+                  - text: "Move my 3pm meeting to 4pm"
+                    category: "update"
+                    description: "Reschedule an existing event"
+                categories: ["create", "query", "update", "delete", "general"]
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for authentication
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token for authenticated requests
+
+  schemas:
+    Calendar:
+      type: object
+      description: Calendar information and metadata
+      required:
+        - id
+        - name
+        - url
+      properties:
+        id:
+          type: string
+          description: Unique calendar identifier
+          example: "work-calendar-123"
+        name:
+          type: string
+          description: Human-readable calendar name
+          example: "Work Calendar"
+        description:
+          type: string
+          description: Optional calendar description
+          example: "Professional meetings and work events"
+        url:
+          type: string
+          format: uri
+          description: CalDAV URL for this calendar
+          example: "http://localhost:5232/user/work-calendar-123/"
+        color:
+          type: string
+          pattern: "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
+          description: Calendar display color in hex format
+          example: "#007bff"
+        timezone:
+          type: string
+          description: Default timezone for calendar events
+          example: "America/New_York"
+        permissions:
+          type: object
+          properties:
+            read:
+              type: boolean
+              description: Can read events from this calendar
+            write:
+              type: boolean
+              description: Can create/edit events in this calendar
+            delete:
+              type: boolean
+              description: Can delete events from this calendar
+        created_at:
+          type: string
+          format: date-time
+          description: Calendar creation timestamp
+        updated_at:
+          type: string
+          format: date-time
+          description: Last modification timestamp
+
+    Event:
+      type: object
+      description: Complete calendar event with all metadata
+      required:
+        - id
+        - summary
+        - start
+        - end
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique event identifier
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        summary:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Event title/summary
+          example: "Team Standup Meeting"
+        description:
+          type: string
+          maxLength: 2000
+          description: Detailed event description
+          example: "Daily team synchronization meeting to discuss progress and blockers"
+        start:
+          type: string
+          format: date-time
+          description: Event start time in ISO 8601 format with timezone
+          example: "2025-06-15T09:00:00Z"
+        end:
+          type: string
+          format: date-time
+          description: Event end time in ISO 8601 format with timezone
+          example: "2025-06-15T09:30:00Z"
+        location:
+          type: string
+          maxLength: 255
+          description: Event location or meeting room
+          example: "Conference Room A"
+        calendar:
+          type: string
+          description: Calendar containing this event
+          example: "Work Calendar"
+        attendees:
+          type: array
+          items:
+            type: object
+            properties:
+              email:
+                type: string
+                format: email
+              name:
+                type: string
+              status:
+                type: string
+                enum: [accepted, declined, tentative, needs-action]
+          description: List of event attendees
+        recurrence:
+          type: object
+          description: Recurrence rules for repeating events
+          properties:
+            frequency:
+              type: string
+              enum: [daily, weekly, monthly, yearly]
+            interval:
+              type: integer
+              minimum: 1
+            until:
+              type: string
+              format: date-time
+            count:
+              type: integer
+              minimum: 1
+        status:
+          type: string
+          enum: [confirmed, tentative, cancelled]
+          description: Event status
+          default: confirmed
+        visibility:
+          type: string
+          enum: [public, private, confidential]
+          description: Event visibility level
+          default: public
+        created_at:
+          type: string
+          format: date-time
+          description: Event creation timestamp
+          example: "2025-06-01T10:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          description: Last modification timestamp
+          example: "2025-06-01T10:00:00Z"
+        url:
+          type: string
+          format: uri
+          description: CalDAV URL for this specific event
+          example: "http://localhost:5232/user/work-calendar/550e8400-e29b-41d4-a716-446655440000.ics"
+
+    EventCreate:
+      type: object
+      description: Data required to create a new calendar event
+      required:
+        - calendar_name
+        - summary
+        - start
+      properties:
+        calendar_name:
+          type: string
+          description: Name of calendar to create event in
+          example: "Work Calendar"
+        summary:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Event title/summary
+          example: "Project Review Meeting"
+        description:
+          type: string
+          maxLength: 2000
+          description: Detailed event description
+          example: "Weekly project status review with stakeholders"
+        start:
+          type: string
+          format: date-time
+          description: Event start time in ISO 8601 format
+          example: "2025-06-15T14:00:00Z"
+        end:
+          type: string
+          format: date-time
+          description: Event end time (defaults to start + 1 hour if omitted)
+          example: "2025-06-15T15:00:00Z"
+        location:
+          type: string
+          maxLength: 255
+          description: Event location
+          example: "Conference Room B"
+        attendees:
+          type: array
+          items:
+            type: object
+            required: [email]
+            properties:
+              email:
+                type: string
+                format: email
+              name:
+                type: string
+          description: List of attendee email addresses
+        recurrence:
+          type: object
+          description: Recurrence rules for repeating events
+          properties:
+            frequency:
+              type: string
+              enum: [daily, weekly, monthly, yearly]
+            interval:
+              type: integer
+              minimum: 1
+              default: 1
+            until:
+              type: string
+              format: date-time
+            count:
+              type: integer
+              minimum: 1
+        visibility:
+          type: string
+          enum: [public, private, confidential]
+          description: Event visibility level
+          default: public
+
+    EventUpdate:
+      type: object
+      description: Data for updating an existing event (all fields optional)
+      properties:
+        summary:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Updated event title
+        description:
+          type: string
+          maxLength: 2000
+          description: Updated event description
+        start:
+          type: string
+          format: date-time
+          description: Updated start time
+        end:
+          type: string
+          format: date-time
+          description: Updated end time
+        location:
+          type: string
+          maxLength: 255
+          description: Updated location
+        attendees:
+          type: array
+          items:
+            type: object
+            properties:
+              email:
+                type: string
+                format: email
+              name:
+                type: string
+              status:
+                type: string
+                enum: [accepted, declined, tentative, needs-action]
+        status:
+          type: string
+          enum: [confirmed, tentative, cancelled]
+          description: Updated event status
+        visibility:
+          type: string
+          enum: [public, private, confidential]
+          description: Updated visibility level
+
+    ChatMessage:
+      type: object
+      description: Natural language message for calendar operations
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: Natural language request from user
+          example: "Schedule a meeting tomorrow at 2pm"
+        context:
+          type: object
+          description: Additional context for processing the message
+          properties:
+            user_timezone:
+              type: string
+              description: User's timezone for date/time interpretation
+              example: "America/New_York"
+            default_calendar:
+              type: string
+              description: Default calendar for operations
+              example: "Work Calendar"
+            conversation_id:
+              type: string
+              description: Conversation identifier for context tracking
+              example: "conv-550e8400-e29b-41d4"
+
+    ChatResponse:
+      type: object
+      description: Response to natural language calendar request
+      required:
+        - response
+      properties:
+        response:
+          type: string
+          description: Human-readable response to the user
+          example: "I'll schedule a team meeting for tomorrow at 2pm. Should I create this event?"
+        action:
+          type: string
+          enum: [create_event, list_events, update_event, delete_event, request_clarification, none]
+          description: Suggested action based on the message
+        data:
+          type: object
+          description: Action-specific data (event details, query results, etc.)
+          additionalProperties: true
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Confidence score for the interpretation
+          example: 0.95
+        suggestions:
+          type: array
+          items:
+            type: string
+          description: Suggested follow-up questions or commands
+        conversation_id:
+          type: string
+          description: Conversation identifier for tracking context
+
+    Error:
+      type: object
+      description: Standard error response format
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error type identifier
+          example: "ValidationError"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Event summary is required"
+        details:
+          type: object
+          description: Additional error details and context
+          additionalProperties: true
+        timestamp:
+          type: string
+          format: date-time
+          description: Error occurrence timestamp
+        request_id:
+          type: string
+          description: Unique request identifier for debugging
+          example: "req-550e8400-e29b-41d4"
+
+  responses:
+    UnauthorizedError:
+      description: Authentication required or invalid credentials
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "UnauthorizedError"
+            message: "Valid authentication credentials are required"
+            details:
+              auth_methods: ["ApiKey", "Bearer"]
+
+    NotFoundError:
+      description: Requested resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "NotFoundError"
+            message: "Event not found"
+            details:
+              resource_type: "Event"
+              resource_id: "550e8400-e29b-41d4-a716-446655440000"
+
+    ValidationError:
+      description: Request validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "ValidationError"
+            message: "Invalid request data"
+            details:
+              field_errors:
+                summary: ["This field is required"]
+                start: ["Invalid datetime format"]
+
+  examples:
+    BasicEventExample:
+      summary: Basic calendar event
+      value:
+        id: "550e8400-e29b-41d4-a716-446655440000"
+        summary: "Team Standup"
+        description: "Daily team synchronization"
+        start: "2025-06-15T09:00:00Z"
+        end: "2025-06-15T09:30:00Z"
+        location: "Conference Room A"
+        calendar: "Work Calendar"
+        created_at: "2025-06-01T10:00:00Z"
+        updated_at: "2025-06-01T10:00:00Z"
+
+    RecurringEventExample:
+      summary: Recurring weekly meeting
+      value:
+        id: "recurring-meeting-123"
+        summary: "Weekly Planning Meeting"
+        description: "Strategic planning and goal setting"
+        start: "2025-06-15T10:00:00Z"
+        end: "2025-06-15T11:00:00Z"
+        location: "Executive Conference Room"
+        calendar: "Work Calendar"
+        recurrence:
+          frequency: "weekly"
+          interval: 1
+          until: "2025-12-31T23:59:59Z"
+        attendees:
+          - email: "john@company.com"
+            name: "John Smith"
+            status: "accepted"
+        created_at: "2025-06-01T10:00:00Z"
+        updated_at: "2025-06-01T10:00:00Z"
+
+# API Usage Examples and Best Practices
+externalDocs:
+  description: Complete API documentation and guides
+  url: https://ark-calendar.com/docs
+
+# Webhook configuration (for future extension)
+webhooks:
+  eventCreated:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                event_id:
+                  type: string
+                event:
+                  $ref: '#/components/schemas/Event'
+                calendar:
+                  type: string
+                timestamp:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: Webhook received successfully
