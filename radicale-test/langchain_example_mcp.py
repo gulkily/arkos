@@ -97,6 +97,7 @@ class MCPCalendarAgent:
             llm = ChatOpenAI(
                 model=self.model,
                 temperature=self.temperature,
+                max_tokens=4000,  # Increase token limit for large responses
                 api_key=os.getenv("OPENAI_API_KEY")
             )
             
