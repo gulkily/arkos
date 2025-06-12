@@ -1,34 +1,145 @@
 """
-Example usage of CalendarToolAdapter with LangChain
+Example usage of MCP Radicale Bridge with LangChain
 
 This script demonstrates how to:
-1. Initialize the CalendarToolAdapter
+1. Connect to the MCP Radicale Bridge server
 2. Create a LangChain agent with calendar tools
 3. Perform basic calendar operations
 4. Handle errors and responses
 """
 
 import os
+import json
+import asyncio
+import websockets
+from datetime import datetime
 from dotenv import load_dotenv
 from langchain.agents import AgentExecutor, create_openai_functions_agent
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain.schema import SystemMessage, HumanMessage, AIMessage
+from langchain.schema import SystemMessage
 from langchain.tools import Tool
-from langchain_tool_adapter import CalendarToolAdapter
 
 # Load environment variables from .env file
 load_dotenv()
 
-# Initialize the calendar tool adapter with credentials from .env
-calendar_adapter = CalendarToolAdapter(
-    url=os.getenv("RADICALE_URL"),
-    username=os.getenv("RADICALE_USERNAME"),
-    password=os.getenv("RADICALE_PASSWORD")
-)
+# MCP Server settings
+MCP_HOST = "localhost"
+MCP_PORT = 8765
 
-# Get all calendar tools
-tools = calendar_adapter.get_all_tools()
+class MCPCalendarTool:
+    def __init__(self, host=MCP_HOST, port=MCP_PORT):
+        self.host = host
+        self.port = port
+        self.ws = None
+
+    async def connect(self):
+        """Connect to the MCP server"""
+        try:
+            self.ws = await websockets.connect(f"ws://{self.host}:{self.port}")
+            return True
+        except Exception as e:
+            print(f"Failed to connect to MCP server: {e}")
+            return False
+
+    async def send_request(self, request_type, **kwargs):
+        """Send a request to the MCP server"""
+        if not self.ws:
+            if not await self.connect():
+                return {"status": "error", "message": "Not connected to MCP server"}
+
+        try:
+            request = {
+                "type": request_type,
+                **kwargs
+            }
+            await self.ws.send(json.dumps(request))
+            response = await self.ws.recv()
+            return json.loads(response)
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    async def list_calendars(self):
+        """List available calendars"""
+        return await self.send_request("query")
+
+    async def get_events(self, calendar=None, start_date=None, end_date=None):
+        """Get events from a calendar"""
+        return await self.send_request(
+            "query",
+            calendar=calendar,
+            start_date=start_date.isoformat() if start_date else None,
+            end_date=end_date.isoformat() if end_date else None
+        )
+
+    async def create_event(self, calendar, event_data):
+        """Create a new event"""
+        return await self.send_request(
+            "create",
+            calendar=calendar,
+            event=event_data
+        )
+
+    async def update_event(self, calendar, event_id, event_data):
+        """Update an existing event"""
+        return await self.send_request(
+            "update",
+            calendar=calendar,
+            event_id=event_id,
+            event=event_data
+        )
+
+    async def delete_event(self, calendar, event_id):
+        """Delete an event"""
+        return await self.send_request(
+            "delete",
+            calendar=calendar,
+            event_id=event_id
+        )
+
+# Initialize the MCP calendar tool
+mcp_tool = MCPCalendarTool()
+
+# Create LangChain tools from MCP tool methods
+tools = [
+    Tool(
+        name="list_calendars",
+        func=lambda _: asyncio.run(mcp_tool.list_calendars()),
+        description="List all available calendars"
+    ),
+    Tool(
+        name="get_events",
+        func=lambda calendar, start_date=None, end_date=None: asyncio.run(
+            mcp_tool.get_events(
+                calendar,
+                datetime.fromisoformat(start_date) if start_date else None,
+                datetime.fromisoformat(end_date) if end_date else None
+            )
+        ),
+        description="Get events from a calendar within a date range"
+    ),
+    Tool(
+        name="create_event",
+        func=lambda calendar, event_data: asyncio.run(
+            mcp_tool.create_event(calendar, json.loads(event_data))
+        ),
+        description="Create a new calendar event"
+    ),
+    Tool(
+        name="update_event",
+        func=lambda calendar, event_id, event_data: asyncio.run(
+            mcp_tool.update_event(calendar, event_id, json.loads(event_data))
+        ),
+        description="Update an existing calendar event"
+    ),
+    Tool(
+        name="delete_event",
+        func=lambda calendar, event_id: asyncio.run(
+            mcp_tool.delete_event(calendar, event_id)
+        ),
+        description="Delete a calendar event"
+    )
+]
 
 # Create the prompt template
 prompt = ChatPromptTemplate.from_messages([
@@ -45,7 +156,7 @@ prompt = ChatPromptTemplate.from_messages([
 
 # Initialize the LLM with API key from .env
 llm = ChatOpenAI(
-    model="gpt-3.5-turbo",  # or any other supported model
+    model="gpt-3.5-turbo",
     temperature=0,
     api_key=os.getenv("OPENAI_API_KEY")
 )
@@ -119,10 +230,7 @@ if __name__ == "__main__":
 # 1. OpenAI API key is read from the .env file:
 #    OPENAI_API_KEY=your-api-key
 #
-# 2. Create a .env file with your Radicale credentials:
-#    RADICALE_URL=http://localhost:5232
-#    RADICALE_USERNAME=your-username
-#    RADICALE_PASSWORD=your-password
+# 2. The MCP Radicale Bridge server must be running on localhost:8765
 #
 # 3. The agent will handle date parsing and formatting automatically
 #
