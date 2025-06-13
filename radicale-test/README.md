@@ -1,6 +1,51 @@
-# Radicale Calendar Integration - Project Summary
+# LangChain MCP Calendar Integration
 
-This directory contains a comprehensive calendar integration system that bridges Radicale CalDAV server with various interfaces including LangChain tools and MCP (Model Context Protocol) bridge. The project provides robust calendar operations with proper error handling, testing, and documentation.
+A complete integration between LangChain and calendar operations using the Model Context Protocol (MCP) with a Radicale CalDAV server.
+
+## Overview
+
+This project demonstrates how to use LangChain agents with calendar operations through MCP (Model Context Protocol). It provides natural language interfaces for calendar management, including creating events, listing calendars, and querying events.
+
+## Features
+
+- 🗓️ **Natural Language Calendar Operations** - Create, read, and manage calendar events using plain English
+- 🔄 **MCP Integration** - Standardized protocol for tool communication
+- 🤖 **LangChain Agent Support** - Full integration with LangChain's agent framework
+- 📅 **CalDAV Compatible** - Works with Radicale and other CalDAV servers
+- 🔧 **Multiple Integration Methods** - Automatic fallback between MCP packages
+- 🌐 **Async Support** - Full asynchronous operation support
+
+## Quick Start
+
+See [INSTALLATION.md](INSTALLATION.md) for detailed setup instructions.
+
+### Prerequisites
+- Python 3.8+
+- OpenAI API key
+- Radicale CalDAV server
+
+### Installation
+```bash
+pip install langchain langchain-openai python-dotenv caldav
+pip install langchain-mcp-adapters mcp  # Optional MCP packages
+```
+
+### Environment Setup
+```env
+OPENAI_API_KEY=your_openai_api_key_here
+RADICALE_URL=http://localhost:5232
+RADICALE_USERNAME=your_username
+RADICALE_PASSWORD=your_password
+```
+
+### Run the Example
+```bash
+python langchain_example_mcp.py
+```
+
+## Project Structure (Minimal Files)
+
+This directory contains a comprehensive calendar integration system with minimal required files for LangChain MCP integration:
 
 ## 📁 Project Structure
 
