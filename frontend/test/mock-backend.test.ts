@@ -1,13 +1,20 @@
 import { describe, test } from 'vitest';
 import assert from 'node:assert';
 
+describe('environment', () => {
+    // this is the base URL for the mock backend, so it's important to verify it's correct
+	test('document.baseURI is localhost', () => {
+		assert.equal(document.baseURI, 'http://localhost:3000/');
+	});
+});
+
 describe('GET /vfm-mock', () => {
 	test('accepts GET', async () => {
-		assert.doesNotReject(fetch('https://example.com/vfm-mock', { method: 'GET' }));
+		assert.doesNotReject(fetch('https://localhost:3000/vfm-mock', { method: 'GET' }));
 	});
 
 	test("doesn't accept POST", async () => {
-		assert.rejects(fetch('https://example.com/vfm-mock', { method: 'POST' }));
+		assert.rejects(fetch('https://localhost:3000/vfm-mock', { method: 'POST' }));
 	});
 });
 
