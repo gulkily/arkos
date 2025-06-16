@@ -1,5 +1,7 @@
 import '@testing-library/jest-dom/vitest';
 import { vi } from 'vitest';
+import createFetchMock from 'vitest-fetch-mock';
+import { FetchMock } from 'vitest-fetch-mock';
 
 // required for svelte5 + jsdom as jsdom does not support matchMedia
 Object.defineProperty(window, 'matchMedia', {
@@ -15,4 +17,7 @@ Object.defineProperty(window, 'matchMedia', {
 	}))
 });
 
-// add more mocks here if you need them
+// use vitest-fetch-mock
+// TODO: add mock routes
+const fetchMocker: FetchMock = createFetchMock(vi);
+fetchMocker.enableMocks();
