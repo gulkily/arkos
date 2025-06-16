@@ -21,19 +21,71 @@ describe('POST /v1/chat/completions', () => {
 	// - method: GET (shouldn't work), POST (should work)
 	// - mandatory parameters: model, messages
 	// - optional parameters: stream, temperature, thread_id
-	test.skip("doesn't accept GET");
+	test("doesn't accept GET", async () => {
+		const response: Response = await fetch('https://localhost:3000/v1/chat/completions', {
+			method: 'GET'
+		});
+		assert.strictEqual(response.status, 405); // NOTE: HTTP 405 = "method not allowed"
+	});
 
-	test.skip("doesn't accept POST, no model, no messages");
+	test("doesn't accept POST, no model, no messages", async () => {
+		const response: Response = await fetch('https://localhost:3000/v1/chat/completions', {
+			method: 'POST'
+		});
+		assert.strictEqual(response.status, 400); // NOTE: HTTP 400 = "bad request"
+	});
 
-	test.skip("doesn't accept POST, model, no messages");
+	test("doesn't accept POST, model, no messages", async () => {
+		const response: Response = await fetch('https://localhost:3000/v1/chat/completions', {
+			method: 'POST',
+			body: JSON.stringify({ model: 'ark-reason' })
+		});
+		assert.strictEqual(response.status, 400);
+	});
 
-	test.skip("doesn't accept POST, no model, messages");
+	test("doesn't accept POST, no model, messages", async () => {
+		const response: Response = await fetch('https://localhost:3000/v1/chat/completions', {
+			method: 'POST',
+			body: JSON.stringify({ messages: [{ role: 'user', content: 'hello world' }] })
+		});
+		assert.strictEqual(response.status, 400);
+	});
 
-	test.skip('POST with model and messages');
+	test('POST with model and messages', async () => {
+		const response: Response = await fetch('https://localhost:3000/v1/chat/completions', {
+			method: 'POST',
+			body: JSON.stringify({
+				model: 'ark-reason',
+				messages: [{ role: 'user', content: 'hello world' }]
+			})
+		});
+		assert.strictEqual(response.status, 200);
+		// TODO: check response structure is also correct (also applies to the temperature and thread_id tests below)
+	});
 
-	test.skip('POST with model, messages, stream');
+	test('POST with model, messages, temperature', async () => {
+		const response: Response = await fetch('https://localhost:3000/v1/chat/completions', {
+			method: 'POST',
+			body: JSON.stringify({
+				model: 'ark-reason',
+				messages: [{ role: 'user', content: 'hello world' }],
+				temperature: 2
+			})
+		});
+		assert.strictEqual(response.status, 200);
+	});
 
-	test.skip('POST with model, messages, temperature');
+	test('POST with model, messages, thread_id', async () => {
+		const response: Response = await fetch('https://localhost:3000/v1/chat/completions', {
+			method: 'POST',
+			body: JSON.stringify({
+				model: 'ark-reason',
+				messages: [{ role: 'user', content: 'hello world' }],
+				thread_id: 'abc123'
+			})
+		});
+		assert.strictEqual(response.status, 200);
+	});
 
-	test.skip('POST with model, messages, thread_id');
+	test.skip('POST with model, messages, stream'); // TODO: implement this test once I figure out how to implement streaming
 });
