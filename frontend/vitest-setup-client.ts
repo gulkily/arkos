@@ -21,7 +21,8 @@ Object.defineProperty(window, 'matchMedia', {
 const fetchMocker: FetchMock = createFetchMock(vi);
 
 // a silly route for sanity-checking
-fetchMocker.doMockIf('/vfm-mock', (req: Request) => {
+// TODO: replace `example.com` by actual domain name once we get one
+fetchMocker.doMockIf('https://example.com/vfm-mock', (req: Request) => {
 	return req.method == 'GET'
 		? 'lorem ipsum dolor sit amet'
 		: Promise.reject(new Error('wrong HTTP method'));

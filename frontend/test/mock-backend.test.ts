@@ -1,10 +1,14 @@
 import { describe, test } from 'vitest';
-/*import assert from 'node:assert';*/
+import assert from 'node:assert';
 
 describe('GET /vfm-mock', () => {
-	test.skip('accepts GET');
+	test('accepts GET', async () => {
+		assert.doesNotReject(fetch('https://example.com/vfm-mock', { method: 'GET' }));
+	});
 
-	test.skip("doesn't accept POST");
+	test("doesn't accept POST", async () => {
+		assert.rejects(fetch('https://example.com/vfm-mock', { method: 'POST' }));
+	});
 });
 
 describe('POST /v1/chat/completions', () => {
