@@ -18,6 +18,15 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 // use vitest-fetch-mock
-// TODO: add mock routes
 const fetchMocker: FetchMock = createFetchMock(vi);
+
+// a silly route for sanity-checking
+fetchMocker.doMockIf('/vfm-mock', (req: Request) => {
+	return req.method == 'GET'
+		? 'lorem ipsum dolor sit amet'
+		: Promise.reject(new Error('wrong HTTP method'));
+});
+// TODO: mock POST /v1/chat/completions
+
+// enable mocking
 fetchMocker.enableMocks();
