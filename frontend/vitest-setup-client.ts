@@ -22,11 +22,7 @@ const fetchMocker: FetchMock = createFetchMock(vi);
 
 // a silly route for sanity-checking
 // TODO: replace `localhost:3000` by actual domain name once we get one
-fetchMocker.doMockIf('https://localhost:3000/vfm-mock', (req: Request) => {
-	return req.method == 'GET'
-		? 'lorem ipsum dolor sit amet'
-		: Promise.reject(new Error('wrong HTTP method'));
-});
+fetchMocker.doMockIf('https://localhost:3000/vfm-mock', 'lorem ipsum dolor sit amet'); // no need to check HTTP method for now
 // TODO: mock POST /v1/chat/completions
 
 // enable mocking

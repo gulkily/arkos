@@ -14,10 +14,6 @@ describe('GET /vfm-mock', () => {
 		assert.strictEqual(response.status, 200);
 		assert.strictEqual(await response.text(), 'lorem ipsum dolor sit amet');
 	});
-
-	test("doesn't accept POST", async () => {
-		assert.rejects(fetch('https://localhost:3000/vfm-mock', { method: 'POST' }));
-	});
 });
 
 describe('POST /v1/chat/completions', () => {
