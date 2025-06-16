@@ -2,7 +2,7 @@ import { describe, test } from 'vitest';
 import assert from 'node:assert';
 
 describe('environment', () => {
-    // this is the base URL for the mock backend, so it's important to verify it's correct
+	// this is the base URL for the mock backend, so it's important to verify it's correct
 	test('document.baseURI is localhost', () => {
 		assert.equal(document.baseURI, 'http://localhost:3000/');
 	});
@@ -10,7 +10,9 @@ describe('environment', () => {
 
 describe('GET /vfm-mock', () => {
 	test('accepts GET', async () => {
-		assert.doesNotReject(fetch('https://localhost:3000/vfm-mock', { method: 'GET' }));
+		const response: Response = await fetch('https://localhost:3000/vfm-mock', { method: 'GET' });
+		assert.strictEqual(response.status, 200);
+		assert.strictEqual(await response.text(), 'lorem ipsum dolor sit amet');
 	});
 
 	test("doesn't accept POST", async () => {
