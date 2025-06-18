@@ -6,12 +6,13 @@ import assert from 'node:assert';
  * @param req the HTTP request to handle
  * @returns the HTTP response to send
  */
-function handleChatCompletions(req: Request): Response {
+async function handleChatCompletions(req: Request): Promise<Response> {
 	assert.strictEqual(req.url, 'https://localhost:3000/v1/chat/completions');
 	if (req.method !== 'POST') {
 		return new Response('wrong HTTP method!', { status: 405 });
 	}
-	// TODO: input validation and construct an appropriate response
+	const reqJSON: any = await req.json();
+	// TODO: input validation for `reqJSON`
 	return new Response('TODO', { status: 501 }); // NOTE: HTTP 501 = "not implemented"
 }
 
@@ -20,11 +21,11 @@ function handleChatCompletions(req: Request): Response {
  * @param req the HTTP request to handle
  * @returns the HTTP response to send
  */
-function handleMockBackendRequest(req: Request): Response {
+async function handleMockBackendRequest(req: Request): Promise<Response> {
 	if (req.url === 'https://localhost:3000/vfm-mock') {
 		return new Response('lorem ipsum dolor sit amet', { status: 200 });
 	} else if (req.url === 'https://localhost:3000/v1/chat/completions') {
-		return handleChatCompletions(req);
+		return await handleChatCompletions(req);
 	} else {
 		return new Response('not found', { status: 404 });
 	}
