@@ -28,9 +28,19 @@ describe('POST /v1/chat/completions', () => {
 		assert.strictEqual(response.status, 405); // NOTE: HTTP 405 = "method not allowed"
 	});
 
+	test("doesn't accept POST, wrong Content-Type", async () => {
+		const response: Response = await fetch('https://localhost:3000/v1/chat/completions', {
+			method: 'POST',
+			headers: { 'Content-Type': 'text/plain' }
+		});
+		assert.strictEqual(response.status, 400);
+	});
+
 	test("doesn't accept POST, no model, no messages", async () => {
 		const response: Response = await fetch('https://localhost:3000/v1/chat/completions', {
-			method: 'POST'
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({})
 		});
 		assert.strictEqual(response.status, 400); // NOTE: HTTP 400 = "bad request"
 	});
@@ -38,6 +48,7 @@ describe('POST /v1/chat/completions', () => {
 	test("doesn't accept POST, model, no messages", async () => {
 		const response: Response = await fetch('https://localhost:3000/v1/chat/completions', {
 			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ model: 'ark-reason' })
 		});
 		assert.strictEqual(response.status, 400);
@@ -46,6 +57,7 @@ describe('POST /v1/chat/completions', () => {
 	test("doesn't accept POST, no model, messages", async () => {
 		const response: Response = await fetch('https://localhost:3000/v1/chat/completions', {
 			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ messages: [{ role: 'user', content: 'hello world' }] })
 		});
 		assert.strictEqual(response.status, 400);
@@ -54,6 +66,7 @@ describe('POST /v1/chat/completions', () => {
 	test('POST with model and messages', async () => {
 		const response: Response = await fetch('https://localhost:3000/v1/chat/completions', {
 			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
 				model: 'ark-reason',
 				messages: [{ role: 'user', content: 'hello world' }]
@@ -66,6 +79,7 @@ describe('POST /v1/chat/completions', () => {
 	test('POST with model, messages, temperature', async () => {
 		const response: Response = await fetch('https://localhost:3000/v1/chat/completions', {
 			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
 				model: 'ark-reason',
 				messages: [{ role: 'user', content: 'hello world' }],
@@ -78,6 +92,7 @@ describe('POST /v1/chat/completions', () => {
 	test('POST with model, messages, thread_id', async () => {
 		const response: Response = await fetch('https://localhost:3000/v1/chat/completions', {
 			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
 				model: 'ark-reason',
 				messages: [{ role: 'user', content: 'hello world' }],
