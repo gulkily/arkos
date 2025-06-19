@@ -1,5 +1,9 @@
 import { describe, test } from 'vitest';
 import assert from 'node:assert';
+import { Validator, ValidatorResult } from 'jsonschema';
+import response_schema from '../../schemas/chatcompletionresponse_schema.json';
+
+const v: Validator = new Validator();
 
 /*
 NOTE: these test cases are meant as sanity checks for the testing environment
@@ -104,12 +108,8 @@ describe('POST /v1/chat/completions', () => {
 		});
 		assert.strictEqual(response.status, 200);
 		const responseJSON: unknown = await response.json();
-		// TODO: use JSON validation library instead? (this also applies to the 3 tests below)
-		assert(responseJSON instanceof Object);
-		assert.deepStrictEqual(
-			new Set(Object.keys(responseJSON)),
-			new Set(['id', 'object', 'created', 'model', 'choices'])
-		);
+		const validationResults: ValidatorResult = v.validate(responseJSON, response_schema);
+		assert(validationResults.valid, validationResults.errors.toString());
 	});
 
 	test('POST with model, messages, temperature', async () => {
@@ -124,11 +124,8 @@ describe('POST /v1/chat/completions', () => {
 		});
 		assert.strictEqual(response.status, 200);
 		const responseJSON: unknown = await response.json();
-		assert(responseJSON instanceof Object);
-		assert.deepStrictEqual(
-			new Set(Object.keys(responseJSON)),
-			new Set(['id', 'object', 'created', 'model', 'choices'])
-		);
+		const validationResults: ValidatorResult = v.validate(responseJSON, response_schema);
+		assert(validationResults.valid, validationResults.errors.toString());
 	});
 
 	test('POST with model, messages, thread_id', async () => {
@@ -143,11 +140,8 @@ describe('POST /v1/chat/completions', () => {
 		});
 		assert.strictEqual(response.status, 200);
 		const responseJSON: unknown = await response.json();
-		assert(responseJSON instanceof Object);
-		assert.deepStrictEqual(
-			new Set(Object.keys(responseJSON)),
-			new Set(['id', 'object', 'created', 'model', 'choices'])
-		);
+		const validationResults: ValidatorResult = v.validate(responseJSON, response_schema);
+		assert(validationResults.valid, validationResults.errors.toString());
 	});
 
 	test.skip('POST with model, messages, stream'); // TODO: implement this test once I figure out how to implement streaming
