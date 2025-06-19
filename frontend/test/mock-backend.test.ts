@@ -107,7 +107,7 @@ describe('POST /v1/chat/completions', () => {
 		// TODO: use JSON validation library instead? (this also applies to the 3 tests below)
 		assert(responseJSON instanceof Object);
 		assert.deepStrictEqual(
-			Object.keys(responseJSON),
+			new Set(Object.keys(responseJSON)),
 			new Set(['id', 'object', 'created', 'model', 'choices'])
 		);
 	});
@@ -126,7 +126,7 @@ describe('POST /v1/chat/completions', () => {
 		const responseJSON: unknown = await response.json();
 		assert(responseJSON instanceof Object);
 		assert.deepStrictEqual(
-			Object.keys(responseJSON),
+			new Set(Object.keys(responseJSON)),
 			new Set(['id', 'object', 'created', 'model', 'choices'])
 		);
 	});
@@ -145,7 +145,7 @@ describe('POST /v1/chat/completions', () => {
 		const responseJSON: unknown = await response.json();
 		assert(responseJSON instanceof Object);
 		assert.deepStrictEqual(
-			Object.keys(responseJSON),
+			new Set(Object.keys(responseJSON)),
 			new Set(['id', 'object', 'created', 'model', 'choices'])
 		);
 	});

@@ -47,8 +47,30 @@ async function handleChatCompletions(req: Request): Promise<Response> {
 		return new Response('unknown keys', { status: 400 });
 	}
 
-	// TODO: more input validation
-	return new Response('TODO', { status: 501 }); // NOTE: HTTP 501 = "not implemented"
+	if (requestKeys.has('stream')) {
+		// TODO: implement streaming later
+		return new Response('no streaming yet', { status: 501 });
+	}
+
+	return new Response(
+		JSON.stringify({
+			id: 'abcdefghijklmnopqrstuvwxyz', // randomize?
+			object: 'chat.completion',
+			created: Date.now() / 1000,
+			model: 'example',
+			choices: [
+				{
+					index: 0,
+					message: {
+						role: 'assistant',
+						content: 'lorem ipsum' // randomize?
+					},
+					finish_reason: null
+				}
+			]
+		}),
+		{ status: 200 }
+	);
 }
 
 /**
