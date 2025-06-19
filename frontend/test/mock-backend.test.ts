@@ -36,7 +36,24 @@ describe('POST /v1/chat/completions', () => {
 		assert.strictEqual(response.status, 400);
 	});
 
-	test("doesn't accept POST, no model, no messages", async () => {
+	test("doesn't accept POST, no body", async () => {
+		const response: Response = await fetch('https://localhost:3000/v1/chat/completions', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' }
+		});
+		assert.strictEqual(response.status, 400); // NOTE: HTTP 400 = "bad request"
+	});
+
+	test("doesn't accept POST, wrong body type", async () => {
+		const response: Response = await fetch('https://localhost:3000/v1/chat/completions', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(42)
+		});
+		assert.strictEqual(response.status, 400); // NOTE: HTTP 400 = "bad request"
+	});
+
+	test("doesn't accept POST, empty body", async () => {
 		const response: Response = await fetch('https://localhost:3000/v1/chat/completions', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
