@@ -56,7 +56,7 @@ async function handleChatCompletions(req: Request): Promise<Response> {
 		JSON.stringify({
 			id: 'abcdefghijklmnopqrstuvwxyz', // randomize?
 			object: 'chat.completion',
-			created: Date.now() / 1000,
+			created: ~~(Date.now() / 1000), // round so schema's correct; c.f. https://stackoverflow.com/questions/4228356/how-to-perform-an-integer-division-and-separately-get-the-remainder-in-javascr
 			model: 'example',
 			choices: [
 				{
