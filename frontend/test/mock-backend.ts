@@ -8,11 +8,28 @@ import assert from 'node:assert';
  */
 async function handleChatCompletions(req: Request): Promise<Response> {
 	assert.strictEqual(req.url, 'https://localhost:3000/v1/chat/completions');
+	// check HTTP method
 	if (req.method !== 'POST') {
 		return new Response('wrong HTTP method!', { status: 405 });
 	}
-	const reqJSON: any = await req.json();
-	// TODO: input validation for `reqJSON`
+	// check Content-Type
+	if (req.headers.get('Content-Type') !== 'application/json') {
+		return new Response('wrong Content-Type', { status: 400 });
+	}
+	// try to parse JSON
+	let reqJSON: unknown;
+	try {
+		reqJSON = await req.json();
+	} catch {
+		return new Response('no or malformed body', { status: 400 });
+	}
+	// input validation for `reqJSON`
+	// TODO: try using a library for this instead?
+	if (!(reqJSON instanceof Object)) {
+		return new Response('wrong body type', { status: 400 });
+	}
+
+	// TODO: more input validation
 	return new Response('TODO', { status: 501 }); // NOTE: HTTP 501 = "not implemented"
 }
 
