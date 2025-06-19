@@ -29,6 +29,24 @@ async function handleChatCompletions(req: Request): Promise<Response> {
 		return new Response('wrong body type', { status: 400 });
 	}
 
+	const requestKeys: Set<string> = new Set(Object.keys(reqJSON));
+	console.log(`requestKeys = ${[...requestKeys]}`);
+	const requiredKeys: Array<string> = ['model', 'messages'];
+	const allSupportedKeys: Set<string> = new Set([
+		'model',
+		'messages',
+		'stream',
+		'temperature',
+		'thread_id'
+	]);
+	// c.f. https://www.30secondsofcode.org/js/s/superset-subset-of-array/
+	if (!requiredKeys.every((v) => requestKeys.has(v))) {
+		return new Response('missing required keys', { status: 400 });
+	}
+	if (![...requestKeys].every((v) => allSupportedKeys.has(v))) {
+		return new Response('unknown keys', { status: 400 });
+	}
+
 	// TODO: more input validation
 	return new Response('TODO', { status: 501 }); // NOTE: HTTP 501 = "not implemented"
 }
