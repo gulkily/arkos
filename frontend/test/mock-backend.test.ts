@@ -90,7 +90,13 @@ describe('POST /v1/chat/completions', () => {
 			})
 		});
 		assert.strictEqual(response.status, 200);
-		// TODO: check response structure is also correct (also applies to the temperature and thread_id tests below)
+		const responseJSON: unknown = await response.json();
+		// TODO: use JSON validation library instead? (this also applies to the 3 tests below)
+		assert(responseJSON instanceof Object);
+		assert.deepStrictEqual(
+			Object.keys(responseJSON), 
+			new Set(['id', 'object', 'created', 'model', 'choices'])
+		);
 	});
 
 	test('POST with model, messages, temperature', async () => {
@@ -104,6 +110,12 @@ describe('POST /v1/chat/completions', () => {
 			})
 		});
 		assert.strictEqual(response.status, 200);
+		const responseJSON: unknown = await response.json();
+		assert(responseJSON instanceof Object);
+		assert.deepStrictEqual(
+			Object.keys(responseJSON), 
+			new Set(['id', 'object', 'created', 'model', 'choices'])
+		);
 	});
 
 	test('POST with model, messages, thread_id', async () => {
@@ -117,6 +129,12 @@ describe('POST /v1/chat/completions', () => {
 			})
 		});
 		assert.strictEqual(response.status, 200);
+		const responseJSON: unknown = await response.json();
+		assert(responseJSON instanceof Object);
+		assert.deepStrictEqual(
+			Object.keys(responseJSON), 
+			new Set(['id', 'object', 'created', 'model', 'choices'])
+		);
 	});
 
 	test.skip('POST with model, messages, stream'); // TODO: implement this test once I figure out how to implement streaming
