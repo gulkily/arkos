@@ -1,10 +1,23 @@
 import { describe, test } from 'vitest';
 import assert from 'node:assert';
 
+/*
+NOTE: these test cases are meant as sanity checks for the testing environment
+if any of these fail, the code below probably needs to be refactored
+*/
 describe('environment', () => {
 	// this is the base URL for the mock backend, so it's important to verify it's correct
 	test('document.baseURI is localhost', () => {
 		assert.equal(document.baseURI, 'http://localhost:3000/');
+	});
+	test('is running in node.js', () => {
+		// c.f. https://stackoverflow.com/questions/4224606/how-to-check-whether-a-script-is-running-under-node-js
+		assert.strictEqual(typeof process, 'object');
+		assert.strictEqual(process + '', '[object process]');
+	});
+	test('is running with jsdom', () => {
+		// c.f. https://github.com/jsdom/jsdom/issues/1537
+		assert(navigator.userAgent.includes('jsdom'));
 	});
 });
 
