@@ -9,7 +9,7 @@
       "type": "string"
     },
     "created": {
-      "type": "integer"
+      "type": "number"
     },
     "model": {
       "type": "string"

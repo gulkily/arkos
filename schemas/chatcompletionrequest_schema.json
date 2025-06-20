@@ -15,7 +15,7 @@
       "type": "boolean"
     },
     "temperature": {
-      "type": "integer"
+      "type": "number"
     },
     "thread_id": {
       "type": "string"
