@@ -23,19 +23,7 @@
             "type": "integer"
           },
           "message": {
-            "type": "object",
-            "properties": {
-              "role": {
-                "type": "string"
-              },
-              "content": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "role",
-              "content"
-            ]
+            "$ref": "ChatMessage"
           },
           "finish_reason": {
             "type": [

@@ -8,19 +8,7 @@
 		"messages": {
 			"type": "array",
 			"items": {
-				"type": "object",
-				"properties": {
-					"role": {
-						"type": "string"
-					},
-					"content": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"role",
-					"content"
-				]
+				"$ref": "ChatMessage"
 			}
 		},
 		"stream": {

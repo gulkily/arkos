@@ -2,8 +2,10 @@
 import assert from 'node:assert';
 import { Validator, ValidatorResult } from 'jsonschema';
 import request_schema from '../../schemas/chatcompletionrequest_schema.json';
+import message_schema from '../../schemas/chatmessage_schema.json';
 
 const v: Validator = new Validator();
+v.addSchema(message_schema);
 
 /**
  * Handles *only* requests to POST /v1/chat/completions
