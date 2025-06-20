@@ -13,6 +13,7 @@ This is the ARK 2.0 frontend. It currently shows exactly one page: a calendar an
 - @testing-library/svelte
 - @event-calendar/core
 - jsonschema
+- vitest-fetch-mock
 
 ## Todos
 
