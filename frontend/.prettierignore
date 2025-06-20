@@ -3,5 +3,11 @@
 # no reformatting the README!
 README.md
 
-# can't use prettier for images anyways
+# can't use prettier for images or .DS_Store anyways
 **/*.png
+**/.DS_Store
+.prettierignore
+.npmrc
+
+# no touching .svelte-kit (this will be regenerated anyways)
+.svelte-kit/**/*
