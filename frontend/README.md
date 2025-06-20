@@ -12,12 +12,11 @@ This is the ARK 2.0 frontend. It currently shows exactly one page: a calendar an
 - Vitest
 - @testing-library/svelte
 - @event-calendar/core
+- jsonschema
 
 ## Todos
 
 ### PRE-MVP
-- Split the chat feature into its own component
-- Figure out how to use library components in the UI
 - Split the UI into multiple pages
     - Marketing landing page
     - Dashboard
@@ -31,7 +30,6 @@ This is the ARK 2.0 frontend. It currently shows exactly one page: a calendar an
     - Detect unexpected/malformed backend output and display an appropriate error message? (to safeguard against potential backend-side bugs)
 - Testing cleanup + expansion
     - ~~Refactor the UI HTML markup so that `screen.getByRole` or `screen.getByText` works (potentially making it more accessible)~~ (now refactored to use `screen.getByTestId` for now)
-    - Mock the backend
     - Mock components (both library and ARK2.0-specific)
     - Mock user-generated content
     - Potentially determine code coverage
@@ -57,23 +55,23 @@ This is the ARK 2.0 frontend. It currently shows exactly one page: a calendar an
 2. Install npm if you don’t have it already.
 3. Install git if you don’t have it already.
 4. `cd` into your favorite folder.
-5. Clone the entire repo using `git clone https://github.com/SGIARK/ARK2.0` (note: this repo is private)
+5. Clone the entire repo using `git clone https://github.com/SGIARK/ARK2.0`. Note that this repo is private.
 6. `cd` into `ARK2.0/frontend` to access the `frontend` folder.
 7. Install the remaining dependencies using `npm install`.
 8. Run `npm run dev`, then immediately hit the O key, to launch the (currently extremely sparse) frontend in your web browser.
 
 ## Quick
 
-Copy-paste this for a quickstart (assuming you already have node.js, npm, and git, and have cd'd in your favorite repository already).
+Open a terminal window, copy-paste this entire code block, and hit enter. Be warned: this assumes you already installed node.js, npm, and git, that you've cd'd into your favorite repository already, and that you use VS Code as your code editor.
 
 ```
 git clone https://github.com/SGIARK/ARK2.0
 cd ARK2.0/frontend
 npm install
-npx prettier **/* --check
-npx eslint {src,test}/*
+npm run lint
 npm test
 npm run dev
+code .
 ```
 
 # File structure
@@ -94,6 +92,7 @@ npm run dev
     - `app.html`
     - `components`
         - `Calendar.svelte` (shows the calendar view)
+        - `chat.svelte` (shows the chat view)
     - `lib`
         - `index.ts` (currently empty but kept as a placeholder)
     - `routes`
@@ -104,7 +103,10 @@ npm run dev
 - `svelte.config.js`
 - `test`
     - `Calendar.test.ts` (for testing the `<Calendar/>` component)
+    - `chat.test.ts` (for testing the `<Chat/>` component)
     - `page.svelte.test.ts` (for testing `src/routes/+page.svelte`, which is currently the only page available)
+    - `mock-backend.ts` (creates the mock backend)
+    - `mock-backend.test.ts` (for testing the mock backend)
 - `tsconfig.json`
 - `vite.config.ts`
 - `vitest-setup-client.ts`
@@ -140,7 +142,11 @@ Every `.svelte` and `.ts` file in the `src` folder needs to be tested, with the 
 
 As a general rule of thumb, to test a Svelte component, write one test per HTML tag. If the content or children of a certain tag can vary depending on certain variables (such as props, state, and/or network requests), write multiple tests for that tag using input space partitioning. Tags that are purely for layout purposes and will never change don’t need to be tested if you don’t want to. See the `test` folder for some examples.
 
-Plain `.ts` files should be tested using input space partitioning for each function/class/etc. This should be fairly straightforward.
+Plain `.ts` files should be tested using input space partitioning for each function/class/etc.
+
+## JSON schemas
+
+Schemas go in `../schemas/`. This is *intentionally* a repo top-level folder because double-checking responses and requests are malformed is also very useful for backend-side code. Use `jsonschema` to validate data against a schema; don't roll your own validator, because it'll probably be a lot flakier.
 
 # Helpful links if you get stuck
 
@@ -151,6 +157,8 @@ Plain `.ts` files should be tested using input space partitioning for each funct
   - [HTML](https://developer.mozilla.org/en-US/docs/Web/HTML)
   - [CSS](https://developer.mozilla.org/en-US/docs/Web/CSS)
   - [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+  - [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request): useful when developing or testing the mock backend
+  - [Response](https://developer.mozilla.org/en-US/docs/Web/API/Response): also useful for the mock backend
 - [Prettier](https://prettier.io/docs/)
 - [Svelte](https://svelte.dev/docs/svelte/overview)
 - [SvelteKit](https://svelte.dev/docs/kit/introduction)
@@ -160,6 +168,8 @@ Plain `.ts` files should be tested using input space partitioning for each funct
 - [TypeScript](https://www.typescriptlang.org/docs/handbook/intro.html)
 - [Vitest](https://vitest.dev/guide/)
 - [@event-calendar GitHub repo](https://github.com/vkurko/calendar)
+- [jsonschema README](https://www.npmjs.com/package/jsonschema)
+- [vitest-fetch-mock README](https://www.npmjs.com/package/vitest-fetch-mock)
 
 ## Others
 
