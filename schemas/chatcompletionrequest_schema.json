@@ -1,28 +1,25 @@
 {
-	"$schema": "http://json-schema.org/draft-04/schema#",
-	"type": "object",
-	"properties": {
-		"model": {
-			"type": "string"
-		},
-		"messages": {
-			"type": "array",
-			"items": {
-				"$ref": "ChatMessage"
-			}
-		},
-		"stream": {
-			"type": "boolean"
-		},
-		"temperature": {
-			"type": "integer"
-		},
-		"thread_id": {
-			"type": "string"
-		}
-	},
-	"required": [
-		"model",
-		"messages"
-	]
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "model": {
+      "type": "string"
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "$ref": "ChatMessage"
+      }
+    },
+    "stream": {
+      "type": "boolean"
+    },
+    "temperature": {
+      "type": "integer"
+    },
+    "thread_id": {
+      "type": "string"
+    }
+  },
+  "required": ["model", "messages"]
 }

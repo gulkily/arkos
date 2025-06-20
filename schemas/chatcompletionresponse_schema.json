@@ -26,25 +26,12 @@
             "$ref": "ChatMessage"
           },
           "finish_reason": {
-            "type": [
-              "null",
-              "string"
-            ]
+            "type": ["null", "string"]
           }
         },
-        "required": [
-          "index",
-          "message",
-          "finish_reason"
-        ]
+        "required": ["index", "message", "finish_reason"]
       }
     }
   },
-  "required": [
-    "id",
-    "object",
-    "created",
-    "model",
-    "choices"
-  ]
+  "required": ["id", "object", "created", "model", "choices"]
 }
