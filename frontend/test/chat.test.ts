@@ -45,10 +45,8 @@ describe('Chat', () => {
 		assert.ok(screen.getByRole('button'));
 	});
 
-	/* TODO: write these tests after I figure out how to mock the backend */
-	test.skip('loading should result in GET /api/chat/suggestions call');
-
-	test.skip('sending message should result in POST /api/chat/messages call');
+	/* TODO: write these tests after I figure out how @testing-library/user-event works */
+	test.skip('sending message should result in POST /v1/chat/completions call');
 
 	test.skip('sending message should result in new message appearing on screen');
 
