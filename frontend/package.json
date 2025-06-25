@@ -17,6 +17,7 @@
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",
 		"@eslint/js": "^9.18.0",
+		"@testing-library/user-event": "^14.6.1",
 		"@types/event-calendar__core": "^4.0.0",
 		"eslint": "^9.18.0",
 		"eslint-config-prettier": "^10.0.1",
