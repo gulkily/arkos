@@ -1,7 +1,11 @@
-import { describe, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import assert from 'node:assert';
 import { render, screen } from '@testing-library/svelte';
 import Chat from '../src/components/chat.svelte';
+import { handleChatCompletions } from './mock-backend.ts';
+import { userEvent, UserEvent } from '@testing-library/user-event';
+
+vi.mock('./mock-backend.ts', { spy: true }); // c.f. https://vitest.dev/api/vi.html#vi-mock
 
 describe('Chat', () => {
 	test('should render chat-container div', () => {
@@ -46,7 +50,15 @@ describe('Chat', () => {
 	});
 
 	/* TODO: write these tests after I figure out how @testing-library/user-event works */
-	test.skip('sending message should result in POST /v1/chat/completions call');
+	test('sending message should result in POST /v1/chat/completions call', async () => {
+		render(Chat);
+		const user: UserEvent = userEvent.setup();
+		// type a placeholder message and click the button
+		await user.type(screen.getByRole('textbox'), 'lorem ipsum'); // randomize?
+		await user.click(screen.getByRole('button'));
+		// expect handleChatCompletions to have been called
+		expect(handleChatCompletions).toHaveBeenCalled();
+	});
 
 	test.skip('sending message should result in new message appearing on screen');
 
