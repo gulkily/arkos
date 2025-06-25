@@ -90,7 +90,40 @@ describe('Chat', () => {
 		assert.strictEqual(myTextBox.value, '');
 	});
 
-	test.skip('enter key should result in sending message');
+	/* NOTE: these tests are somewhat redundant since the enter key and submit button shuold share the same handler, but I'm doing them anyways */
+	test('enter key should result in POST /v1/chat/completions request', async () => {
+		render(Chat);
+		const user: UserEvent = userEvent.setup();
+		await user.type(screen.getByRole('textbox'), 'lorem ipsum\n');
+		expect(handleChatCompletions).toHaveBeenCalled();
+	});
+
+	test('enter key should result in new message appearing on screen', async () => {
+		render(Chat);
+		const user: UserEvent = userEvent.setup();
+		await user.type(screen.getByRole('textbox'), 'lorem ipsum\n');
+		expect(handleChatCompletions).toHaveBeenCalled();
+		const newMessage: HTMLElement = screen.getByTestId('message1');
+		assert.strictEqual(newMessage.tagName, 'DIV');
+	});
+
+	test('enter key should result in reply message appearing on screen', async () => {
+		render(Chat);
+		const user: UserEvent = userEvent.setup();
+		await user.type(screen.getByRole('textbox'), 'lorem ipsum\n');
+		expect(handleChatCompletions).toHaveBeenCalled();
+		const newMessage: HTMLElement = await screen.findByTestId('message1');
+		assert.strictEqual(newMessage.tagName, 'DIV');
+	});
+
+	test('sending message should clear original input field', async () => {
+		render(Chat);
+		const user: UserEvent = userEvent.setup();
+		const myTextBox: HTMLElement = screen.getByRole('textbox');
+		assert(myTextBox instanceof HTMLInputElement);
+		await user.type(myTextBox, 'lorem ipsum\n'); // randomize?
+		assert.strictEqual(myTextBox.value, '');
+	});
 
 	test.skip('should support sending multiple rounds of messages');
 });
