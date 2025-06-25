@@ -63,7 +63,7 @@ describe('Chat', () => {
 	test('sending message should result in new message appearing on screen', async () => {
 		render(Chat);
 		const user: UserEvent = userEvent.setup();
-		await user.type(screen.getByRole('textbox'), 'lorem ipsum'); // randomize?
+		await user.type(screen.getByRole('textbox'), 'lorem ipsum'); // randomize? )a;sp 
 		await user.click(screen.getByRole('button'));
 		// look for the new message
 		const newMessage: HTMLElement = screen.getByTestId('message1');
@@ -73,7 +73,7 @@ describe('Chat', () => {
 	test('sending message should result in reply message appearing on screen', async () => {
 		render(Chat);
 		const user: UserEvent = userEvent.setup();
-		await user.type(screen.getByRole('textbox'), 'lorem ipsum'); // randomize?
+		await user.type(screen.getByRole('textbox'), 'lorem ipsum');
 		await user.click(screen.getByRole('button'));
 		// await the reply message (don't look for it immediately, because it could take time)
 		const newMessage: HTMLElement = await screen.findByTestId('message2');
@@ -85,7 +85,7 @@ describe('Chat', () => {
 		const user: UserEvent = userEvent.setup();
 		const myTextBox: HTMLElement = screen.getByRole('textbox');
 		assert(myTextBox instanceof HTMLInputElement);
-		await user.type(myTextBox, 'lorem ipsum'); // randomize?
+		await user.type(myTextBox, 'lorem ipsum');
 		await user.click(screen.getByRole('button'));
 		assert.strictEqual(myTextBox.value, '');
 	});
@@ -121,9 +121,21 @@ describe('Chat', () => {
 		const user: UserEvent = userEvent.setup();
 		const myTextBox: HTMLElement = screen.getByRole('textbox');
 		assert(myTextBox instanceof HTMLInputElement);
-		await user.type(myTextBox, 'lorem ipsum\n'); // randomize?
+		await user.type(myTextBox, 'lorem ipsum\n');
 		assert.strictEqual(myTextBox.value, '');
 	});
 
-	test.skip('should support sending multiple rounds of messages');
+	test('should support sending multiple rounds of messages', async () => {
+		render(Chat);
+		const user: UserEvent = userEvent.setup();
+		const myTextBox: HTMLElement = screen.getByRole('textbox');
+		assert(myTextBox instanceof HTMLInputElement);
+		const testMessages: Array<string> = ['lorem', 'ipsum', 'dolor']; // randomize?
+		for (const [i, message] of testMessages.entries()) {
+			await user.type(myTextBox, `${message}\n`);
+			// look for the message and its reply
+			screen.getByTestId(`message${2*i + 1}`);
+			screen.getByTestId(`message${2*i + 2}`);
+		}
+	});
 });
