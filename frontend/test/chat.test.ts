@@ -60,11 +60,35 @@ describe('Chat', () => {
 		expect(handleChatCompletions).toHaveBeenCalled();
 	});
 
-	test.skip('sending message should result in new message appearing on screen');
+	test('sending message should result in new message appearing on screen', async () => {
+		render(Chat);
+		const user: UserEvent = userEvent.setup();
+		await user.type(screen.getByRole('textbox'), 'lorem ipsum'); // randomize?
+		await user.click(screen.getByRole('button'));
+		// look for the new message
+		const newMessage: HTMLElement = screen.getByTestId('message1');
+		assert.strictEqual(newMessage.tagName, 'DIV');
+	});
 
-	test.skip('sending message should result in reply message appearing on screen');
+	test('sending message should result in reply message appearing on screen', async () => {
+		render(Chat);
+		const user: UserEvent = userEvent.setup();
+		await user.type(screen.getByRole('textbox'), 'lorem ipsum'); // randomize?
+		await user.click(screen.getByRole('button'));
+		// await the reply message (don't look for it immediately, because it could take time)
+		const newMessage: HTMLElement = await screen.findByTestId('message2');
+		assert.strictEqual(newMessage.tagName, 'DIV');
+	});
 
-	test.skip('sending message should clear original input field');
+	test('sending message should clear original input field', async () => {
+		render(Chat);
+		const user: UserEvent = userEvent.setup();
+		const myTextBox: HTMLElement = screen.getByRole('textbox');
+		assert(myTextBox instanceof HTMLInputElement);
+		await user.type(myTextBox, 'lorem ipsum'); // randomize?
+		await user.click(screen.getByRole('button'));
+		assert.strictEqual(myTextBox.value, '');
+	});
 
 	test.skip('enter key should result in sending message');
 
