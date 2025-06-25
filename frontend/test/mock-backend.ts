@@ -9,10 +9,12 @@ v.addSchema(message_schema);
 
 /**
  * Handles *only* requests to POST /v1/chat/completions
+ * NOTE: this is exported so we can use `expect().toHaveBeenCalled()` when spying on it during testing
+ *
  * @param req the HTTP request to handle
  * @returns the HTTP response to send
  */
-async function handleChatCompletions(req: Request): Promise<Response> {
+export async function handleChatCompletions(req: Request): Promise<Response> {
 	assert.strictEqual(req.url, 'https://localhost:3000/v1/chat/completions');
 	// check HTTP method
 	if (req.method !== 'POST') {
@@ -67,7 +69,7 @@ async function handleChatCompletions(req: Request): Promise<Response> {
  * @param req the HTTP request to handle
  * @returns the HTTP response to send
  */
-async function handleMockBackendRequest(req: Request): Promise<Response> {
+export async function handleMockBackendRequest(req: Request): Promise<Response> {
 	if (req.url === 'https://localhost:3000/vfm-mock') {
 		return new Response('lorem ipsum dolor sit amet', { status: 200 });
 	} else if (req.url === 'https://localhost:3000/v1/chat/completions') {
@@ -76,5 +78,3 @@ async function handleMockBackendRequest(req: Request): Promise<Response> {
 		return new Response('not found', { status: 404 });
 	}
 }
-
-export default handleMockBackendRequest;
