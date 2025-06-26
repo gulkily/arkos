@@ -18,23 +18,35 @@ export async function handleChatCompletions(req: Request): Promise<Response> {
 	assert.strictEqual(req.url, 'https://localhost:3000/v1/chat/completions');
 	// check HTTP method
 	if (req.method !== 'POST') {
-		return new Response('wrong HTTP method!', { status: 405 });
+		return new Response('wrong HTTP method!', {
+			status: 405,
+			headers: { 'Content-Type': 'text/plain' }
+		});
 	}
 	// check Content-Type
 	if (req.headers.get('Content-Type') !== 'application/json') {
-		return new Response('wrong Content-Type', { status: 400 });
+		return new Response('wrong Content-Type', {
+			status: 400,
+			headers: { 'Content-Type': 'text/plain' }
+		});
 	}
 	// try to parse JSON
 	let reqJSON: unknown;
 	try {
 		reqJSON = await req.json();
 	} catch {
-		return new Response('no or malformed body', { status: 400 });
+		return new Response('no or malformed body', {
+			status: 400,
+			headers: { 'Content-Type': 'text/plain' }
+		});
 	}
 	// input validation for `reqJSON`
 	const validationResults: ValidatorResult = v.validate(reqJSON, request_schema);
 	if (!validationResults.valid) {
-		return new Response(`malformed request: ${validationResults.errors}`, { status: 400 });
+		return new Response(`malformed request: ${validationResults.errors}`, {
+			status: 400,
+			headers: { 'Content-Type': 'text/plain' }
+		});
 	}
 
 	assert(reqJSON instanceof Object);
