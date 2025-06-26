@@ -1,9 +1,9 @@
 from typing import Any, Dict, List, Optional, Union, AsyncIterator
-
+import json
 from pydantic import BaseModel, Field
 from langchain_core.language_models import BaseChatModel
 from langchain_core.callbacks import CallbackManagerForLLMRun
-from langchain_core.messages import BaseMessage, AIMessage
+from langchain_core.messages import BaseMessage, AIMessage, HumanMessage
 from langchain_core.outputs import ChatGeneration, ChatGenerationChunk, ChatResult
 from langchain_core.tools import BaseTool
 from langchain_core.utils.function_calling import convert_to_openai_function
@@ -11,6 +11,7 @@ from huggingface_hub import InferenceClient
 from openai import OpenAI
 import pprint 
 pp = pprint.PrettyPrinter()
+
 
 
 
@@ -64,12 +65,7 @@ class ArkModelLink(BaseChatModel, BaseModel):
             max_tokens=self.max_tokens,
         )
         message = chat_completion.choices[0].message
-        if hasattr(message, "tool_calls") and message.tool_calls:
-            # Return full message object if there are tool calls
-            return {"tool_calls": message.tool_calls}
-        else:
-            return {"tool_calls": None, "message": message.content}
-        
+        return {"tool_calls": message.tool_calls, "message": message.content} 
     
     def _generate(
     self,
@@ -82,6 +78,7 @@ class ArkModelLink(BaseChatModel, BaseModel):
 
         # Step 1: Make initial LLM call
         response = self.make_llm_call(messages, tools=tool_schemas)
+        original_tool_calls = response["tool_calls"]
         if response["tool_calls"]: 
 
             print("***** IM USING TOOLS ******")
@@ -111,21 +108,48 @@ class ArkModelLink(BaseChatModel, BaseModel):
                 # Step 2: Make SECOND LLM call, feeding back tool results
 
                 hinter = "the answer to the tool you called is: "
-                second_response = self.make_llm_call(
-                    messages + [BaseMessage(type="unknown", content=hinter + tool_messages[0]['content'])],  # feed back the tool result
-                    tools=tool_schemas,
+                # priht("HERE *****")
+                # print(messages + [HumanMessage(content= hinter + tool_messages[0]['content'])]) 
+                # exit()
+
+                tool_name = tool_call.function.name
+                tool_args = tool_call.function.arguments  # this is a dict
+                tool_result = str(tool_output)
+
+# Optional: Format args nicely
+                arg_str = ", ".join([f"{k}={v}" for k, v in tool_args.items()])
+
+                second_prompt = (
+                    f"You previously called the tool `{tool_name}` "
+                    f"with arguments ({arg_str}).\n"
+                    f"The tool returned the result: {tool_result}.\n"
+                    f"Write a clear, helpful message that uses this result to answer the user."
                 )
+                
+                second_response = self.make_llm_call(
+                messages + [HumanMessage(content=second_prompt)],
+                tools=None
+            )
+
+
+
 
                 
-                content = str(second_response)
-
+                tool_call_obj = {
+    "id": 1234,
+    "name": tool_name,
+    "arguments": json.dumps(tool_args)  # MUST be a JSON string!
+                }
+                content = second_response["message"]
         else:
             print("*****NO TOOL CALL USED****")
             # No tool used, just regular model output
-            content = str(response)
+            content = second_response["message"]
+
 
         message = AIMessage(
             content=content,
+            additional_kwargs={"tool_calls": [tool_call_obj]},
             usage_metadata={
                 "input_tokens": 123,
                 "output_tokens": 456,

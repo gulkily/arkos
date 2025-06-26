@@ -9,7 +9,7 @@ from langchain_core.messages import (
 from langchain_core.tools import tool
 
 
-from ArkModelOAI import ArkModelLink
+from ArkModelRefactored import ArkModelLink
 import yaml
 # loads configuration for model
 with open("../config_module/config.yaml", 'r') as file:
@@ -21,14 +21,14 @@ model_url = configuration["model_url"]
 chat_model = ArkModelLink()
 
 @tool
-def multiply_tool(number_1: int, number_2: int) -> str:
+def multiply_two_numbers(number_1: int, number_2: int) -> str:
     """Multiplies two numbers."""
 
     return number_1 * number_2
 
 
 # Bind the tools to the model
-chat_model = chat_model.bind_tools([multiply_tool])
+chat_model = chat_model.bind_tools([multiply_two_numbers])
 
 
 
@@ -41,7 +41,7 @@ prompt_template = ChatPromptTemplate.from_messages(
         ("human", "{prompt}"), 
     ]
 )
-chain =  prompt_template | chat_model | StrOutputParser()
+chain =  prompt_template | chat_model
 result = chain.invoke({"prompt": "What is 51  * 90123 "})
 print("******* \n\n **HERE**** \n\n")
 print(result)

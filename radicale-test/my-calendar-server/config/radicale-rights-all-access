@@ -1,0 +1,4 @@
+[all-access]
+user = .+
+collection = .*
+permissions = rw
