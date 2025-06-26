@@ -1,0 +1,19 @@
+
+
+[server]
+hosts = 0.0.0.0:5232
+
+[auth]
+type = htpasswd
+htpasswd_filename = config/htpasswd-users
+htpasswd_encryption = bcrypt
+
+
+[rights]
+type = radicale.rights.from_file
+rights_file = config/radicale-rights-all-access
+
+[storage]
+filesystem_folder = collections
+
+

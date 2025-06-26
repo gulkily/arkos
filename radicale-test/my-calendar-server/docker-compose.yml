@@ -1,0 +1,12 @@
+version: '3'
+services:
+  radicale:
+    image: tomsquest/docker-radicale
+    ports:
+      - "5232:5232"
+    volumes:
+      - ./collections:/data
+      - ./config:/config
+    environment:
+      - RADICALE_CONFIG=/config/radicale-config
+

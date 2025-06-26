@@ -1,0 +1,18 @@
+[auth]
+user = .+
+collection = .*
+permissions = r
+
+[owner-principal]
+user = %%(login)s
+# This regex will match "ark" exactly, without leading/trailing slashes.
+# This seems to be what Radicale expects for the principal path check.
+collection = ^%%(login)s$
+permissions = rw
+
+[owner-write-collections]
+user = .+
+# This regex should match "ark/testcalendar" (no leading slash)
+collection = ^%%(login)s(/.*)?$
+permissions = rw
+
