@@ -52,7 +52,8 @@ describe('POST /v1/chat/completions', () => {
 			method: 'POST',
 			headers: { 'Content-Type': 'text/plain' }
 		});
-		assert.strictEqual(response.status, 400);
+		assert.strictEqual(response.status, 400); // NOTE: HTTP 400 = "bad request"
+		assert.strictEqual(response.headers.get('Content-Type'), 'text/plain');
 	});
 
 	test("doesn't accept POST, no body", async () => {
@@ -60,7 +61,8 @@ describe('POST /v1/chat/completions', () => {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' }
 		});
-		assert.strictEqual(response.status, 400); // NOTE: HTTP 400 = "bad request"
+		assert.strictEqual(response.status, 400);
+		assert.strictEqual(response.headers.get('Content-Type'), 'text/plain');
 	});
 
 	test("doesn't accept POST, wrong body type", async () => {
@@ -69,7 +71,8 @@ describe('POST /v1/chat/completions', () => {
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(42)
 		});
-		assert.strictEqual(response.status, 400); // NOTE: HTTP 400 = "bad request"
+		assert.strictEqual(response.status, 400);
+		assert.strictEqual(response.headers.get('Content-Type'), 'text/plain');
 	});
 
 	test("doesn't accept POST, empty body", async () => {
@@ -78,7 +81,8 @@ describe('POST /v1/chat/completions', () => {
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({})
 		});
-		assert.strictEqual(response.status, 400); // NOTE: HTTP 400 = "bad request"
+		assert.strictEqual(response.status, 400);
+		assert.strictEqual(response.headers.get('Content-Type'), 'text/plain');
 	});
 
 	test("doesn't accept POST, model, no messages", async () => {
@@ -88,6 +92,7 @@ describe('POST /v1/chat/completions', () => {
 			body: JSON.stringify({ model: 'ark-reason' })
 		});
 		assert.strictEqual(response.status, 400);
+		assert.strictEqual(response.headers.get('Content-Type'), 'text/plain');
 	});
 
 	test("doesn't accept POST, no model, messages", async () => {
@@ -97,6 +102,7 @@ describe('POST /v1/chat/completions', () => {
 			body: JSON.stringify({ messages: [{ role: 'user', content: 'hello world' }] })
 		});
 		assert.strictEqual(response.status, 400);
+		assert.strictEqual(response.headers.get('Content-Type'), 'text/plain');
 	});
 
 	test('POST with model and messages', async () => {
