@@ -15,7 +15,6 @@
 	</div>
 	<div class="chat-input-container" data-testid="chat-input-container">
 		<input type="text" class="chat-input" id="chatInput" placeholder="Type a message..." />
-		<!-- TODO: attach an event listener to this button to call the backend -->
 		<button class="send-button" id="sendButton" onclick={handleMessageSending}>Send</button>
 	</div>
 </div>
