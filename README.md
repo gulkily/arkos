@@ -1,20 +1,15 @@
 # ARK2.0
- ARK (Automate Resource Knowledgebase) revolutionizes resource management via automation. Using advanced algorithms, it streamlines collection, organization, and access to resource data, facilitating efficient decision-making.
+ ARK (Automated Resource Knowledgebase) revolutionizes resource management via automation. Using advanced algorithms, it streamlines collection, organization, and access to resource data, facilitating efficient decision-making.
+
+tldr. its an open source interface for a local LLM app store utilizing long term memory for personalized request 
 
 # Instructions 
 
-## Infernece Engine (Llama Cpp)
-* Download Llama Cpp from https://github.com/ggerganov/llama.Cpp
-* Make the Llama Cpp server 
+## Start Infernece Engine (HF-TGI)
+* cmd: bash model_module/hftgi_2.sh
+* Note: Qwen 2.5 is what is currently in use 
 
-## Model Download (Mistral 7b)
-* Download model weights from https://huggingface.co/mistralai/Mistral-7B-Instruct-v0
-
-## Running Inference Engine
-* Run the following command 
-  * ./llama-server -m your_model.gguf --port 8080 (note: replace "your_model.gguf" with the path to your model file)
-
-
-
+## Test model_module (Model Class ARKOAI)
+* cmd: python ArkModelRefactored.py
 
 
