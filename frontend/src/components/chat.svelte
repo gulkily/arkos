@@ -11,7 +11,7 @@
 	// c.f. https://lightningchart.com/js-charts/api-documentation/v5.2.0/types/MouseEventHandler.html for typing
 	async function handleMessageSending(event: MouseEvent): Promise<void> {
 		console.log(`hello from ${event.toString()}, it's ${Date.now()}`);
-		currentMessages.push({ role: 'user', content: currentUserMessage });
+		currentMessages = [...currentMessages, { role: 'user', content: currentUserMessage }]; // reassign for better reactivity
 		const response: Response = await fetch('https://localhost:3000/v1/chat/completions', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
@@ -25,7 +25,7 @@
 			`response status was ${response.status} and responseJSON was ${String(responseJSON)}`
 		);
 		// TODO: append new input to currentMessages after validation
-		
+
 		// reset the input
 		currentUserMessage = '';
 	}
