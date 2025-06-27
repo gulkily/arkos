@@ -5,12 +5,13 @@
 			role: 'assistant',
 			content: "Hello! I'm your calendar assistant. How can I help you today?"
 		}
-	]); // TODO: update this in `handleMessageSending`
+	]);
+	let currentUserMessage: string = $state('');
 
 	// c.f. https://lightningchart.com/js-charts/api-documentation/v5.2.0/types/MouseEventHandler.html for typing
 	async function handleMessageSending(event: MouseEvent): Promise<void> {
-		/* TODO: replace this with a real event listener */
 		console.log(`hello from ${event.toString()}, it's ${Date.now()}`);
+		currentMessages.push({ role: 'user', content: currentUserMessage });
 		const response: Response = await fetch('https://localhost:3000/v1/chat/completions', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
@@ -23,6 +24,10 @@
 		console.log(
 			`response status was ${response.status} and responseJSON was ${String(responseJSON)}`
 		);
+		// TODO: append new input to currentMessages after validation
+		
+		// reset the input
+		currentUserMessage = '';
 	}
 </script>
 
@@ -36,7 +41,14 @@
 		{/each}
 	</div>
 	<div class="chat-input-container" data-testid="chat-input-container">
-		<input type="text" class="chat-input" id="chatInput" placeholder="Type a message..." />
+		<input
+			type="text"
+			class="chat-input"
+			id="chatInput"
+			placeholder="Type a message..."
+			bind:value={currentUserMessage}
+		/>
+		<!-- c.f. https://svelte.dev/tutorial/svelte/text-inputs -->
 		<button class="send-button" id="sendButton" onclick={handleMessageSending}>Send</button>
 	</div>
 </div>
