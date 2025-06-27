@@ -6,10 +6,6 @@
 			content: "Hello! I'm your calendar assistant. How can I help you today?"
 		}
 	]); // TODO: update this in `handleMessageSending`
-	const roleToClassDict: Map<string, string> = new Map([
-		['user', 'user'],
-		['assistant', 'system']
-	]);
 
 	// c.f. https://lightningchart.com/js-charts/api-documentation/v5.2.0/types/MouseEventHandler.html for typing
 	async function handleMessageSending(event: MouseEvent): Promise<void> {
@@ -34,7 +30,7 @@
 	<div class="chat-messages" data-testid="chat-messages">
 		<!-- NOTE: for testing purposes, messages are numbered in `data-testid` using zero-indexing -->
 		{#each currentMessages.entries() as [index, message] (index)}
-			<div class={`message ${roleToClassDict.get(message.role)}`} data-testid={`message${index}`}>
+			<div class={`message ${message.role}`} data-testid={`message${index}`}>
 				<p>{message.content}</p>
 			</div>
 		{/each}
