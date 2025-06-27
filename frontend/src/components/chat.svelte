@@ -1,6 +1,6 @@
 <script lang="ts">
 	type ChatMessage = { role: string; content: string };
-	const currentMessages: Array<ChatMessage> = $state([]);
+	const currentMessages: Array<ChatMessage> = $state([]); // TODO: update this in `handleMessageSending`
 
 	// c.f. https://lightningchart.com/js-charts/api-documentation/v5.2.0/types/MouseEventHandler.html for typing
 	async function handleMessageSending(event: MouseEvent): Promise<void> {
