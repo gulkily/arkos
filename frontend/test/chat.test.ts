@@ -1,4 +1,4 @@
-import { describe, expect, test, vi } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import assert from 'node:assert';
 import { render, screen } from '@testing-library/svelte';
 import Chat from '../src/components/chat.svelte';
