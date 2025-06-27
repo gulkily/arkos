@@ -1,6 +1,15 @@
 <script lang="ts">
 	type ChatMessage = { role: string; content: string };
-	const currentMessages: Array<ChatMessage> = $state([]); // TODO: update this in `handleMessageSending`
+	let currentMessages: Array<ChatMessage> = $state([
+		{
+			role: 'assistant',
+			content: "Hello! I'm your calendar assistant. How can I help you today?"
+		}
+	]); // TODO: update this in `handleMessageSending`
+	const roleToClassDict: Map<string, string> = new Map([
+		['user', 'user'],
+		['assistant', 'system']
+	]);
 
 	// c.f. https://lightningchart.com/js-charts/api-documentation/v5.2.0/types/MouseEventHandler.html for typing
 	async function handleMessageSending(event: MouseEvent): Promise<void> {
@@ -24,9 +33,11 @@
 <div class="chat-container" data-testid="chat-container">
 	<div class="chat-messages" data-testid="chat-messages">
 		<!-- NOTE: for testing purposes, messages are numbered in `data-testid` using zero-indexing -->
-		<div class="message system" data-testid="message0">
-			<p>Hello! I'm your calendar assistant. How can I help you today?</p>
-		</div>
+		{#each currentMessages.entries() as [index, message] (index)}
+			<div class={`message ${roleToClassDict.get(message.role)}`} data-testid={`message${index}`}>
+				<p>{message.content}</p>
+			</div>
+		{/each}
 	</div>
 	<div class="chat-input-container" data-testid="chat-input-container">
 		<input type="text" class="chat-input" id="chatInput" placeholder="Type a message..." />
