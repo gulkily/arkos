@@ -1,4 +1,7 @@
 <script lang="ts">
+	type ChatMessage = { role: string; content: string };
+	const currentMessages: Array<ChatMessage> = $state([]);
+
 	// c.f. https://lightningchart.com/js-charts/api-documentation/v5.2.0/types/MouseEventHandler.html for typing
 	async function handleMessageSending(event: MouseEvent): Promise<void> {
 		/* TODO: replace this with a real event listener */
@@ -8,11 +11,13 @@
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
 				model: 'ark-reason',
-				messages: [] // TODO: add real messages
+				messages: currentMessages
 			})
 		});
-		const responseJSON: any = await response.json();
-		console.log(`response status was ${response.status} and responseJSON was ${String(responseJSON)}`);
+		const responseJSON: unknown = await response.json();
+		console.log(
+			`response status was ${response.status} and responseJSON was ${String(responseJSON)}`
+		);
 	}
 </script>
 
