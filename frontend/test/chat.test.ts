@@ -2,7 +2,6 @@ import { describe, test } from 'vitest';
 import assert from 'node:assert';
 import { render, screen } from '@testing-library/svelte';
 import Chat from '../src/components/chat.svelte';
-import { handleChatCompletions } from './mock-backend.ts';
 import { userEvent, UserEvent } from '@testing-library/user-event';
 
 // TODO: fix this
@@ -51,7 +50,7 @@ describe('Chat', () => {
 		assert.ok(screen.getByRole('button'));
 	});
 
-	/* TODO: write these tests after I figure out how @testing-library/user-event works */
+	/* TODO: write these tests after I figure out how to spy on the backend properly */
 	/*
 	test('sending message should result in POST /v1/chat/completions call', async () => {
 		render(Chat);
