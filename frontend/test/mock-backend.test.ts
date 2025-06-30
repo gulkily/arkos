@@ -1,16 +1,12 @@
 import { describe, test } from 'vitest';
 import assert from 'node:assert';
-import { Validator, ValidatorResult } from 'jsonschema'; // TODO: deprecate this
 import { Ajv, ValidateFunction } from 'ajv';
 import { ChatCompletionResponse } from '../src/lib/schema_types.ts';
 import response_schema from '../../schemas/chatcompletionresponse_schema.json';
 import message_schema from '../../schemas/chatmessage_schema.json';
 
-const v: Validator = new Validator();
-v.addSchema(message_schema);
-
 const ajv: Ajv = new Ajv();
-const response_validator: ValidateFunction = ajv
+const response_validator: ValidateFunction<ChatCompletionResponse> = ajv
 	.addSchema(message_schema)
 	.compile<ChatCompletionResponse>(response_schema);
 
@@ -123,8 +119,7 @@ describe('POST /v1/chat/completions', () => {
 		});
 		assert.strictEqual(response.status, 200);
 		const responseJSON: unknown = await response.json();
-		const validationResults: ValidatorResult = v.validate(responseJSON, response_schema);
-		assert(validationResults.valid, validationResults.errors.toString());
+		assert(response_validator(responseJSON));
 	});
 
 	test('POST with model, messages, temperature', async () => {
@@ -139,8 +134,7 @@ describe('POST /v1/chat/completions', () => {
 		});
 		assert.strictEqual(response.status, 200);
 		const responseJSON: unknown = await response.json();
-		const validationResults: ValidatorResult = v.validate(responseJSON, response_schema);
-		assert(validationResults.valid, validationResults.errors.toString());
+		assert(response_validator(responseJSON));
 	});
 
 	test('POST with model, messages, thread_id', async () => {
@@ -155,8 +149,7 @@ describe('POST /v1/chat/completions', () => {
 		});
 		assert.strictEqual(response.status, 200);
 		const responseJSON: unknown = await response.json();
-		const validationResults: ValidatorResult = v.validate(responseJSON, response_schema);
-		assert(validationResults.valid, validationResults.errors.toString());
+		assert(response_validator(responseJSON));
 	});
 
 	test.skip('POST with model, messages, stream'); // TODO: implement this test once I figure out how to implement streaming
