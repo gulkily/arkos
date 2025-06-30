@@ -55,6 +55,11 @@
 		// reset the input
 		currentUserMessage = '';
 	}
+
+	async function handleKeydown(event: KeyboardEvent): Promise<void> {
+		console.log(`handleKeydown was called with "${event.key}"`);
+		// TODO: check key and call handleMessageSending if it was the enter key
+	}
 </script>
 
 <div class="chat-container" data-testid="chat-container">
@@ -73,6 +78,7 @@
 			id="chatInput"
 			placeholder="Type a message..."
 			bind:value={currentUserMessage}
+			onkeydown={handleKeydown}
 		/>
 		<!-- c.f. https://svelte.dev/tutorial/svelte/text-inputs -->
 		<button class="send-button" id="sendButton" onclick={handleMessageSending}>Send</button>
