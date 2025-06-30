@@ -1,6 +1,6 @@
 {
-  "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "ChatMessage",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "ChatMessage",
   "type": "object",
   "properties": {
     "role": {
