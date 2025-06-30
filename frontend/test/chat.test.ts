@@ -105,7 +105,8 @@ describe('Chat', () => {
 	test('enter key should result in new message appearing on screen', async () => {
 		render(Chat);
 		const user: UserEvent = userEvent.setup();
-		await user.type(screen.getByRole('textbox'), 'lorem ipsum\n');
+		// c.f. https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values and https://testing-library.com/docs/user-event/keyboard
+		await user.type(screen.getByRole('textbox'), 'lorem ipsum{Enter}');
 		expect(handleChatCompletions).toHaveBeenCalled();
 		const newMessage: HTMLElement = screen.getByTestId('message1');
 		assert.strictEqual(newMessage.tagName, 'DIV');
@@ -114,7 +115,7 @@ describe('Chat', () => {
 	test('enter key should result in reply message appearing on screen', async () => {
 		render(Chat);
 		const user: UserEvent = userEvent.setup();
-		await user.type(screen.getByRole('textbox'), 'lorem ipsum\n');
+		await user.type(screen.getByRole('textbox'), 'lorem ipsum{Enter}');
 		expect(handleChatCompletions).toHaveBeenCalled();
 		const newMessage: HTMLElement = await screen.findByTestId('message1');
 		assert.strictEqual(newMessage.tagName, 'DIV');
@@ -125,7 +126,7 @@ describe('Chat', () => {
 		const user: UserEvent = userEvent.setup();
 		const myTextBox: HTMLElement = screen.getByRole('textbox');
 		assert(myTextBox instanceof HTMLInputElement);
-		await user.type(myTextBox, 'lorem ipsum\n');
+		await user.type(myTextBox, 'lorem ipsum{Enter}');
 		assert.strictEqual(myTextBox.value, '');
 	});
 
@@ -136,7 +137,7 @@ describe('Chat', () => {
 		assert(myTextBox instanceof HTMLInputElement);
 		const testMessages: Array<string> = ['lorem', 'ipsum', 'dolor']; // randomize?
 		for (const [i, message] of testMessages.entries()) {
-			await user.type(myTextBox, `${message}\n`);
+			await user.type(myTextBox, `${message}{Enter}`);
 			// look for the message and its reply
 			screen.getByTestId(`message${2 * i + 1}`);
 			screen.getByTestId(`message${2 * i + 2}`);
