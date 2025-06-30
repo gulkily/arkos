@@ -1,5 +1,14 @@
 <script lang="ts">
-	type ChatMessage = { role: string; content: string };
+	import { Ajv, type ValidateFunction } from 'ajv';
+	import { type ChatMessage, type ChatCompletionResponse } from '../lib/schema_types.js';
+	import response_schema from '../../../schemas/chatcompletionresponse_schema.json';
+	import message_schema from '../../../schemas/chatmessage_schema.json';
+
+	const ajv: Ajv = new Ajv();
+	const response_validator: ValidateFunction<ChatCompletionResponse> = ajv
+		.addSchema(message_schema)
+		.compile<ChatCompletionResponse>(response_schema);
+
 	let currentMessages: Array<ChatMessage> = $state([
 		{
 			role: 'assistant',
