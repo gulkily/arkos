@@ -40,7 +40,6 @@
 		"ajv": "^8.17.1",
 		"globals": "^16.0.0",
 		"jsdom": "^26.0.0",
-		"jsonschema": "^1.5.0",
 		"resize-observer-polyfill": "^1.5.1",
 		"svelte": "^5.0.0",
 		"svelte-check": "^4.0.0",
