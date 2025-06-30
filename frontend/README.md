@@ -74,7 +74,7 @@ code .
 
 # File structure
 
-(As of June 19, 2025.)
+(As of June 30, 2025.)
 
 - `.npmrc`
 - `.prettierignore`
