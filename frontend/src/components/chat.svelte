@@ -23,7 +23,6 @@
 
 	// c.f. https://lightningchart.com/js-charts/api-documentation/v5.2.0/types/MouseEventHandler.html for typing
 	async function handleMessageSending(event: MouseEvent): Promise<void> {
-		console.log(`hello from ${event.toString()}, it's ${Date.now()}`);
 		currentMessages = [...currentMessages, { role: 'user', content: currentUserMessage }]; // reassign for better reactivity
 		const response: Response = await fetch('https://localhost:3000/v1/chat/completions', {
 			method: 'POST',
@@ -34,9 +33,6 @@
 			})
 		});
 		const responseJSON: unknown = await response.json();
-		console.log(
-			`response status was ${response.status} and responseJSON was ${String(responseJSON)}`
-		);
 		if (!response_validator(responseJSON)) {
 			// if invalid, log and also remove the last message for now
 			// TODO: make this more user-friendly and also figure out how to test this
