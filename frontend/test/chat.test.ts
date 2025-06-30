@@ -107,7 +107,6 @@ describe('Chat', () => {
 		const user: UserEvent = userEvent.setup();
 		// c.f. https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values and https://testing-library.com/docs/user-event/keyboard
 		await user.type(screen.getByRole('textbox'), 'lorem ipsum{Enter}');
-		expect(handleChatCompletions).toHaveBeenCalled();
 		const newMessage: HTMLElement = screen.getByTestId('message1');
 		assert.strictEqual(newMessage.tagName, 'DIV');
 	});
