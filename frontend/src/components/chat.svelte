@@ -22,7 +22,7 @@
 	let currentUserMessage: string = $state('');
 
 	// c.f. https://lightningchart.com/js-charts/api-documentation/v5.2.0/types/MouseEventHandler.html for typing
-	async function handleMessageSending(event: MouseEvent): Promise<void> {
+	async function handleMessageSending(): Promise<void> {
 		currentMessages = [...currentMessages, { role: 'user', content: currentUserMessage }]; // reassign for better reactivity
 		const response: Response = await fetch('https://localhost:3000/v1/chat/completions', {
 			method: 'POST',
@@ -57,8 +57,10 @@
 	}
 
 	async function handleKeydown(event: KeyboardEvent): Promise<void> {
-		console.log(`handleKeydown was called with "${event.key}"`);
-		// TODO: check key and call handleMessageSending if it was the enter key
+		if (event.key === "Enter"){
+			event.preventDefault();
+			await handleMessageSending();
+		}
 	}
 </script>
 
