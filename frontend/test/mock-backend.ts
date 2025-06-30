@@ -1,12 +1,12 @@
 // NOTE: replace `localhost:3000` by actual domain name once we get one
-import assert from 'node:assert';
 import { Ajv, ValidateFunction } from 'ajv';
 import { ChatCompletionRequest } from '../src/lib/schema_types.ts';
 import request_schema from '../../schemas/chatcompletionrequest_schema.json';
 import message_schema from '../../schemas/chatmessage_schema.json';
 
 const ajv: Ajv = new Ajv();
-const request_validator: ValidateFunction = ajv
+// NOTE: you MUST type `request_validator` this way to narrow the type of `reqJSON`, otherwise a priori TypeScript just thinks this is a generic `ValidateFunction` object
+const request_validator: ValidateFunction<ChatCompletionRequest> = ajv
 	.addSchema(message_schema)
 	.compile<ChatCompletionRequest>(request_schema);
 
@@ -18,7 +18,6 @@ const request_validator: ValidateFunction = ajv
  * @returns the HTTP response to send
  */
 export async function handleChatCompletions(req: Request): Promise<Response> {
-	assert.strictEqual(req.url, 'https://localhost:3000/v1/chat/completions');
 	// check HTTP method
 	if (req.method !== 'POST') {
 		return new Response('wrong HTTP method!', {
@@ -51,7 +50,6 @@ export async function handleChatCompletions(req: Request): Promise<Response> {
 		});
 	}
 
-	assert(reqJSON instanceof Object);
 	if (reqJSON['stream'] === true) {
 		// TODO: implement streaming later
 		return new Response('no streaming yet', { status: 501 });

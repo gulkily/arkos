@@ -1,11 +1,18 @@
 import { describe, test } from 'vitest';
 import assert from 'node:assert';
-import { Validator, ValidatorResult } from 'jsonschema';
+import { Validator, ValidatorResult } from 'jsonschema'; // TODO: deprecate this
+import { Ajv, ValidateFunction } from 'ajv';
+import { ChatCompletionResponse } from '../src/lib/schema_types.ts';
 import response_schema from '../../schemas/chatcompletionresponse_schema.json';
 import message_schema from '../../schemas/chatmessage_schema.json';
 
 const v: Validator = new Validator();
 v.addSchema(message_schema);
+
+const ajv: Ajv = new Ajv();
+const response_validator: ValidateFunction = ajv
+	.addSchema(message_schema)
+	.compile<ChatCompletionResponse>(response_schema);
 
 /*
 NOTE: these test cases are meant as sanity checks for the testing environment
