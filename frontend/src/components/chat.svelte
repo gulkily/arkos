@@ -1,6 +1,10 @@
 <script lang="ts">
 	import { Ajv, type ValidateFunction } from 'ajv';
-	import { type ChatMessage, type ChatCompletionResponse } from '../lib/schema_types.js';
+	import {
+		type ChatMessage,
+		type ChatCompletionResponse,
+		type ChatChoice
+	} from '../lib/schema_types.js';
 	import response_schema from '../../../schemas/chatcompletionresponse_schema.json';
 	import message_schema from '../../../schemas/chatmessage_schema.json';
 
@@ -33,7 +37,24 @@
 		console.log(
 			`response status was ${response.status} and responseJSON was ${String(responseJSON)}`
 		);
-		// TODO: append new input to currentMessages after validation
+		if (!response_validator(responseJSON)) {
+			// if invalid, log and also remove the last message for now
+			// TODO: make this more user-friendly and also figure out how to test this
+			console.log('response JSON was invalid!');
+			currentMessages = currentMessages.slice(0, -2);
+			return;
+		}
+		// pick an arbitrary choice (TODO: randomize or show a picker UI explicitly?)
+		const responseChoices: Array<ChatChoice> = responseJSON.choices;
+		const myMessage: ChatMessage | undefined = responseChoices.at(0)?.message;
+		if (myMessage === undefined) {
+			// TODO: make this more user-friendly?
+			console.log('there are no choices in the response!');
+			currentMessages = currentMessages.slice(0, -2);
+			return;
+		}
+		// if it's valid, add!
+		currentMessages = [...currentMessages, myMessage];
 
 		// reset the input
 		currentUserMessage = '';
