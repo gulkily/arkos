@@ -1,16 +1,14 @@
 // NOTE: replace `localhost:3000` by actual domain name once we get one
 import assert from 'node:assert';
-import { Validator, ValidatorResult } from 'jsonschema'; // TODO: deprecate this
 import { Ajv } from 'ajv';
 import { ChatCompletionRequest } from '../src/lib/schema_types.ts';
 import request_schema from '../../schemas/chatcompletionrequest_schema.json';
 import message_schema from '../../schemas/chatmessage_schema.json';
 
-const v: Validator = new Validator();
-v.addSchema(message_schema);
-
 const ajv: Ajv = new Ajv();
-const request_validator = ajv.addSchema(message_schema).compile<ChatCompletionRequest>(request_schema);
+const request_validator = ajv
+	.addSchema(message_schema)
+	.compile<ChatCompletionRequest>(request_schema);
 
 /**
  * Handles *only* requests to POST /v1/chat/completions
@@ -46,9 +44,8 @@ export async function handleChatCompletions(req: Request): Promise<Response> {
 		});
 	}
 	// input validation for `reqJSON`
-	const validationResults: ValidatorResult = v.validate(reqJSON, request_schema);
-	if (!validationResults.valid) {
-		return new Response(`malformed request: ${validationResults.errors}`, {
+	if (!request_validator(reqJSON)) {
+		return new Response(`malformed request: ${request_validator.errors}`, {
 			status: 400,
 			headers: { 'Content-Type': 'text/plain' }
 		});
