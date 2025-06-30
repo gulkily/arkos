@@ -12,7 +12,7 @@ This is the ARK 2.0 frontend. It currently shows exactly one page: a calendar an
 - Vitest
 - @testing-library/svelte
 - @event-calendar/core
-- jsonschema
+- ajv
 - vitest-fetch-mock
 
 ## Todos
@@ -25,14 +25,11 @@ This is the ARK 2.0 frontend. It currently shows exactly one page: a calendar an
     - Chat-only view
     - (potentially other pages in the future)
 - Add authentication (primarily MIT Touchstone, possibly others)
-- Make it interactive
-    - Test basic user interaction using Cypress/Playwright/etc
-- Connect to the backend
-    - Detect unexpected/malformed backend output and display an appropriate error message? (to safeguard against potential backend-side bugs)
+- Make the UI more user-friendly when the backend returns a malformed response
 - Testing cleanup + expansion
     - ~~Refactor the UI HTML markup so that `screen.getByRole` or `screen.getByText` works (potentially making it more accessible)~~ (now refactored to use `screen.getByTestId` for now)
     - Mock components (both library and ARK2.0-specific)
-    - Mock user-generated content
+    - ~~Mock user-generated content~~ (maybe randomize?)
     - Potentially determine code coverage
         - Figure out how `.c8rc` or `.nycrc` work so we can remove unnecessary files from the report
 - Create a Figma mockup to guide future frontend development
@@ -96,6 +93,7 @@ code .
         - `chat.svelte` (shows the chat view)
     - `lib`
         - `index.ts` (currently empty but kept as a placeholder)
+        - `schema_types.ts` (for type declarations)
     - `routes`
         - `+page.svelte`
 - `static`
@@ -103,8 +101,8 @@ code .
     - `styles.css`
 - `svelte.config.js`
 - `test`
-    - `Calendar.test.ts` (for testing the `<Calendar/>` component)
-    - `chat.test.ts` (for testing the `<Chat/>` component)
+    - `Calendar.test.ts` (for testing `src/components/Calendar.svelte`)
+    - `chat.test.ts` (for testing `src/components/chat.svelte`)
     - `page.svelte.test.ts` (for testing `src/routes/+page.svelte`, which is currently the only page available)
     - `mock-backend.ts` (creates the mock backend)
     - `mock-backend.test.ts` (for testing the mock backend)
@@ -147,7 +145,9 @@ Plain `.ts` files should be tested using input space partitioning for each funct
 
 ## JSON schemas
 
-Schemas go in `../schemas/`. This is *intentionally* a repo top-level folder because double-checking responses and requests are malformed is also very useful for backend-side code. Use `jsonschema` to validate data against a schema; don't roll your own validator, because it'll probably be a lot flakier.
+Schemas go in `../schemas/`. This is *intentionally* a repo top-level folder because double-checking responses and requests are malformed is also very useful for backend-side code.
+
+Use `ajv` to validate data against a schema. Don't roll your own validator, because it'll probably be a lot flakier. Make sure to type your validator with `ValidateFunction<T>` instead of just `ValidateFunction`, so that you can convince TypeScript can narrow the data's type for you.
 
 # Helpful links if you get stuck
 
@@ -169,7 +169,8 @@ Schemas go in `../schemas/`. This is *intentionally* a repo top-level folder bec
 - [TypeScript](https://www.typescriptlang.org/docs/handbook/intro.html)
 - [Vitest](https://vitest.dev/guide/)
 - [@event-calendar GitHub repo](https://github.com/vkurko/calendar)
-- [jsonschema README](https://www.npmjs.com/package/jsonschema)
+- [ajv API reference](https://ajv.js.org/api.html)
+  - [ajv guide](https://ajv.js.org/guide/typescript.html)
 - [vitest-fetch-mock README](https://www.npmjs.com/package/vitest-fetch-mock)
 
 ## Others
