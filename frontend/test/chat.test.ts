@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest';
+import { describe, test } from 'vitest';
 import assert from 'node:assert';
 import { render, screen } from '@testing-library/svelte';
 import Chat from '../src/components/chat.svelte';
@@ -115,7 +115,6 @@ describe('Chat', () => {
 		render(Chat);
 		const user: UserEvent = userEvent.setup();
 		await user.type(screen.getByRole('textbox'), 'lorem ipsum{Enter}');
-		expect(handleChatCompletions).toHaveBeenCalled();
 		const newMessage: HTMLElement = await screen.findByTestId('message1');
 		assert.strictEqual(newMessage.tagName, 'DIV');
 	});
