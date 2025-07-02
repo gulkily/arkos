@@ -10,8 +10,42 @@ on:
 
 # TODO: replace this with real jobs
 jobs:
-  placeholder:
+  prettier:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
     steps:
-      - name: run placeholder
-        run: echo "yay!"
+      - uses: actions/checkout@v4
+      - name: install
+        run: npm install
+
+      - name: check with prettier
+        run: npx prettier "**/*" --check
+
+  eslint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - name: install
+        run: npm install
+
+      - name: check with eslint
+        run: npx eslint "{src,test}/**/*" --max-warnings=0
+
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: install
+        run: npm install
+
+      - name: run testcases
+        run: npm test
