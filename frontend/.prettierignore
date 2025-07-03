@@ -1,11 +1,9 @@
 # reformatting package-lock.json is fine actually, makes it easier to read
 
-# no reformatting the README!
-README.md
-
-# can't use prettier for images or .DS_Store anyways
-**/*.png
-**/.DS_Store
+# can't use prettier for these files anyways
+# NOTE: using ".." since CI requires reformatting *all* files including those in the parent folder
+../**/*.png
+../**/.DS_Store
 .prettierignore
 .npmrc
 
