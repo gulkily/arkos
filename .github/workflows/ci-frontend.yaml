@@ -13,18 +13,7 @@ on:
       - "./frontend"
       - "!**/*.{txt,md}"
 
-# TODO: replace this with real jobs
 jobs:
-  prettier:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: install
-        run: npm install
-
-      - name: check with prettier
-        run: npx prettier "**/*" --check
-
   eslint:
     runs-on: ubuntu-latest
     steps:

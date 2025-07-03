@@ -5,10 +5,20 @@ on:
   pull_request:
     branches:
       - main
+    paths-ignore:
+      - "**/*.{txt,md}" # no need to reformat text
+      - "**/*.py" # since Prettier doesn't currently support Python
 
 jobs:
-  example: # TODO: replace this with a real task
+  prettier:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "./frontend"
     steps:
-      - name: placeholder
-        run: echo "yay!"
+      - uses: actions/checkout@v4
+      - name: install
+        run: npm install
+
+      - name: check with prettier
+        run: npx prettier "../**/*" --check
