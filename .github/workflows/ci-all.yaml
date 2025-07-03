@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/SchemaStore/schemastore/refs/heads/master/src/schemas/json/github-workflow.json
+name: CI checks for everything
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  example: # TODO: replace this with a real task
+    runs-on: ubuntu-latest
+    steps:
+      - name: placeholder
+        run: echo "yay!"
