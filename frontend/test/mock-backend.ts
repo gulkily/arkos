@@ -1,41 +1,55 @@
 // NOTE: replace `localhost:3000` by actual domain name once we get one
-import assert from 'node:assert';
-import { Validator, ValidatorResult } from 'jsonschema';
+import { Ajv, ValidateFunction } from 'ajv';
+import { ChatCompletionRequest } from '../src/lib/schema_types.ts';
 import request_schema from '../../schemas/chatcompletionrequest_schema.json';
 import message_schema from '../../schemas/chatmessage_schema.json';
 
-const v: Validator = new Validator();
-v.addSchema(message_schema);
+const ajv: Ajv = new Ajv();
+// NOTE: you MUST type `request_validator` this way to narrow the type of `reqJSON`, otherwise a priori TypeScript just thinks this is a generic `ValidateFunction` object
+const request_validator: ValidateFunction<ChatCompletionRequest> = ajv
+	.addSchema(message_schema)
+	.compile<ChatCompletionRequest>(request_schema);
 
 /**
  * Handles *only* requests to POST /v1/chat/completions
+ * NOTE: this is exported so we can use `expect().toHaveBeenCalled()` when spying on it during testing
+ *
  * @param req the HTTP request to handle
  * @returns the HTTP response to send
  */
-async function handleChatCompletions(req: Request): Promise<Response> {
-	assert.strictEqual(req.url, 'https://localhost:3000/v1/chat/completions');
+export async function handleChatCompletions(req: Request): Promise<Response> {
 	// check HTTP method
 	if (req.method !== 'POST') {
-		return new Response('wrong HTTP method!', { status: 405 });
+		return new Response('wrong HTTP method!', {
+			status: 405,
+			headers: { 'Content-Type': 'text/plain' }
+		});
 	}
 	// check Content-Type
 	if (req.headers.get('Content-Type') !== 'application/json') {
-		return new Response('wrong Content-Type', { status: 400 });
+		return new Response('wrong Content-Type', {
+			status: 400,
+			headers: { 'Content-Type': 'text/plain' }
+		});
 	}
 	// try to parse JSON
 	let reqJSON: unknown;
 	try {
 		reqJSON = await req.json();
 	} catch {
-		return new Response('no or malformed body', { status: 400 });
+		return new Response('no or malformed body', {
+			status: 400,
+			headers: { 'Content-Type': 'text/plain' }
+		});
 	}
 	// input validation for `reqJSON`
-	const validationResults: ValidatorResult = v.validate(reqJSON, request_schema);
-	if (!validationResults.valid) {
-		return new Response(`malformed request: ${validationResults.errors}`, { status: 400 });
+	if (!request_validator(reqJSON)) {
+		return new Response(`malformed request: ${request_validator.errors}`, {
+			status: 400,
+			headers: { 'Content-Type': 'text/plain' }
+		});
 	}
 
-	assert(reqJSON instanceof Object);
 	if (reqJSON['stream'] === true) {
 		// TODO: implement streaming later
 		return new Response('no streaming yet', { status: 501 });
@@ -67,7 +81,7 @@ async function handleChatCompletions(req: Request): Promise<Response> {
  * @param req the HTTP request to handle
  * @returns the HTTP response to send
  */
-async function handleMockBackendRequest(req: Request): Promise<Response> {
+export async function handleMockBackendRequest(req: Request): Promise<Response> {
 	if (req.url === 'https://localhost:3000/vfm-mock') {
 		return new Response('lorem ipsum dolor sit amet', { status: 200 });
 	} else if (req.url === 'https://localhost:3000/v1/chat/completions') {
@@ -76,5 +90,3 @@ async function handleMockBackendRequest(req: Request): Promise<Response> {
 		return new Response('not found', { status: 404 });
 	}
 }
-
-export default handleMockBackendRequest;

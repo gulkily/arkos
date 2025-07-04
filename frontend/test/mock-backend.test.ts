@@ -1,11 +1,14 @@
 import { describe, test } from 'vitest';
 import assert from 'node:assert';
-import { Validator, ValidatorResult } from 'jsonschema';
+import { Ajv, ValidateFunction } from 'ajv';
+import { ChatCompletionResponse } from '../src/lib/schema_types.ts';
 import response_schema from '../../schemas/chatcompletionresponse_schema.json';
 import message_schema from '../../schemas/chatmessage_schema.json';
 
-const v: Validator = new Validator();
-v.addSchema(message_schema);
+const ajv: Ajv = new Ajv();
+const response_validator: ValidateFunction<ChatCompletionResponse> = ajv
+	.addSchema(message_schema)
+	.compile<ChatCompletionResponse>(response_schema);
 
 /*
 NOTE: these test cases are meant as sanity checks for the testing environment
@@ -52,7 +55,8 @@ describe('POST /v1/chat/completions', () => {
 			method: 'POST',
 			headers: { 'Content-Type': 'text/plain' }
 		});
-		assert.strictEqual(response.status, 400);
+		assert.strictEqual(response.status, 400); // NOTE: HTTP 400 = "bad request"
+		assert.strictEqual(response.headers.get('Content-Type'), 'text/plain');
 	});
 
 	test("doesn't accept POST, no body", async () => {
@@ -60,7 +64,8 @@ describe('POST /v1/chat/completions', () => {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' }
 		});
-		assert.strictEqual(response.status, 400); // NOTE: HTTP 400 = "bad request"
+		assert.strictEqual(response.status, 400);
+		assert.strictEqual(response.headers.get('Content-Type'), 'text/plain');
 	});
 
 	test("doesn't accept POST, wrong body type", async () => {
@@ -69,7 +74,8 @@ describe('POST /v1/chat/completions', () => {
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(42)
 		});
-		assert.strictEqual(response.status, 400); // NOTE: HTTP 400 = "bad request"
+		assert.strictEqual(response.status, 400);
+		assert.strictEqual(response.headers.get('Content-Type'), 'text/plain');
 	});
 
 	test("doesn't accept POST, empty body", async () => {
@@ -78,7 +84,8 @@ describe('POST /v1/chat/completions', () => {
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({})
 		});
-		assert.strictEqual(response.status, 400); // NOTE: HTTP 400 = "bad request"
+		assert.strictEqual(response.status, 400);
+		assert.strictEqual(response.headers.get('Content-Type'), 'text/plain');
 	});
 
 	test("doesn't accept POST, model, no messages", async () => {
@@ -88,6 +95,7 @@ describe('POST /v1/chat/completions', () => {
 			body: JSON.stringify({ model: 'ark-reason' })
 		});
 		assert.strictEqual(response.status, 400);
+		assert.strictEqual(response.headers.get('Content-Type'), 'text/plain');
 	});
 
 	test("doesn't accept POST, no model, messages", async () => {
@@ -97,6 +105,7 @@ describe('POST /v1/chat/completions', () => {
 			body: JSON.stringify({ messages: [{ role: 'user', content: 'hello world' }] })
 		});
 		assert.strictEqual(response.status, 400);
+		assert.strictEqual(response.headers.get('Content-Type'), 'text/plain');
 	});
 
 	test('POST with model and messages', async () => {
@@ -110,8 +119,7 @@ describe('POST /v1/chat/completions', () => {
 		});
 		assert.strictEqual(response.status, 200);
 		const responseJSON: unknown = await response.json();
-		const validationResults: ValidatorResult = v.validate(responseJSON, response_schema);
-		assert(validationResults.valid, validationResults.errors.toString());
+		assert(response_validator(responseJSON));
 	});
 
 	test('POST with model, messages, temperature', async () => {
@@ -126,8 +134,7 @@ describe('POST /v1/chat/completions', () => {
 		});
 		assert.strictEqual(response.status, 200);
 		const responseJSON: unknown = await response.json();
-		const validationResults: ValidatorResult = v.validate(responseJSON, response_schema);
-		assert(validationResults.valid, validationResults.errors.toString());
+		assert(response_validator(responseJSON));
 	});
 
 	test('POST with model, messages, thread_id', async () => {
@@ -142,8 +149,7 @@ describe('POST /v1/chat/completions', () => {
 		});
 		assert.strictEqual(response.status, 200);
 		const responseJSON: unknown = await response.json();
-		const validationResults: ValidatorResult = v.validate(responseJSON, response_schema);
-		assert(validationResults.valid, validationResults.errors.toString());
+		assert(response_validator(responseJSON));
 	});
 
 	test.skip('POST with model, messages, stream'); // TODO: implement this test once I figure out how to implement streaming

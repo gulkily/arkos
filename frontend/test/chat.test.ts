@@ -2,6 +2,11 @@ import { describe, test } from 'vitest';
 import assert from 'node:assert';
 import { render, screen } from '@testing-library/svelte';
 import Chat from '../src/components/chat.svelte';
+import { userEvent, UserEvent } from '@testing-library/user-event';
+
+// TODO: fix this
+// c.f. https://vitest.dev/api/vi.html
+/*vi.mock('./mock-backend.ts', { spy: true });*/
 
 describe('Chat', () => {
 	test('should render chat-container div', () => {
@@ -45,18 +50,94 @@ describe('Chat', () => {
 		assert.ok(screen.getByRole('button'));
 	});
 
-	/* TODO: write these tests after I figure out how to mock the backend */
-	test.skip('loading should result in GET /api/chat/suggestions call');
+	/* TODO: write these tests after I figure out how to spy on the backend properly */
+	/*
+	test('sending message should result in POST /v1/chat/completions call', async () => {
+		render(Chat);
+		const user: UserEvent = userEvent.setup();
+		// type a placeholder message and click the button
+		await user.type(screen.getByRole('textbox'), 'lorem ipsum'); // randomize?
+		await user.click(screen.getByRole('button'));
+		// expect handleChatCompletions to have been called
+		expect(handleChatCompletions).toHaveBeenCalled();
+	});
+	*/
 
-	test.skip('sending message should result in POST /api/chat/messages call');
+	test('sending message should result in new message appearing on screen', async () => {
+		render(Chat);
+		const user: UserEvent = userEvent.setup();
+		await user.type(screen.getByRole('textbox'), 'lorem ipsum'); // randomize? )a;sp
+		await user.click(screen.getByRole('button'));
+		// look for the new message
+		const newMessage: HTMLElement = screen.getByTestId('message1');
+		assert.strictEqual(newMessage.tagName, 'DIV');
+	});
 
-	test.skip('sending message should result in new message appearing on screen');
+	test('sending message should result in reply message appearing on screen', async () => {
+		render(Chat);
+		const user: UserEvent = userEvent.setup();
+		await user.type(screen.getByRole('textbox'), 'lorem ipsum');
+		await user.click(screen.getByRole('button'));
+		// await the reply message (don't look for it immediately, because it could take time)
+		const newMessage: HTMLElement = await screen.findByTestId('message2');
+		assert.strictEqual(newMessage.tagName, 'DIV');
+	});
 
-	test.skip('sending message should result in reply message appearing on screen');
+	test('sending message should clear original input field', async () => {
+		render(Chat);
+		const user: UserEvent = userEvent.setup();
+		const myTextBox: HTMLElement = screen.getByRole('textbox');
+		assert(myTextBox instanceof HTMLInputElement);
+		await user.type(myTextBox, 'lorem ipsum');
+		await user.click(screen.getByRole('button'));
+		assert.strictEqual(myTextBox.value, '');
+	});
 
-	test.skip('sending message should clear original input field');
+	/* NOTE: these tests are somewhat redundant since the enter key and submit button shuold share the same handler, but I'm doing them anyways */
+	/*test('enter key should result in POST /v1/chat/completions request', async () => {
+		render(Chat);
+		const user: UserEvent = userEvent.setup();
+		await user.type(screen.getByRole('textbox'), 'lorem ipsum\n');
+		expect(handleChatCompletions).toHaveBeenCalled();
+	});*/
 
-	test.skip('enter key should result in sending message');
+	test('enter key should result in new message appearing on screen', async () => {
+		render(Chat);
+		const user: UserEvent = userEvent.setup();
+		// c.f. https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values and https://testing-library.com/docs/user-event/keyboard
+		await user.type(screen.getByRole('textbox'), 'lorem ipsum{Enter}');
+		const newMessage: HTMLElement = screen.getByTestId('message1');
+		assert.strictEqual(newMessage.tagName, 'DIV');
+	});
 
-	test.skip('should support sending multiple rounds of messages');
+	test('enter key should result in reply message appearing on screen', async () => {
+		render(Chat);
+		const user: UserEvent = userEvent.setup();
+		await user.type(screen.getByRole('textbox'), 'lorem ipsum{Enter}');
+		const newMessage: HTMLElement = await screen.findByTestId('message1');
+		assert.strictEqual(newMessage.tagName, 'DIV');
+	});
+
+	test('sending message should clear original input field', async () => {
+		render(Chat);
+		const user: UserEvent = userEvent.setup();
+		const myTextBox: HTMLElement = screen.getByRole('textbox');
+		assert(myTextBox instanceof HTMLInputElement);
+		await user.type(myTextBox, 'lorem ipsum{Enter}');
+		assert.strictEqual(myTextBox.value, '');
+	});
+
+	test('should support sending multiple rounds of messages', async () => {
+		render(Chat);
+		const user: UserEvent = userEvent.setup();
+		const myTextBox: HTMLElement = screen.getByRole('textbox');
+		assert(myTextBox instanceof HTMLInputElement);
+		const testMessages: Array<string> = ['lorem', 'ipsum', 'dolor']; // randomize?
+		for (const [i, message] of testMessages.entries()) {
+			await user.type(myTextBox, `${message}{Enter}`);
+			// look for the message and its reply
+			screen.getByTestId(`message${2 * i + 1}`);
+			screen.getByTestId(`message${2 * i + 2}`);
+		}
+	});
 });
