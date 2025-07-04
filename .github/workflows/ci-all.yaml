@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/SchemaStore/schemastore/refs/heads/master/src/schemas/json/github-workflow.json
+name: CI checks for everything
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - "**/*.{txt,md}" # no need to reformat text
+      - "**/*.py" # since Prettier doesn't currently support Python
+
+jobs:
+  prettier:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "./frontend"
+    steps:
+      - uses: actions/checkout@v4
+      - name: install
+        run: npm install
+
+      - name: check with prettier
+        run: npx prettier "../**/*" --check

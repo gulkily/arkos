@@ -1,0 +1,36 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/SchemaStore/schemastore/refs/heads/master/src/schemas/json/github-workflow.json
+name: Pull request CI checks
+
+defaults:
+  run:
+    working-directory: "./frontend"
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "./frontend"
+      - "!**/*.{txt,md}"
+
+jobs:
+  eslint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: install
+        run: npm install
+
+      - name: check with eslint
+        run: npx eslint "{src,test}/**/*" --max-warnings=0
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: install
+        run: npm install
+
+      - name: run testcases
+        run: npm test
