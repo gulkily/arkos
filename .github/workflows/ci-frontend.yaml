@@ -10,7 +10,7 @@ on:
     branches:
       - main
     paths:
-      - "frontend"
+      - "frontend/**" # NOTE: "frontend" alone won't trigger the checks, because it just matches the folder itself
       - "!**/*.{txt,md}"
 
 jobs:
