@@ -18,6 +18,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ">=24.3.0" # latest as of July 2025; see https://nodejs.org/en/about/previous-releases for schedule
       - name: install
         run: npm install
 
@@ -29,6 +32,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ">=24.3.0"
       - name: install
         run: npm install
 
