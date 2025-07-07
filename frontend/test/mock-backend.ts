@@ -6,8 +6,6 @@ import message_schema from '../../schemas/chatmessage_schema.json';
 import frontend_config from '../../config_module/config_frontend.json';
 
 const BASEURL: string = frontend_config['backend_base_url'];
-console.log(`debug: BASEURL = ${BASEURL}`);
-
 const ajv: Ajv = new Ajv();
 // NOTE: you MUST type `request_validator` this way to narrow the type of `reqJSON`, otherwise a priori TypeScript just thinks this is a generic `ValidateFunction` object
 const request_validator: ValidateFunction<ChatCompletionRequest> = ajv

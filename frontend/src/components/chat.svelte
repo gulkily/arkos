@@ -10,8 +10,6 @@
 	import frontend_config from '../../../config_module/config_frontend.json';
 
 	const BASEURL: string = frontend_config['backend_base_url'];
-	console.log(`debug: BASEURL = ${BASEURL}`);
-
 	const ajv: Ajv = new Ajv();
 	const response_validator: ValidateFunction<ChatCompletionResponse> = ajv
 		.addSchema(message_schema)
