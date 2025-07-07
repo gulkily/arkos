@@ -3,14 +3,14 @@ name: Pull request CI checks
 
 defaults:
   run:
-    working-directory: "./frontend"
+    working-directory: "frontend"
 
 on:
   pull_request:
     branches:
       - main
     paths:
-      - "./frontend"
+      - "frontend"
       - "!**/*.{txt,md}"
 
 jobs:
