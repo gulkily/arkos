@@ -57,7 +57,7 @@
 	}
 
 	async function handleKeydown(event: KeyboardEvent): Promise<void> {
-		if (event.key === "Enter"){
+		if (event.key === 'Enter') {
 			event.preventDefault();
 			await handleMessageSending();
 		}
