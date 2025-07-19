@@ -2,6 +2,7 @@
 
 # can't use prettier for these files anyways
 # NOTE: using ".." since CI requires reformatting *all* files including those in the parent folder
+../**/*.py
 ../**/*.png
 ../**/.DS_Store
 ../requirements.txt
