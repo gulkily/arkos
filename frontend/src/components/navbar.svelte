@@ -9,8 +9,8 @@
 		<button class="dropbtn">Features </button>
 		<div class="dropdown-content">
 			<a href="/dashboard">Dashboard</a>
-			<a href="https://example.com">AI chat</a>
-			<a href="https://example.com">Calendar</a>
+			<a href="/chat">AI chat</a>
+			<a href="/calendar">Calendar</a>
 		</div>
 	</div>
 	<a href="https://github.com/SGIARK/ARK2.0">Source code</a>
