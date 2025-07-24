@@ -4,7 +4,7 @@
 	<!-- NOTE: this CSS class is necessary, otherwise it conflicts with the navbar in the calendar view -->
 	<a href="/">Home</a>
 	<!-- TODO: replace these links -->
-	<a href="https://example.com">About</a>
+	<a href="/about">About</a>
 	<div class="dropdown">
 		<button class="dropbtn">Features </button>
 		<div class="dropdown-content">
