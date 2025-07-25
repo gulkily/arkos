@@ -1,49 +1,57 @@
 # About
 
-This is the ARK 2.0 frontend. It currently shows exactly one page: a calendar and a chat interface side-by-side. It’s currently a single-page app, but we plan on making it a multi-page app (using SvelteKit routing).
+This is the ARK 2.0 frontend. It's a Svelte web app, and it currently has four pages:
 
-## Languages and dependencies
+- a landing page
+- an about page
+- a "dashboard"
+- a calendar-only view
+- a chat-only view
+
+# Tech stack
+
+## Languages
 
 - TypeScript
 - Svelte
-- SvelteKit
+
+## CI dependencies
+
 - Prettier
 - ESLint
 - Vitest
 - @testing-library/svelte
+
+## Other dependencies
+
+- SvelteKit
 - @event-calendar/core
 - ajv
 - vitest-fetch-mock
 
-## Todos
+# Todo list
 
-### PRE-MVP
-- Split the UI into multiple pages
-    - Marketing landing page
-    - Dashboard
-    - Calendar-only view
-    - Chat-only view
-    - (potentially other pages in the future)
+## Pre-MVP
+
 - Add authentication (primarily MIT Touchstone, possibly others)
 - Make the UI more user-friendly when the backend returns a malformed response
 - Testing cleanup + expansion
     - ~~Refactor the UI HTML markup so that `screen.getByRole` or `screen.getByText` works (potentially making it more accessible)~~ (now refactored to use `screen.getByTestId` for now)
     - Mock components (both library and ARK2.0-specific)
     - ~~Mock user-generated content~~ (maybe randomize?)
-    - Potentially determine code coverage
+    - Determine code coverage
         - Figure out how `.c8rc` or `.nycrc` work so we can remove unnecessary files from the report
-- Create a Figma mockup to guide future frontend development
-- Set up at least one CI check
-
-### POTENTIALLY POST-MVP:
 - Fine-tune the CSS and/or HTML markup to look nicer
     - Figure out visual brand identity (favorite fonts? colors? logo?)
-- User settings page (eg dark/light mode, etc)
-- Some way for users to submit feedback
-- Task list tracking
-    - Specifically track assignments/classwork and their due dates
+
+## Post-MVP
+
+- Additional pages
+  - user settings page (eg dark/light mode, etc)
+  - Some way for users to submit feedback
+  - Task list tracking
+    - Specifically track assignments/classwork and their due dates?
 - Mobile-friendliness?
-- Expand pre-commit CI checks aggressively
 
 # Installation
 
@@ -53,7 +61,7 @@ This is the ARK 2.0 frontend. It currently shows exactly one page: a calendar an
 2. Install npm if you don’t have it already.
 3. Install git if you don’t have it already.
 4. `cd` into your favorite folder.
-5. Clone the entire repo using `git clone https://github.com/SGIARK/ARK2.0`. Note that this repo is private.
+5. Clone the entire repo using `git clone https://github.com/SGIARK/ARK2.0`.
 6. `cd` into `ARK2.0/frontend` to access the `frontend` folder.
 7. Install the remaining dependencies using `npm install`.
 8. Run `npm run dev`, then immediately hit the O key, to launch the (currently extremely sparse) frontend in your web browser.
@@ -74,7 +82,7 @@ code .
 
 # File structure
 
-(As of June 30, 2025.)
+(As of July 24, 2025.)
 
 - `.npmrc`
 - `.prettierignore`
@@ -91,10 +99,19 @@ code .
     - `components`
         - `Calendar.svelte` (shows the calendar view)
         - `chat.svelte` (shows the chat view)
+        - `navbar.svelte`
     - `lib`
         - `index.ts` (currently empty but kept as a placeholder)
         - `schema_types.ts` (for type declarations)
     - `routes`
+        - `about`
+          - `+page.svelte`
+        - `calendar`
+          - `+page.svelte`
+        - `chat`
+          - `+page.svelte`
+        - `dashboard`
+          - `+page.svelte`
         - `+page.svelte`
 - `static`
     - `favicon.png` (not used right now)
