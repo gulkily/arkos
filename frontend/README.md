@@ -82,7 +82,7 @@ code .
 
 # File structure
 
-(As of July 24, 2025.)
+(As of July 25, 2025.)
 
 - `.npmrc`
 - `.prettierignore`
@@ -133,7 +133,7 @@ As always, make a pull request.
 
 ## Style + quality guidelines
 
-Before submitting your pull request, please do the following checks. It’s a good idea to do some or all of these before every commit too. The first three could potentially go into GitHub Actions, but we haven’t done that yet.
+Before submitting your pull request, please do the following checks. The first three will also be run by GitHub Actions.
 
 - Reformat everything using `npx prettier **/* --write`.
 - Lint everything using `npx eslint **/*`. The output should be empty; if not, you should fix the issue(s) identified.
@@ -146,17 +146,17 @@ If your page or component code becomes too long or unwieldy, consider splitting 
 
 ## Appearance
 
-All CSS styles should live in `static/styles.css` for the time being. Do NOT use `import '[something].css` in any `<script>` tag because Svelte/Vite will automatically convert this into an injected `<style>` tag, and this is bad. Alternatively, you can add a `<link>` tag within the `<svelte:head>` directive.
+All CSS styles should live in `static/styles.css`. Do NOT use `import '[something].css` in any `<script>` tag because Svelte/Vite will automatically convert this into an injected `<style>` tag, and this is bad. Alternatively, you can add a `<link>` tag within the `<svelte:head>` directive.
 
 If you plan on making major changes to the UI, please dogfood the new version yourself. If possible, let the other ARK 2.0 team members try it. Keep in mind that a great UI can often be just one CSS rule or one stray HTML tag away from an abysmal one.
 
 ## Automated testing
 
-All test code should go in the `test` folder. Do NOT put any test code in the `src` folder. This makes it easier to review test code at a glance.
+All test code should go in the `test` folder. Do NOT put any test code in the `src` folder. This makes it easy to review test code at a glance.
 
-Every `.svelte` and `.ts` file in the `src` folder needs to be tested, with the obvious exception of `app.d.ts`.
+As a general rule of thumb, every `.svelte` and `.ts` file in the `src` folder needs to be tested. However, this excludes `app.d.ts`, TypeScript type declarations, and static Svelte components or routes whose content will never change.
 
-As a general rule of thumb, to test a Svelte component, write one test per HTML tag. If the content or children of a certain tag can vary depending on certain variables (such as props, state, and/or network requests), write multiple tests for that tag using input space partitioning. Tags that are purely for layout purposes and will never change don’t need to be tested if you don’t want to. See the `test` folder for some examples.
+To test a dynamic Svelte component, write one test per HTML tag. If the content or children of a certain tag can vary depending on certain variables (such as props, state, and/or network requests), write multiple tests for that tag using input space partitioning. Tags that are purely for layout purposes and will never change don’t need to be tested. See the `test` folder for some examples.
 
 Plain `.ts` files should be tested using input space partitioning for each function/class/etc.
 
