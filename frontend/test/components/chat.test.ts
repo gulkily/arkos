@@ -1,7 +1,7 @@
 import { describe, test } from 'vitest';
 import assert from 'node:assert';
 import { render, screen } from '@testing-library/svelte';
-import Chat from '../src/components/chat.svelte';
+import Chat from '../../src/components/chat.svelte';
 import { userEvent, UserEvent } from '@testing-library/user-event';
 
 // TODO: fix this
