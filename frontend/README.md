@@ -36,13 +36,12 @@ This is the ARK 2.0 frontend. It's a Svelte web app, and it currently has four p
 - Add authentication (primarily MIT Touchstone, possibly others)
 - Make the UI more user-friendly when the backend returns a malformed response
 - Testing cleanup + expansion
-    - ~~Refactor the UI HTML markup so that `screen.getByRole` or `screen.getByText` works (potentially making it more accessible)~~ (now refactored to use `screen.getByTestId` for now)
-    - Mock components (both library and ARK2.0-specific)
-    - ~~Mock user-generated content~~ (maybe randomize?)
-    - Determine code coverage
-        - Figure out how `.c8rc` or `.nycrc` work so we can remove unnecessary files from the report
-- Fine-tune the CSS and/or HTML markup to look nicer
-    - Figure out visual brand identity (favorite fonts? colors? logo?)
+  - Mock components (both library and ARK2.0-specific)
+  - ~~Mock user-generated content~~ (maybe randomize?)
+  - Determine code coverage
+    - Figure out how `.c8rc` or `.nycrc` work so we can remove unnecessary files from the report
+- Fine-tune the CSS to look nicer
+  - Figure out visual brand identity (fonts? colors? logo?)
 
 ## Post-MVP
 
@@ -64,13 +63,13 @@ This is the ARK 2.0 frontend. It's a Svelte web app, and it currently has four p
 5. Clone the entire repo using `git clone https://github.com/SGIARK/ARK2.0`.
 6. `cd` into `ARK2.0/frontend` to access the `frontend` folder.
 7. Install the remaining dependencies using `npm install`.
-8. Run `npm run dev`, then immediately hit the O key, to launch the (currently extremely sparse) frontend in your web browser.
+8. Run `npm run dev`, then immediately hit the O key, to launch the (currently rather sparse) frontend in your web browser.
 
 ## Quick
 
 Open a terminal window, copy-paste this entire code block, and hit enter. Be warned: this assumes you already installed node.js, npm, and git, that you've cd'd into your favorite repository already, and that you use VS Code as your code editor.
 
-```
+```sh
 git clone https://github.com/SGIARK/ARK2.0
 cd ARK2.0/frontend
 npm install
@@ -82,7 +81,7 @@ code .
 
 # File structure
 
-(As of July 25, 2025.)
+(As of July 28, 2025.)
 
 - `.npmrc`
 - `.prettierignore`
@@ -94,35 +93,38 @@ code .
 - `package-lock.json`
 - `package.json`
 - `src` (all the actual frontend code goes here!)
-    - `app.d.ts`
-    - `app.html`
-    - `components`
-        - `Calendar.svelte` (shows the calendar view)
-        - `chat.svelte` (shows the chat view)
-        - `navbar.svelte`
-    - `lib`
-        - `index.ts` (currently empty but kept as a placeholder)
-        - `schema_types.ts` (for type declarations)
-    - `routes`
-        - `about`
-          - `+page.svelte`
-        - `calendar`
-          - `+page.svelte`
-        - `chat`
-          - `+page.svelte`
-        - `dashboard`
-          - `+page.svelte`
-        - `+page.svelte`
+  - `app.d.ts`
+  - `app.html`
+  - `components`
+    - `Calendar.svelte` (shows the calendar view)
+    - `chat.svelte` (shows the chat view)
+    - `navbar.svelte`
+  - `lib`
+    - `index.ts` (currently empty but kept as a placeholder)
+    - `schema_types.ts` (for type declarations)
+  - `routes`
+    - `about`
+      - `+page.svelte`
+    - `calendar`
+      - `+page.svelte`
+    - `chat`
+      - `+page.svelte`
+    - `dashboard`
+      - `+page.svelte`
+    - `+page.svelte`
 - `static`
-    - `favicon.png` (not used right now)
-    - `styles.css`
+  - `favicon.png` (not used right now)
+  - `styles.css`
 - `svelte.config.js`
 - `test`
+  - `components`
     - `Calendar.test.ts` (for testing `src/components/Calendar.svelte`)
     - `chat.test.ts` (for testing `src/components/chat.svelte`)
-    - `page.svelte.test.ts` (for testing `src/routes/+page.svelte`, which is currently the only page available)
-    - `mock-backend.ts` (creates the mock backend)
-    - `mock-backend.test.ts` (for testing the mock backend)
+  - `routes`
+    - `calendar.test.ts`
+    - `chat.test.ts`
+  - `mock-backend.ts` (creates the mock backend)
+  - `mock-backend.test.ts` (for testing the mock backend)
 - `tsconfig.json`
 - `vite.config.ts`
 - `vitest-setup-client.ts`
@@ -152,13 +154,13 @@ If you plan on making major changes to the UI, please dogfood the new version yo
 
 ## Automated testing
 
-All test code should go in the `test` folder. Do NOT put any test code in the `src` folder. This makes it easy to review test code at a glance.
+All test code should go in the `test` folder. Do NOT put any test code in the `src` folder. This makes it easy to review test code at a glance. Tests for `src/components/` go in `test/components/` and tests for `src/routes/` go in `test/routes/`.
 
-As a general rule of thumb, every `.svelte` and `.ts` file in the `src` folder needs to be tested. However, this excludes `app.d.ts`, TypeScript type declarations, and static Svelte components or routes whose content will never change.
+As a general rule of thumb, every `.svelte` and `.ts` file in the `src` folder needs a corresponding test suite. However, this excludes `app.d.ts`, TypeScript type declarations, and static Svelte components or routes whose content will never change.
 
-To test a dynamic Svelte component, write one test per HTML tag. If the content or children of a certain tag can vary depending on certain variables (such as props, state, and/or network requests), write multiple tests for that tag using input space partitioning. Tags that are purely for layout purposes and will never change don’t need to be tested. See the `test` folder for some examples.
+To test a dynamic Svelte component, write one test per HTML tag. If the content or children of a certain tag can vary depending on certain variables (such as props, state, and/or network requests), write multiple tests for that tag using input space partitioning. You don't need to test tags that are purely for layout purposes and that will never change. See the `test` folder for some examples.
 
-Plain `.ts` files should be tested using input space partitioning for each function/class/etc.
+Test plain `.ts` files using input space partitioning for each function/class/etc.
 
 ## JSON schemas
 
