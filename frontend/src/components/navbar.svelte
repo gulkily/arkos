@@ -1,6 +1,6 @@
 <!-- c.f. https://www.w3schools.com/howto/howto_css_dropdown_navbar.asp -->
 <!-- This is static for now, so it doesn't need to be tested -->
-<nav class="navbar">
+<nav class="navbar" data-testid="navbar">
 	<!-- NOTE: this CSS class is necessary, otherwise it conflicts with the navbar in the calendar view -->
 	<a href="/">Home</a>
 	<a href="/about">About</a>
