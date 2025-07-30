@@ -8,8 +8,8 @@
 .prettierignore
 .npmrc
 
-# no reformatting any of the README's!
-../**/README.md
+# no reformatting any of the documentation!
+../**/*.md
 README.md
 
 # no touching .svelte-kit (this will be regenerated anyways)
