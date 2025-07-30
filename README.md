@@ -26,7 +26,7 @@ NOTE: This is not a complete list.
 
 # File structure
 
-(As of July 3, 2025; update as needed.)
+(As of July 30, 2025; update as needed.)
 
 This repo is currently a bit chaotic, but from a top-level point of view, here's each file or folder is for:
 
@@ -39,7 +39,6 @@ This repo is currently a bit chaotic, but from a top-level point of view, here's
 * `radicale-test/` is for using [Radicale](https://radicale.org/v3.html) to make calendar changes; read the [folder readme](radicale_test/README.md) for more information
 * `schemas/` for JSON schemas when communicating between frontend and backend
 * `.gitignore` (standard)
-* `.nvimlog` (empty)
 * `README.md` (this very file!)
 * `requirements.txt` (Python dependencies; rather bloated for now, but it'll have to do)
 
