@@ -60,6 +60,6 @@ This repo is currently a bit chaotic, but from a top-level point of view, here's
 | Joshua Guo            | Frontend       | duck_master     | MIT         |
 | Ilya Gulko            | Backend        | gulkily         | MIT         |
 | Yeabkal Abeje         | (departed)     | Yebe-Abe        | MIT         |
-| Jack Luo              | Backend        |                 |             |
-| Bryce Roberts         | Backend        |                 |             | 
+| Jack Luo              | Backend        | thejackluo      | GT          |
+| Bryce Roberts         | Backend        | BryceRoberts13  | MIT         | 
 
