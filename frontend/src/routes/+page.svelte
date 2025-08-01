@@ -1,11 +1,17 @@
-<!-- NOTE: do NOT transclude the stylesheet here! This WILL break the test cases! -->
-
-<script lang="ts">
-	import Calendar from '../components/Calendar.svelte';
-	import Chat from '../components/chat.svelte';
+<script>
+	import Navbar from '../components/navbar.svelte';
 </script>
 
-<div class="app-container" data-testid="app-container">
-	<Calendar />
-	<Chat />
-</div>
+<Navbar />
+<!-- TODO: make the landing page copy more exciting -->
+<main>
+	<h1>
+		Welcome to the MIT<br />
+		Automated<br />
+		Resource<br />
+		Knowledgebase
+	</h1>
+	<p>MIT's very own digital productivity hub</p>
+	<!-- TODO: make this interactive once we figure out authentication -->
+	<button>Sign up or log in!</button>
+</main>

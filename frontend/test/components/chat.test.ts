@@ -1,7 +1,7 @@
 import { describe, test } from 'vitest';
 import assert from 'node:assert';
 import { render, screen } from '@testing-library/svelte';
-import Chat from '../src/components/chat.svelte';
+import Chat from '../../src/components/chat.svelte';
 import { userEvent, UserEvent } from '@testing-library/user-event';
 
 // TODO: fix this
@@ -23,29 +23,29 @@ describe('Chat', () => {
 		assert.strictEqual(chatmessages.tagName, 'DIV');
 	});
 
-	test.skip('should render default message', () => {
+	test('should render default message', () => {
 		render(Chat);
 
 		/* NOTE: we might change the default message text or the message HTML markup later on */
 		const defaultMessage: string = "Hello! I'm your calendar assistant. How can I help you today?";
 		const defaultMessageDiv: HTMLElement = screen.getByText(defaultMessage);
 		assert.ok(defaultMessageDiv);
-		assert.strictEqual(defaultMessageDiv.tagName, 'DIV');
+		assert.strictEqual(defaultMessageDiv.tagName, 'P');
 	});
 
-	test.skip('should render chat-input-container', () => {
+	test('should render chat-input-container', () => {
 		render(Chat);
 		const chatcontainer: HTMLElement = screen.getByTestId('chat-input-container');
 		assert.ok(chatcontainer);
 		assert.strictEqual(chatcontainer.tagName, 'DIV');
 	});
 
-	test.skip('should render chat-input field', () => {
+	test('should render chat-input field', () => {
 		render(Chat);
-		assert.ok(screen.getByRole('input'));
+		assert.ok(screen.getByPlaceholderText('Type a message...'));
 	});
 
-	test.skip('should render send button', () => {
+	test('should render send button', () => {
 		render(Chat);
 		assert.ok(screen.getByRole('button'));
 	});
