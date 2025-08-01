@@ -21,13 +21,12 @@ class StateHandler:
         }
         self.initial_state_name: str = self.graph.get("initial")
 
-    def get_initial_state(self) -> State:
+    def get_initial_state(    agent.context["messages"].append(default_message)self) -> State:
         return self.states[self.initial_state_name]
 
     def get_next_state(self, current_state_name: str, context: Dict[str, Any]) -> State:
         state = self.states[current_state_name]
-        for condition, next_state in state.transitions.items():
-            if context.get(condition):
-                return self.states[next_state]
-        return state  # No transition matched; remain in current
+        next_state = state.transiton
+        return self.states[next_state]
+
 

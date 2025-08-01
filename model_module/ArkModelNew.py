@@ -15,6 +15,11 @@ class Message(BaseModel):
     content: str
     role: str
 
+
+class SystemMessage(Message):
+    """Represents a message to the system"""
+    role: str = "system"
+
 class UserMessage(Message):
     """Represents a message from the user."""
     role: str = "user"
@@ -43,7 +48,7 @@ class ArkModelLink(BaseModel):
     """
 
     model_name: str = Field(default="tgi")
-    base_url: str = Field(default="http://localhost:8080/v1")
+    base_url: str = Field(default="http://0.0.0.0:30000/v1")
     max_tokens: int = Field(default=1024)
     temperature: float = Field(default=0.7)
     # tools: Optional[List[CustomTool]] = Field(default_factory=list)
@@ -86,24 +91,24 @@ class ArkModelLink(BaseModel):
         for msg in messages:
             if isinstance(msg, UserMessage):
                 openai_messages_payload.append({"role": "user", "content": msg.content})
+
+            if isinstance(msg, SystemMessage):
+                openai_messages_payload.append({"role": "system", "content": msg.content})
+
             elif isinstance(msg, AIMessage):
                 msg_dict = {"role": "assistant"}
                 # Always include 'content' key for assistant messages.
                 # If msg.content is None, set it to an empty string.
                 msg_dict["content"] = msg.content if msg.content is not None else ""
-                if msg.tool_calls:
-                    # Tool calls from a previous AI turn need to be passed back to the API.
-                    # They should already be in the correct dict format.
-                    msg_dict["tool_calls"] = msg.tool_calls
                 openai_messages_payload.append(msg_dict)
             elif isinstance(msg, ToolMessage):
                 # For ToolMessage, 'tool_call_id' is required.
                 openai_messages_payload.append({"role": "tool", "tool_call_id": msg.tool_call_id, "content": msg.content})
             else:
-                # Catch-all for generic Message objects or unknown types (shouldn't happen with strict typing)
-                openai_messages_payload.append({"role": msg.role, "content": msg.content})
-        if not stream:
+                raise ValueError("Unsupported Message Type ArkModel.py")
+
             try:
+
 
                 # Call the OpenAI API chat completions endpoint.
                 chat_completion = client.chat.completions.create(
@@ -116,14 +121,7 @@ class ArkModelLink(BaseModel):
                 )
                 message_from_llm = chat_completion.choices[0].message.content 
                 
-                if json_schema:
-                    return {
-                    "schema_result":  message_from_llm
-                }
-                else:
-                    return{
-                        "message": message_from_llm
-                    }
+                return message_from_llm
 
 
             except Exception as e:
@@ -133,7 +131,7 @@ class ArkModelLink(BaseModel):
             raise NotImplementedError
 
 
-    async def generate_response(self, messages: List[Message]) -> AIMessage:
+    def generate_response(self, messages: List[Message], json_schema) -> AIMessage:
         """
         Generates a response from the model
 
@@ -146,14 +144,12 @@ class ArkModelLink(BaseModel):
 
         conversation_history = messages
 
-        response = await self.make_llm_call(conversation_history, tools=tool_schemas)
-        llm_content = response_step_1["message"]
+        response = self.make_llm_call(conversation_history, json_schema=json_schema)
+        
 
 
         # this can be a schema or a regular message response 
-        return AIMessage(
-            content=final_content,
-        )
+        return response
 
 
 
@@ -167,8 +163,7 @@ class ArkModelLink(BaseModel):
 
 if __name__ == "__main__":
     print("Initializing ArkModelLink...")
-    # Instantiate the model, assuming TGI server is at http://localhost:8080/v1
-    model = ArkModelLink(base_url="http://localhost:8080/v1/")
+    model = ArkModelLink(base_url="http://0.0.0.0:30000/v1")
 
 
     messages = [UserMessage(content="Give me a simple product listing.")]

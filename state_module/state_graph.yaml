@@ -1,22 +1,16 @@
-initial: greet_user
-states:
-  greet_user:
-    response: "Hello! What product are you looking for?"
-    intent: greet
-    transitions:
-      user_input: fetch_product
+# initial: greet
+# greet:
+#   transition:
+#     user:
 
-  fetch_product:
-    intent: find_product
-    tool:
-      name: "product_lookup"
-      inputs: ["user_input"]
-    wait_for_tool_result: true
-    transitions:
-      tool_result_ready: summarize_result
 
-  summarize_result:
-    response: "Here's what I found."
-    intent: present
-    is_terminal: true
+initial: user
+
+user:
+  transiton:
+    agent:
+
+memory_recall:
+  transition:
+    next_state:
 
