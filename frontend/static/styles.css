@@ -6,9 +6,13 @@ body {
 }
 
 main {
-	text-align: center;
 	background-image: linear-gradient(to right, #eaeaea, whitesmoke, white, whitesmoke, #eaeaea);
 	padding: 5px 10px 20px 10px;
+}
+
+
+main > .hero {
+	text-align: center; /* only center text in the hero section */
 }
 
 .home-button {
