@@ -13,5 +13,5 @@
 	</h1>
 	<p>MIT's very own digital productivity hub</p>
 	<!-- TODO: make this interactive once we figure out authentication -->
-	<button>Sign up or log in!</button>
+	<button class="home-button">Sign up or log in!</button>
 </main>
