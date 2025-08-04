@@ -81,9 +81,9 @@ class ArkModelLink(BaseModel):
             - 'schema_result': A dictionary containing then result of the schema
             - 'message': The content of the LLM's text response.
         """
-        client = InferenceClient(
+        client = OpenAI(
             base_url=self.base_url,
-            # api_key="_", # Placeholder API key. The TGI server doesn't usually require one.
+            api_key="-", 
         )
 
         # Convert custom Message objects into the format expected by the OpenAI API.
@@ -92,7 +92,7 @@ class ArkModelLink(BaseModel):
             if isinstance(msg, UserMessage):
                 openai_messages_payload.append({"role": "user", "content": msg.content})
 
-            if isinstance(msg, SystemMessage):
+            elif isinstance(msg, SystemMessage):
                 openai_messages_payload.append({"role": "system", "content": msg.content})
 
             elif isinstance(msg, AIMessage):
@@ -101,32 +101,31 @@ class ArkModelLink(BaseModel):
                 # If msg.content is None, set it to an empty string.
                 msg_dict["content"] = msg.content if msg.content is not None else ""
                 openai_messages_payload.append(msg_dict)
-            elif isinstance(msg, ToolMessage):
-                # For ToolMessage, 'tool_call_id' is required.
-                openai_messages_payload.append({"role": "tool", "tool_call_id": msg.tool_call_id, "content": msg.content})
             else:
+                print(type(msg))
+                print(msg)
                 raise ValueError("Unsupported Message Type ArkModel.py")
 
-            try:
+        try:
 
 
-                # Call the OpenAI API chat completions endpoint.
-                chat_completion = client.chat.completions.create(
-                    model=self.model_name,
-                    messages=openai_messages_payload,
-                    max_tokens=self.max_tokens,
-                    temperature=self.temperature,
-                    response_format = json_schema
+            # Call the OpenAI API chat completions endpoint.
+            chat_completion = client.chat.completions.create(
+                model=self.model_name,
+                messages=openai_messages_payload,
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+                response_format = json_schema
 
-                )
-                message_from_llm = chat_completion.choices[0].message.content 
-                
-                return message_from_llm
+            )
+            message_from_llm = chat_completion.choices[0].message.content 
+            
+            return message_from_llm
 
 
-            except Exception as e:
-                print(f"Error during LLM call: {e}")
-                return {"error": f"Error: An error occurred during LLM call: {e}"}
+        except Exception as e:
+            print(f"Error during LLM call: {e}")
+            return {"error": f"Error: An error occurred during LLM call: {e}"}
         if stream:
             raise NotImplementedError
 

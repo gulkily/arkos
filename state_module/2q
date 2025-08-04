@@ -1,0 +1,9 @@
+STATE_REGISTRY = {}
+
+def register_state(cls):
+    state_type = getattr(cls, "type", None)
+    print(f"Registering state: {cls.type}")
+    if not state_type:
+        raise ValueError(f"State class {cls.__name__} must have a `type` attribute.")
+    STATE_REGISTRY[state_type] = cls
+    return cls

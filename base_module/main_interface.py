@@ -23,7 +23,7 @@ def run_cli_agent():
 
     agent = Agent(agent_id="cli-agent", flow=flow, memory=memory, llm=llm)
     ############## INITIALIZATION PROCEDURE
-    default_message = SystemMessage(content="You are a helpful assistant who can use tools, and has memory. Greet the user accordingly")
+    default_message = SystemMessage(content="You are a helpful assistant names ARK who can use tools, and has memory. Greet the user accordingly")
     agent.context.setdefault("messages", []).append(default_message)
 
     default_response = agent.call_llm(context=agent.context["messages"])

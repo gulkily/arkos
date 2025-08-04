@@ -45,13 +45,14 @@ class Agent:
         self.bind_tool(tool)
         self.tool_names.append(tool_name)
     
-    def call_llm(input,context=None, json_schema=None):
+    def call_llm(self, input=None,context=None, json_schema=None):
         """
         Agent's interface with chat model 
         input: messages (list), json_schema (json)
 
         output: AI Message
         """
+
         chat_model = self.llm 
         if context:
 
@@ -75,15 +76,14 @@ class Agent:
 
         while not self.current_state.is_terminal:
 
-            updates = self.current_state.run(self, self.context)
+            # asumption run will always return a valid Messsage
+            updates = self.current_state.run(self.context["messages"], self)
             if updates:
                 self.context["messages"].append(updates)
             
-            if self.current_state.check_transition_ready(self, context):
-                next_state_name = self.state_handler.get_next_state(self.context)
+            if self.current_state.check_transition_ready(self.context["messages"]):
+                self.current_state = self.flow.get_next_state(self.current_state.name, self.context)
 
-            if next_state_name:
-                self.current_state = self.flow.get_state(next_state_name)
             else:
                 raise ValueError("State Loop Failed, No next State agent.py")
 

@@ -1,12 +1,22 @@
-from model_module.ArkModelNew import ArkModelLink, UserMessage, AIMessage, SystemMessage
+import os
+import sys
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 
-class StateUser(State):
-    
-    def __init__(self):
-        self.transition: Dict[str, str] = metadata.get("transitions", {})
 
+from model_module.ArkModelNew import ArkModelLink, UserMessage, AIMessage, SystemMessage
+
+from state_module.state import State
+from state_module.state_registry import register_state
+
+@register_state
+class StateUser(State):
+    type = "user"    
+
+
+    def __init__(self, name: str, config: dict):
+        super().__init__(name, config)
         self.is_terminal = False
 
 
@@ -15,7 +25,7 @@ class StateUser(State):
 
     
 
-    def run(self, context):
+    def run(self,context, agent=None):
 
         user_input = input("You: ")
         if user_input.strip().lower() == "exit":

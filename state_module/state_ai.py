@@ -1,14 +1,23 @@
+import sys
+import os
+
 from model_module.ArkModelNew import ArkModelLink, UserMessage, AIMessage, SystemMessage
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 
+from state_module.state import State
 
 
+from state_module.state_registry import register_state
 
-class StateUser(State):
+@register_state
+class StateAI(State):
+    type = "agent"
     
-    def __init__(self):
-        self.transition: Dict[str, str] = metadata.get("transitions", {})
+
+    def __init__(self, name: str, config: dict):
+        super().__init__(name, config)
+
 
         self.is_terminal = False
 
@@ -17,8 +26,10 @@ class StateUser(State):
         return True
 
 
-    def run(self,agent, context):
-        agent_response = agent.call_llm(context=context)
+    def run(self, context, agent):
 
-        return AIMessage(content=agent_response)
+
+        agent_response = agent.call_llm(context=context)
+        print(agent_response.content)
+        return agent_response
 

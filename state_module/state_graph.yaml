@@ -3,14 +3,16 @@
 #   transition:
 #     user:
 
+initial: ask_user
 
-initial: user
+states:
+  ask_user:
+    type: user # change type to a better identifier
+    transition:
+      next: agent_reply
 
-user:
-  transiton:
-    agent:
-
-memory_recall:
-  transition:
-    next_state:
+  agent_reply:
+    type: agent
+    transition:
+      next: ask_user
 
