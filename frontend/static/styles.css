@@ -1,5 +1,5 @@
 body {
-	font-family: 'Segoe UI', 'Helvetica', sans-serif;
+	font-family: system-ui, sans-serif;
 	margin: 0;
 	padding: 20px;
 	background: #f5f5f5;
@@ -10,8 +10,13 @@ main {
 	padding: 5px 10px 20px 10px;
 }
 
-main > .hero {
+.hero {
 	text-align: center; /* only center text in the hero section */
+}
+
+main p,
+main li {
+	font-weight: 300;
 }
 
 .home-button {
