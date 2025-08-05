@@ -44,12 +44,13 @@ This repo is currently a bit chaotic, but from a top-level point of view, here's
 
 # Instructions
 
-## Start Inference Engine (HF-TGI)
-* cmd: bash model_module/hftgi_2.sh
+## Start Inference Engine (SGLANG)
+* Run latest SGLANG image 
+* cmd: bash model_module/run.sh
 * Note: Qwen 2.5 is what is currently in use 
 
-## Test model_module (Model Class ARKOAI)
-* cmd: python ArkModelRefactored.py
+## Test base_module
+* cmd: python main_interface.py
 
 # Contributors + contact
 
