@@ -1,0 +1,18 @@
+# initial: greet
+# greet:
+#   transition:
+#     user:
+
+initial: ask_user
+
+states:
+  ask_user:
+    type: user # change type to a better identifier
+    transition:
+      next: agent_reply
+
+  agent_reply:
+    type: agent
+    transition:
+      next: ask_user
+

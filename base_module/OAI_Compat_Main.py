@@ -13,7 +13,7 @@ import sys # Added to support sys.path.append
 # Assuming these are available from ark_model_refactor.py
 # Adjust path as necessary based on your project structure
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'model_module')))
-from ArkModelRefactored import ArkModelLink, UserMessage, AIMessage, Message
+from ArkModelOld import ArkModelLink, UserMessage, AIMessage, Message
 
 # --- Pydantic Models for Request and Response (Simplified) ---
 class ChatMessage(BaseModel):

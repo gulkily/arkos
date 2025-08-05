@@ -13,13 +13,18 @@ class Tool:
         """
         :param name: Tool name (used in logs and tool resolution)
         :param endpoint: Full URL of the remote MCP tool endpoint
+        :param parameters: Full list of input parameters for model including types
         :param method: HTTP method (typically POST)
         :param timeout: Timeout in seconds for the request
         """
         self.name = name
         self.endpoint = endpoint
+        self.parameters
         self.method = method.upper()
         self.timeout = timeout
+
+    def pull_tool_from_registry(self):
+        raise NotImplementedError
 
     def call(self, tool_input: Dict[str, Any], session_state: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
