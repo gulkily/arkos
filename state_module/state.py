@@ -4,6 +4,7 @@ from typing import Dict, Any, Optional
 
 class AgentState(Enum):
     """Central registry of all possible agent states."""
+
     GREET_USER = "greet_user"
     FETCH_PRODUCT = "fetch_product"
     SUMMARIZE_RESULT = "summarize_result"
@@ -17,11 +18,11 @@ class State:
         self.transition = config.get("transition", {})
 
     def check_transition_ready(self, context: Dict[str, Any]) -> bool:
-
         """
-        USER DEFINED STATES SHOULD OVERRRIDE THIS FUNCTION 
+        USER DEFINED STATES SHOULD OVERRRIDE THIS FUNCTION
         """
         raise NotImplementedError
+
     def run(self, context: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """
         USER DEFINED STATES SHOULD OVERRRIDE THIS FUNCTION

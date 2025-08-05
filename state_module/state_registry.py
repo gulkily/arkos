@@ -1,11 +1,9 @@
-
-
-
 import os
 import importlib
 import pathlib
 
 STATE_REGISTRY = {}
+
 
 def auto_register_states(package_name: str):
     """
@@ -16,6 +14,7 @@ def auto_register_states(package_name: str):
     for py_file in pkg_path.glob("state_*.py"):
         module_name = py_file.stem
         importlib.import_module(f"{package_name}.{module_name}")
+
 
 def register_state(cls):
     state_type = getattr(cls, "type", None)

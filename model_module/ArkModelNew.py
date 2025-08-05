@@ -12,33 +12,34 @@ from openai import OpenAI
 # in the conversation, replacing Langchain's BaseMessage, AIMessage, HumanMessage.
 class Message(BaseModel):
     """Base class for all messages."""
+
     content: str
     role: str
 
 
 class SystemMessage(Message):
     """Represents a message to the system"""
+
     role: str = "system"
+
 
 class UserMessage(Message):
     """Represents a message from the user."""
+
     role: str = "user"
+
 
 class AIMessage(Message):
     """
     Represents a message from the AI.
     Can include tool calls if the AI decides to use tools.
     """
+
     role: str = "assistant"
     # content is now Optional[str] to handle cases where the AI's turn is solely a tool call.
     content: Optional[str] = None
 
     tool_calls: Optional[dict] = None
-
-
-
-
-
 
 
 class ArkModelLink(BaseModel):
@@ -68,7 +69,9 @@ class ArkModelLink(BaseModel):
     #     """
     #     return next((tool for tool in self.tools if tool.name == name), None)
 
-    def make_llm_call(self, messages: List[Message], json_schema: Optional, stream = False) -> Dict[str, Any]:
+    def make_llm_call(
+        self, messages: List[Message], json_schema: Optional, stream=False
+    ) -> Dict[str, Any]:
         """
         Makes a call to the OpenAI-compatible LLM endpoint.
 
@@ -83,7 +86,7 @@ class ArkModelLink(BaseModel):
         """
         client = OpenAI(
             base_url=self.base_url,
-            api_key="-", 
+            api_key="-",
         )
 
         # Convert custom Message objects into the format expected by the OpenAI API.
@@ -93,7 +96,9 @@ class ArkModelLink(BaseModel):
                 openai_messages_payload.append({"role": "user", "content": msg.content})
 
             elif isinstance(msg, SystemMessage):
-                openai_messages_payload.append({"role": "system", "content": msg.content})
+                openai_messages_payload.append(
+                    {"role": "system", "content": msg.content}
+                )
 
             elif isinstance(msg, AIMessage):
                 msg_dict = {"role": "assistant"}
@@ -108,27 +113,23 @@ class ArkModelLink(BaseModel):
 
         try:
 
-
             # Call the OpenAI API chat completions endpoint.
             chat_completion = client.chat.completions.create(
                 model=self.model_name,
                 messages=openai_messages_payload,
                 max_tokens=self.max_tokens,
                 temperature=self.temperature,
-                response_format = json_schema
-
+                response_format=json_schema,
             )
-            message_from_llm = chat_completion.choices[0].message.content 
-            
-            return message_from_llm
+            message_from_llm = chat_completion.choices[0].message.content
 
+            return message_from_llm
 
         except Exception as e:
             print(f"Error during LLM call: {e}")
             return {"error": f"Error: An error occurred during LLM call: {e}"}
         if stream:
             raise NotImplementedError
-
 
     def generate_response(self, messages: List[Message], json_schema) -> AIMessage:
         """
@@ -138,19 +139,15 @@ class ArkModelLink(BaseModel):
             initial_messages: The initial list of messages to start the conversation.
 
         Returns:
-            An AIMessage object containing the final response content 
+            An AIMessage object containing the final response content
         """
 
         conversation_history = messages
 
         response = self.make_llm_call(conversation_history, json_schema=json_schema)
-        
 
-
-        # this can be a schema or a regular message response 
+        # this can be a schema or a regular message response
         return response
-
-
 
     # def bind_tools(self, tools: List[CustomTool]) -> "ArkModelLink":
     #     """
@@ -160,10 +157,10 @@ class ArkModelLink(BaseModel):
     #     self.tools.extend(tools)
     #     return self``
 
+
 if __name__ == "__main__":
     print("Initializing ArkModelLink...")
     model = ArkModelLink(base_url="http://0.0.0.0:30000/v1")
-
 
     messages = [UserMessage(content="Give me a simple product listing.")]
     schema = {
@@ -173,16 +170,15 @@ if __name__ == "__main__":
             "properties": {
                 "product_name": {"type": "string"},
                 "price": {"type": "number"},
-                "in_stock": {"type": "boolean"}
+                "in_stock": {"type": "boolean"},
             },
-            "required": ["product_name", "price", "in_stock"]
-        }
+            "required": ["product_name", "price", "in_stock"],
+        },
     }
     schema = json.dumps(schema)
     result = model.make_llm_call(messages, json_schema=schema)
 
     print(result)
-
 
     # --- Define Dummy Tools ---
     # These are example tools that the LLM can decide to call.
@@ -233,5 +229,3 @@ if __name__ == "__main__":
     #             return f"Error: Unknown timezone '{timezone_str}'."
     #         except Exception as e:
     #             return f"Error getting time: {e}"
-
-

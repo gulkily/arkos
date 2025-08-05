@@ -4,7 +4,7 @@ import yaml
 import os
 import sys
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from state_module.state_registry import STATE_REGISTRY, auto_register_states
 
@@ -13,6 +13,8 @@ from typing import Dict, Any
 
 
 auto_register_states("state_module")
+
+
 class StateHandler:
     def __init__(self, yaml_path: str):
         with open(yaml_path, "r") as f:
@@ -27,12 +29,11 @@ class StateHandler:
             self.states[name] = state_class(name, config)
 
         self.initial_state_name = self.graph["initial"]
-    def get_initial_state( self) -> State:
+
+    def get_initial_state(self) -> State:
         return self.states[self.initial_state_name]
 
     def get_next_state(self, current_state_name: str, context: Dict[str, Any]) -> State:
         state = self.states[current_state_name]
-        next_state = list(state.transition.values())[0] #TODO: overly complicated
+        next_state = list(state.transition.values())[0]  # TODO: overly complicated
         return self.states[next_state]
-
-

@@ -1,11 +1,10 @@
-
 import json
 
 
 import os
 import sys
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from state_module.state_handler import StateHandler
 from memory_module.memory import Memory
@@ -23,7 +22,9 @@ def run_cli_agent():
 
     agent = Agent(agent_id="cli-agent", flow=flow, memory=memory, llm=llm)
     ############## INITIALIZATION PROCEDURE
-    default_message = SystemMessage(content="You are a helpful assistant names ARK who can use tools, and has memory. Greet the user accordingly")
+    default_message = SystemMessage(
+        content="You are a helpful assistant names ARK who can use tools, and has memory. Greet the user accordingly"
+    )
     agent.context.setdefault("messages", []).append(default_message)
 
     default_response = agent.call_llm(context=agent.context["messages"])
@@ -33,14 +34,10 @@ def run_cli_agent():
     print(default_response.content)
 
     try:
-         agent.step("remove this variable")
-            
-
-
+        agent.step("remove this variable")
 
     except KeyboardInterrupt:
         print("\nInteraction interrupted. Goodbye!")
-
 
 
 if __name__ == "__main__":
