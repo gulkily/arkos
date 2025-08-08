@@ -15,4 +15,3 @@ states:
     type: agent
     transition:
       next: ask_user
-
