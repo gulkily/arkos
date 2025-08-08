@@ -1,7 +1,6 @@
 import json
 import pprint
 from typing import Any, AsyncIterator, Dict, List, Optional, Union
-from huggingface_hub import InferenceClient
 
 from pydantic import BaseModel, Field
 from openai import OpenAI
