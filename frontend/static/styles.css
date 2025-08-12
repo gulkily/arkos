@@ -36,9 +36,15 @@ main li {
 .app-container {
 	max-width: 1200px;
 	margin: 0 auto;
-	display: grid;
-	grid-template-columns: 2fr 1fr;
 	gap: 20px;
+}
+
+.app-container > section {
+	margin: 2em auto 0;
+	padding: 0 .5em .5em;
+	border: 1px solid black;
+	border-radius: 5px;
+	background-color:white;
 }
 
 .calendar-container,
