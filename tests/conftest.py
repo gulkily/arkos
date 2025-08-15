@@ -7,9 +7,17 @@ import yaml
 from datetime import datetime, date
 from typing import Dict, Any
 from unittest.mock import Mock, MagicMock, patch
-from fastapi.testclient import TestClient
-from httpx import AsyncClient
 import sys
+
+# Optional imports for FastAPI testing - only import if available
+try:
+    from fastapi.testclient import TestClient
+    from httpx import AsyncClient
+    FASTAPI_AVAILABLE = True
+except ImportError:
+    TestClient = None
+    AsyncClient = None
+    FASTAPI_AVAILABLE = False
 
 # Add project modules to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
@@ -110,6 +118,9 @@ def temp_config_file(mock_config):
 @pytest.fixture
 def mock_fastapi_app():
     """Create a mock FastAPI app for testing."""
+    if not FASTAPI_AVAILABLE:
+        pytest.skip("FastAPI not available")
+    
     # Import here to avoid circular imports
     sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'depricated', 'backend'))
     try:
@@ -129,12 +140,18 @@ def mock_fastapi_app():
 @pytest.fixture
 def fastapi_client(mock_fastapi_app):
     """Create a FastAPI test client."""
+    if not FASTAPI_AVAILABLE:
+        pytest.skip("FastAPI not available")
+    
     with TestClient(mock_fastapi_app) as client:
         yield client
 
 @pytest.fixture
 async def async_fastapi_client(mock_fastapi_app):
     """Create an async FastAPI test client."""
+    if not FASTAPI_AVAILABLE:
+        pytest.skip("FastAPI not available")
+    
     async with AsyncClient(app=mock_fastapi_app, base_url="http://test") as client:
         yield client
 
