@@ -36,11 +36,11 @@ class Agent:
         self.tools = []
         self.tool_names = []
 
-    def bind_tool(tool):
+    def bind_tool(self, tool):
 
-        self.tool.append(tool)
+        self.tools.append(tool)
 
-    def find_downloaded_tool(embedding):
+    def find_downloaded_tool(self, embedding):
         tool = Tool.pull_tool_from_registry(embedding)
         tool_name = tool.tool
         self.bind_tool(tool)
