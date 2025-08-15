@@ -35,5 +35,17 @@ class StateHandler:
 
     def get_next_state(self, current_state_name: str, context: Dict[str, Any]) -> State:
         state = self.states[current_state_name]
-        next_state = list(state.transition.values())[0]  # TODO: overly complicated
-        return self.states[next_state]
+        
+        # Handle simple 'next' transition
+        if "next" in state.transition:
+            next_state_name = state.transition["next"]
+            return self.states[next_state_name]
+        
+        # Handle conditional transitions (future enhancement)
+        # For now, fall back to first available transition
+        if state.transition:
+            next_state_name = list(state.transition.values())[0]
+            return self.states[next_state_name]
+        
+        # If no transitions defined, return current state (terminal state)
+        return state
