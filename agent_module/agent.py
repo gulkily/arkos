@@ -69,7 +69,7 @@ class Agent:
 
         # get first state from states
         if not self.current_state:
-            self.current_state = flow.get_initial_state()
+            self.current_state = self.flow.get_initial_state()
 
         while not self.current_state.is_terminal:
 
