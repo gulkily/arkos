@@ -16,6 +16,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'model_module'))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'base_module'))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'calendar_module'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'state_module'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'agent_module'))
 
 @pytest.fixture(scope="session")
 def event_loop():
@@ -330,3 +332,131 @@ def mock_uuid():
         mock_uuid.return_value.hex = "test-uuid-123"
         mock_uuid.return_value.__str__ = lambda self: "test-uuid-123"
         yield mock_uuid
+
+# Module-specific fixtures for new test implementation
+
+@pytest.fixture
+def mock_yaml_config():
+    """Valid YAML configuration for testing."""
+    return {
+        "initial": "test_user",
+        "states": {
+            "test_user": {
+                "type": "user",
+                "transition": {"next": "test_agent"}
+            },
+            "test_agent": {
+                "type": "agent", 
+                "transition": {"next": "test_user"}
+            }
+        }
+    }
+
+@pytest.fixture
+def mock_invalid_yaml_config():
+    """Invalid YAML configuration for error testing."""
+    return {
+        "initial": "nonexistent_state",
+        "states": {
+            "test_state": {
+                "type": "invalid_type",
+                "transition": {"next": "another_nonexistent"}
+            }
+        }
+    }
+
+@pytest.fixture
+def test_yaml_config_file(tmp_path):
+    """Create temporary YAML config file for testing."""
+    config_data = {
+        "initial": "test_user",
+        "states": {
+            "test_user": {
+                "type": "user",
+                "transition": {"next": "test_agent"}
+            },
+            "test_agent": {
+                "type": "agent",
+                "transition": {"next": "test_user"}
+            }
+        }
+    }
+    config_file = tmp_path / "test_config.yaml"
+    with open(config_file, 'w') as f:
+        yaml.dump(config_data, f)
+    return str(config_file)
+
+@pytest.fixture
+def invalid_yaml_config_file(tmp_path):
+    """Create temporary invalid YAML config file for testing."""
+    config_data = {
+        "initial": "nonexistent_state",
+        "states": {
+            "test_state": {
+                "type": "invalid_type",
+                "transition": {"next": "another_nonexistent"}
+            }
+        }
+    }
+    config_file = tmp_path / "invalid_config.yaml"
+    with open(config_file, 'w') as f:
+        yaml.dump(config_data, f)
+    return str(config_file)
+
+@pytest.fixture
+def mock_state_handler():
+    """Mock StateHandler instance."""
+    mock_handler = Mock()
+    mock_handler.get_initial_state = Mock()
+    mock_handler.get_next_state = Mock()
+    mock_handler.states = {}
+    return mock_handler
+
+@pytest.fixture
+def mock_memory():
+    """Mock Memory instance."""
+    mock_mem = Mock()
+    mock_mem.get = Mock()
+    mock_mem.set = Mock()
+    return mock_mem
+
+@pytest.fixture
+def mock_agent():
+    """Mock Agent instance."""
+    mock_agent = Mock()
+    mock_agent.step = Mock()
+    mock_agent.bind_tool = Mock()
+    mock_agent.call_llm = Mock()
+    return mock_agent
+
+@pytest.fixture
+def mock_tool():
+    """Mock Tool instance."""
+    mock_tool = Mock()
+    mock_tool.tool = "test_tool"
+    mock_tool.name = "test_tool"
+    return mock_tool
+
+@pytest.fixture
+def mock_user_message():
+    """Mock UserMessage instance."""
+    mock_msg = Mock()
+    mock_msg.content = "Test user input"
+    mock_msg.role = "user"
+    return mock_msg
+
+@pytest.fixture
+def mock_ai_message():
+    """Mock AIMessage instance."""
+    mock_msg = Mock()
+    mock_msg.content = "Test AI response"
+    mock_msg.role = "assistant"
+    return mock_msg
+
+@pytest.fixture
+def mock_system_message():
+    """Mock SystemMessage instance."""
+    mock_msg = Mock()
+    mock_msg.content = "Test system message"
+    mock_msg.role = "system"
+    return mock_msg

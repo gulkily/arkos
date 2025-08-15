@@ -1,0 +1,16 @@
+initial: test_user
+
+states:
+  test_user:
+    type: user
+    transition:
+      next: test_agent
+
+  test_agent:
+    type: agent
+    transition:
+      next: test_terminal
+
+  test_terminal:
+    type: user
+    is_terminal: true

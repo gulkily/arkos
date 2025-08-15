@@ -1,0 +1,7 @@
+initial: nonexistent_state
+
+states:
+  test_state:
+    type: invalid_type
+    transition:
+      next: another_nonexistent
