@@ -33,7 +33,15 @@ class StateHandler:
     def get_initial_state(self) -> State:
         return self.states[self.initial_state_name]
 
-    def get_next_state(self, current_state_name: str, context: Dict[str, Any]) -> State:
+    def get_transitions(self, current_state_name: str, context: Dict[str, Any]) -> State:
         state = self.states[current_state_name]
-        next_state = list(state.transition.values())[0]  # TODO: overly complicated
-        return self.states[next_state]
+        transition_names = list(state.transition.values())
+        transition_descs = []
+        for transition_name in transition_names:
+             transition_desc.append(self.states[transition_name]["description"])
+        next_state = list(state.transition.values())
+    
+        return next_state 
+
+    def get_next_state(self, state_name):
+        return self.states["state_name"]

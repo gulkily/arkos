@@ -2,10 +2,11 @@
 
 import os
 import sys
+from pydantic import BaseModel
+
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from typing import Any, Dict
-
+from typing import Any, directory
 from state_module.state_handler import StateHandler
 from state_module.state import State, AgentState
 from model_module.ArkModelNew import ArkModelLink, UserMessage, AIMessage, SystemMessage
@@ -14,6 +15,7 @@ from memory_module.memory import Memory
 
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 
 
 multiply_tool = {"url": "https://localhost:4040", "parameters": None}
@@ -46,6 +48,20 @@ class Agent:
         self.bind_tool(tool)
         self.tool_names.append(tool_name)
 
+    def create_next_state_class(options: List[Tuple[str, str]]):
+        """
+        options: list of tuples (next_state, description of state) 
+        Returns a dynamically created Pydantic model class with those fields.
+        """
+        fields = {}
+        for state, description in options:
+            fields[state] = (str, ...)  # require a string field
+            # descriptions can be added via Field, if you want metadata
+            # fields[state] = (str, Field(..., description=description))
+        
+        NextStates = create_model("NextStates", **fields)  # dynamic class
+        return NextStates
+
     def call_llm(self, input=None, context=None, json_schema=None):
         """
         Agent's interface with chat model
@@ -65,6 +81,19 @@ class Agent:
 
         return AIMessage(content=llm_response)
 
+    def choose_transition(self, transitions, messages):
+
+        prompt = "given the following state transitions, and the preceeding context. output the most reasonable next stat"
+        
+        # creates pydantic class and a model dump 
+        json_schema = self.create_next_state_class(transitions).model_dump_json()
+
+        output = self.call_llm(input=prompt+messages[:-3], json_schema=json_schema, prompt) 
+        
+        next_state_name  = output["state_options"]
+
+        return next_state_name
+
     def step(self, input: str):
 
         # get first state from states
@@ -79,9 +108,14 @@ class Agent:
                 self.context["messages"].append(updates)
 
             if self.current_state.check_transition_ready(self.context["messages"]):
-                self.current_state = self.flow.get_next_state(
-                    self.current_state.name, self.context
-                )
+                # NOTE: get_transitions will return list of tuples (state, state description)
+                if len(self.flow.get_transitions(self.current_state.name)) == 1: 
+                    self.current_state = self.flow.get_next_state(self.current_state.get_transitions[0][0])
+                else: 
+                    transitions = self.flow.get_next_state(self.current_state.name)
+                    next_state = self.choose_transition(transitions, self.context["messages"]) 
+
+                    self.current_state = next_state
 
             else:
                 raise ValueError("State Loop Failed, No next State agent.py")
