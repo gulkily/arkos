@@ -3,10 +3,10 @@
 import os
 import sys
 from pydantic import BaseModel
+from typing import List, Tuple
 
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from typing import Any, directory
 from state_module.state_handler import StateHandler
 from state_module.state import State, AgentState
 from model_module.ArkModelNew import ArkModelLink, UserMessage, AIMessage, SystemMessage
@@ -81,15 +81,15 @@ class Agent:
 
         return AIMessage(content=llm_response)
 
-    def choose_transition(self, transitions, messages):
+    def choose_transition(self, transitions_dict, messages):
 
         prompt = "given the following state transitions, and the preceeding context. output the most reasonable next stat"
-        
-        # creates pydantic class and a model dump 
-        json_schema = self.create_next_state_class(transitions).model_dump_json()
+        transition_tuples = zip(transitions_dict["tt"], transitions_dict["td"])
 
-        output = self.call_llm(input=prompt+messages[:-3], json_schema=json_schema, prompt) 
-        
+        # creates pydantic class and a model dump 
+        json_schema = self.create_next_state_class(transition_tuples).model_dump_json()
+
+        output = self.call_llm(input=prompt+messages[:-3], json_schema=json_scema)
         next_state_name  = output["state_options"]
 
         return next_state_name
@@ -109,11 +109,16 @@ class Agent:
 
             if self.current_state.check_transition_ready(self.context["messages"]):
                 # NOTE: get_transitions will return list of tuples (state, state description)
-                if len(self.flow.get_transitions(self.current_state.name)) == 1: 
-                    self.current_state = self.flow.get_next_state(self.current_state.get_transitions[0][0])
+                transition_dict = self.flow.get_transitions(self.current_state)
+                transition_names = transition_dict["tt"]
+
+                num_transitions = len(transition_names)
+                if num_transitions == 1: 
+                    next_state_name = transition_names[0]
+                    self.current_state = self.flow.get_state(next_state_name)
                 else: 
-                    transitions = self.flow.get_next_state(self.current_state.name)
-                    next_state = self.choose_transition(transitions, self.context["messages"]) 
+
+                    next_state = self.choose_transition(transition_dict, self.context["messages"]) 
 
                     self.current_state = next_state
 

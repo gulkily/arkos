@@ -10,7 +10,7 @@ states:
     description: "state used for input from user"
     type: user # change type to a better identifier
     transition:
-      next: agent_reply
+      next: [agent_reply]
 
   agent_reply:
     description: "state used for your reasoning"
@@ -22,4 +22,4 @@ states:
     description: "state used for tool use"
     type: tool
     transition: 
-      next: agent_reply 
+      next: [agent_reply]
