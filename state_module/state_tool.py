@@ -22,13 +22,6 @@ class StateTool(State):
         return True
 
     def run(self, context, agent=None):
-
-        user_input = input("You: ")
-        if user_input.strip().lower() == "exit":
-            print("safe_shutdown sequence initialized")
-            self.is_terminal = False
-            return
-
-        else:
-            return UserMessage(content=user_input)
+        print("I USED A TOOL")
+        return SystemMessage(content="Tool call placeholder")
 

@@ -126,7 +126,7 @@ class ArkModelLink(BaseModel):
 
         except Exception as e:
             print(f"Error during LLM call: {e}")
-            return {"error": f"Error: An error occurred during LLM call: {e}"}
+            return f"Error: An error occurred during LLM call: {e}"
         if stream:
             raise NotImplementedError
 

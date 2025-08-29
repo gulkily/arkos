@@ -2,8 +2,10 @@
 
 import os
 import sys
-from pydantic import BaseModel
+from pydantic import BaseModel, create_model, Field
 from typing import List, Tuple
+import json
+from enum import Enum
 
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -47,20 +49,24 @@ class Agent:
         tool_name = tool.tool
         self.bind_tool(tool)
         self.tool_names.append(tool_name)
+    def create_next_state_class(self, options: List[Tuple[str, str]]):
+        """
+        options: list of tuples (next_state, description of state)
+        Returns a Pydantic model class with a single field 'next_state',
+        whose value must be one of the provided state names.
+        """
 
-    def create_next_state_class(options: List[Tuple[str, str]]):
-        """
-        options: list of tuples (next_state, description of state) 
-        Returns a dynamically created Pydantic model class with those fields.
-        """
-        fields = {}
-        for state, description in options:
-            fields[state] = (str, ...)  # require a string field
-            # descriptions can be added via Field, if you want metadata
-            # fields[state] = (str, Field(..., description=description))
-        
-        NextStates = create_model("NextStates", **fields)  # dynamic class
-        return NextStates
+        # Dynamically build an Enum of allowed states
+        enum_dict = {state: state for state, _ in options}
+        NextStateEnum = Enum("NextStateEnum", enum_dict)
+
+        # Build the model with a single constrained field
+        NextStateModel = create_model(
+            "NextState",
+            next_state=(NextStateEnum, Field(..., description="The chosen next state"))
+        )
+
+        return NextStateModel
 
     def call_llm(self, input=None, context=None, json_schema=None):
         """
@@ -84,18 +90,34 @@ class Agent:
     def choose_transition(self, transitions_dict, messages):
 
         prompt = "given the following state transitions, and the preceeding context. output the most reasonable next stat"
-        transition_tuples = zip(transitions_dict["tt"], transitions_dict["td"])
+        transition_tuples = list(zip(transitions_dict["tt"], transitions_dict["td"]))
 
         # creates pydantic class and a model dump 
-        json_schema = self.create_next_state_class(transition_tuples).model_dump_json()
+        NextStates = self.create_next_state_class(transition_tuples)
+        json_schema = {
+            "type": "json_schema",
 
-        output = self.call_llm(input=prompt+messages[:-3], json_schema=json_scema)
-        next_state_name  = output["state_options"]
+            "json_schema": {
+                "name":  "class_options", 
+                "schema": NextStates.model_json_schema()
+            }
+        }
+
+
+        context_text = [SystemMessage(content=prompt)] + messages
+        output = self.call_llm(context=context_text, json_schema=json_schema)
+        print(output.content)
+        structured_output = json.loads(output.content)
+
+        # HANDLE ERROR GRACEFULL
+        if "error" in output.content:
+            raise ValueError("AGENT.PY FAILED LLM CALL")
+        next_state_name  = structured_output["next_state"]
 
         return next_state_name
 
     def step(self, input: str):
-
+        messages_list = self.context["messages"]
         # get first state from states
         if not self.current_state:
             self.current_state = flow.get_initial_state()
@@ -105,11 +127,11 @@ class Agent:
             # asumption run will always return a valid Messsage
             updates = self.current_state.run(self.context["messages"], self)
             if updates:
-                self.context["messages"].append(updates)
+                messages_list.append(updates)
 
             if self.current_state.check_transition_ready(self.context["messages"]):
                 # NOTE: get_transitions will return list of tuples (state, state description)
-                transition_dict = self.flow.get_transitions(self.current_state)
+                transition_dict = self.flow.get_transitions(self.current_state, messages_list)
                 transition_names = transition_dict["tt"]
 
                 num_transitions = len(transition_names)
@@ -118,7 +140,8 @@ class Agent:
                     self.current_state = self.flow.get_state(next_state_name)
                 else: 
 
-                    next_state = self.choose_transition(transition_dict, self.context["messages"]) 
+                    next_state_name = self.choose_transition(transition_dict, self.context["messages"]) 
+                    next_state  = self.flow.get_state(next_state_name)
 
                     self.current_state = next_state
 
