@@ -26,7 +26,7 @@ class StateUser(State):
         user_input = input("You: ")
         if user_input.strip().lower() == "exit":
             print("safe_shutdown sequence initialized")
-            self.is_terminal = False
+            self.is_terminal = True
             return
 
         else:

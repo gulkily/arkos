@@ -23,7 +23,11 @@ def run_cli_agent():
     agent = Agent(agent_id="cli-agent", flow=flow, memory=memory, llm=llm)
     ############## INITIALIZATION PROCEDURE
     default_message = SystemMessage(
-        content="You are a helpful assistant names ARK who can use tools, and has memory. Greet the user accordingly"
+        content="""You are a helpful assistant names ARK who can use tools, and has memory. Greet the user accordingly
+            
+            Tools: Multiply Tool
+            Desc: When encountering a query which needs this tool, indicate you wish to move to the tool state. 
+            DO NOT answer the query yourself, wait on the tool response which is provided as a system message """
     )
     agent.context.setdefault("messages", []).append(default_message)
 
@@ -31,7 +35,7 @@ def run_cli_agent():
     ################## INITIALIZATION PROCEDURE
     print("=== Starting CLI Agent (type 'exit' to quit) ===")
 
-    print(default_response.content)
+    # print(default_response.content)
 
     try:
         agent.step("remove this variable")

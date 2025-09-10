@@ -22,6 +22,17 @@ class StateTool(State):
         return True
 
     def run(self, context, agent=None):
-        print("I USED A TOOL")
-        return SystemMessage(content="Tool call placeholder")
+
+
+        # extract tool name 
+
+        # extract tool parameters
+
+
+        # call tool 
+        
+
+        # return tool msg
+        print("TOOL RESULT PLACEHOLDER")
+        return SystemMessage(content="Your tool result: 3*6 is 18")
 

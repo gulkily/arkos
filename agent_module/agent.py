@@ -106,7 +106,7 @@ class Agent:
 
         context_text = [SystemMessage(content=prompt)] + messages
         output = self.call_llm(context=context_text, json_schema=json_schema)
-        print(output.content)
+        # print(output.content)
         structured_output = json.loads(output.content)
 
         # HANDLE ERROR GRACEFULL
@@ -122,12 +122,17 @@ class Agent:
         if not self.current_state:
             self.current_state = flow.get_initial_state()
 
+        
         while not self.current_state.is_terminal:
 
             # asumption run will always return a valid Messsage
             updates = self.current_state.run(self.context["messages"], self)
             if updates:
                 messages_list.append(updates)
+
+            if self.current_state.is_terminal:
+                return  # or break the loop
+
 
             if self.current_state.check_transition_ready(self.context["messages"]):
                 # NOTE: get_transitions will return list of tuples (state, state description)
