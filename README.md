@@ -2,64 +2,56 @@
 
 ARK (Automated Resource Knowledgebase) revolutionizes resource management via automation. Using advanced algorithms, it streamlines collection, organization, and access to resource data, facilitating efficient decision-making.
 
-tl;dr. It'll be an open source interface for a local LLM app store utilizing long term memory for personalized requests. We are primarily focusing on targeting MIT students for the time being.
+tl;dr. It'll be an open source interface for a local LLM app store utilizing long term memory for personalized requests.
 
-(TODO: rewrite this introduction.)
+On [September 9, 2025](https://github.com/SGIARK/ARKOS/commit/38cace85d598ca59f2cfe525f358c8a76bb22f98), nmorgan eliminated the frontend code from this repo and moved it to [its own repo](https://github.com/SGIARK/arkos-webui). As a result, this repo now solely contains the backend.
 
-# Languages and dependencies
+## Languages and dependencies
 
-NOTE: This is not a complete list.
+The entire codebase is in Python, except for a few shell scripts. We use the following four dependencies:
 
-* Python
-* LangChain (deprecated, we are trying to eliminate this for higher flexibility)
-* Model Context Protocol
-* HTTPX
-* HuggingFace (what we currently use as our inference provider)
-* Prettier
-* Pydantic
-* Radicale
-* SQLite
-* Svelte
-* SvelteKit
-* TypeScript
-* @event-calendar/core
+* `openai` for interoperability (we do not use the OpenAI API though!)
+* `pyyaml`
+* `pydantic` for defining schemas
+* `requests`
 
-# File structure
+## File structure
 
-(As of July 30, 2025; update as needed.)
+(As of September 11, 2025.)
 
-This repo is currently a bit chaotic, but from a top-level point of view, here's each file or folder is for:
+This repo is rather chaotic, but from a top-level point of view, here's each file or folder is for:
 
-* `base_module/` for MCP- and database-related stuff
-* `calendar_module/` (mostly empty)
+* `agent_module/`
+* `base_module/` for MCP- and database-related code
 * `config_module/` for YAML configuration files
-* `depricated/` for old, unused code
-* `frontend/` is the tool's web frontend, implemented in Svelte and TypeScript; read the [folder readme](frontend/README.md) for more information
+* `memory_module/` for memory-related code
 * `model_module/` for core LLM-related logic
-* `radicale-test/` is for using [Radicale](https://radicale.org/v3.html) to make calendar changes; read the [folder readme](radicale_test/README.md) for more information
 * `schemas/` for JSON schemas when communicating between frontend and backend
-* `.gitignore` (standard)
+* `state_module/`
+* `tool_module/`
+* `.gitignore`
 * `README.md` (this very file!)
-* `requirements.txt` (Python dependencies; rather bloated for now, but it'll have to do)
+* `requirements.txt`
 
-# Instructions
+## Instructions
 
-## Start Inference Engine (SGLANG)
-* Run latest SGLANG image 
+### Start Inference Engine (SGLANG)
+
+* Run latest SGLANG image
 * cmd: bash model_module/run.sh
-* Note: Qwen 2.5 is what is currently in use 
+* Note: Qwen 2.5 is what is currently in use
 
-## Test base_module
+### Test base_module
+
 * cmd: python main_interface.py
 
-# Contributors + contact
+## Contributors + contact
 
-| Name                  | Role           | GitHub username | Affiliation |
-| --------------------  | -------------- | --------------- | ----------- |
-| Nathaniel Morgan      | Project leader | nmorgan         | MIT         |
-| Joshua Guo            | Frontend       | duck_master     | MIT         |
-| Ilya Gulko            | Backend        | gulkily         | MIT         |
-| Yeabkal Abeje         | (departed)     | Yebe-Abe        | MIT         |
-| Jack Luo              | Backend        | thejackluo      | GT          |
-| Bryce Roberts         | Backend        | BryceRoberts13  | MIT         | 
-
+| Name                  | Role           | GitHub username | Affiliation   |
+| --------------------  | -------------- | --------------- | --------------|
+| Nathaniel Morgan      | Project leader | nmorgan         | MIT           |
+| Joshua Guo            | Frontend       | duck_master     | MIT           |
+| Ilya Gulko            | Backend        | gulkily         | MIT           |
+| Yeabkal Abeje         | (departed)     | Yebe-Abe        | MIT           |
+| Jack Luo              | Backend        | thejackluo      | Georgia Tech  |
+| Bryce Roberts         | Backend        | BryceRoberts13  | MIT           |
