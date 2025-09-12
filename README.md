@@ -21,9 +21,14 @@ NOTE: This is not a complete list.
 
 This repo is currently a bit chaotic, but from a top-level point of view, here's each file or folder is for:
 
-* `base_module/` for MCP- and database-related stuff
+* `base_module/` for main interface
 * `config_module/` for YAML configuration files
-* `model_module/` for core LLM-related logic
+* `model_module/` for core LLM-inference logic
+* `agent_module/` for agentic structure 
+* `state_module/` for defining agent state graphs 
+* `tool_module/` for MCP compatibility 
+* `memory_module/` for long term memory and context management 
+*   ``
 * `schemas/` for JSON schemas when communicating between frontend and backend
 * `.gitignore` (standard)
 * `README.md` (this very file!)
