@@ -2,7 +2,7 @@
 
 ARK (Automated Resource Knowledgebase) revolutionizes resource management via automation. Using advanced algorithms, it streamlines collection, organization, and access to resource data, facilitating efficient decision-making.
 
-tl;dr. It'll be an open source interface for a local LLM agent building utilizing long term memory for personalized requests. We are primarily focusing on targeting MIT students for the time being.
+tl;dr. It'll be an open source interface for a local LLM agent building utilizing long term memory for personalized requests. 
 
 ## Languages and dependencies
 
