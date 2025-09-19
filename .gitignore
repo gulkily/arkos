@@ -5,7 +5,7 @@
 /model_module/hub/* 
 
 # neovim
-.nvimlog
+**/.nvimlog
 
 # Python
 **/__pycache__/
