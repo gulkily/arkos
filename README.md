@@ -2,24 +2,28 @@
 
 ARK (Automated Resource Knowledgebase) revolutionizes resource management via automation. Using advanced algorithms, it streamlines collection, organization, and access to resource data, facilitating efficient decision-making.
 
+
+tl;dr. It'll be an open source interface for a local LLM app store utilizing long term memory for personalized requests.
+
+On [September 9, 2025](https://github.com/SGIARK/ARKOS/commit/38cace85d598ca59f2cfe525f358c8a76bb22f98), nmorgan eliminated the frontend code from this repo and moved it to [its own repo](https://github.com/SGIARK/arkos-webui). As a result, this repo now solely contains the backend.
+
 tl;dr. It'll be an open source interface for a local LLM agent building utilizing long term memory for personalized requests. We are primarily focusing on targeting MIT students for the time being.
 
+## Languages and dependencies
 
-# Languages and dependencies
+The entire codebase is in Python, except for a few shell scripts. We use the following four dependencies:
 
-NOTE: This is not a complete list.
+* `openai` (needed to standardize inference engine communication; we do not use the OpenAI API though!)
+* `pyyaml`
+* `pydantic` for defining schemas
+* `requests`
 
-* Python
-* Pydantic
-* Openai (needed to standardize inference engine communication)
-* Requests
-* Pyyaml
+## File structure
 
-# File structure
+(As of September 11, 2025.)
 
-(As of July 30, 2025; update as needed.)
+This repo is rather chaotic, but from a top-level point of view, here's each file or folder is for:
 
-This repo is currently a bit chaotic, but from a top-level point of view, here's each file or folder is for:
 
 * `base_module/` for main interface
 * `config_module/` for YAML configuration files
@@ -27,31 +31,33 @@ This repo is currently a bit chaotic, but from a top-level point of view, here's
 * `agent_module/` for agentic structure 
 * `state_module/` for defining agent state graphs 
 * `tool_module/` for MCP compatibility 
-* `memory_module/` for long term memory and context management 
-*   ``
+* `memory_module/` for long term memory and context management
 * `schemas/` for JSON schemas when communicating between frontend and backend
-* `.gitignore` (standard)
+* `state_module/`
+* `tool_module/`
+* `.gitignore`
 * `README.md` (this very file!)
 * `requirements.txt` (Python dependencies)
 
-# Instructions
+## Instructions
 
-## Start Inference Engine (SGLANG)
-* Run latest SGLANG image 
+### Start Inference Engine (SGLANG)
+
+* Run latest SGLANG image
 * cmd: bash model_module/run.sh
-* Note: Qwen 2.5 is what is currently in use 
+* Note: Qwen 2.5 is what is currently in use
 
-## Test base_module
+### Test base_module
+
 * cmd: python main_interface.py
 
-# Contributors + contact
+## Contributors + contact
 
-| Name                  | Role           | GitHub username | Affiliation |
-| --------------------  | -------------- | --------------- | ----------- |
-| Nathaniel Morgan      | Project leader | nmorgan         | MIT         |
-| Joshua Guo            | Frontend       | duck_master     | MIT         |
-| Ilya Gulko            | Backend        | gulkily         | MIT         |
-| Yeabkal Abeje         | (departed)     | Yebe-Abe        | MIT         |
-| Jack Luo              | Backend        | thejackluo      | GT          |
-| Bryce Roberts         | Backend        | BryceRoberts13  | MIT         | 
-
+| Name                  | Role           | GitHub username | Affiliation   |
+| --------------------  | -------------- | --------------- | --------------|
+| Nathaniel Morgan      | Project leader | nmorgan         | MIT           |
+| Joshua Guo            | Frontend       | duck_master     | MIT           |
+| Ilya Gulko            | Backend        | gulkily         | MIT           |
+| Yeabkal Abeje         | (departed)     | Yebe-Abe        | MIT           |
+| Jack Luo              | Backend        | thejackluo      | Georgia Tech  |
+| Bryce Roberts         | Backend        | BryceRoberts13  | MIT           |
