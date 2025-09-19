@@ -2,11 +2,6 @@
 
 ARK (Automated Resource Knowledgebase) revolutionizes resource management via automation. Using advanced algorithms, it streamlines collection, organization, and access to resource data, facilitating efficient decision-making.
 
-
-tl;dr. It'll be an open source interface for a local LLM app store utilizing long term memory for personalized requests.
-
-On [September 9, 2025](https://github.com/SGIARK/ARKOS/commit/38cace85d598ca59f2cfe525f358c8a76bb22f98), nmorgan eliminated the frontend code from this repo and moved it to [its own repo](https://github.com/SGIARK/arkos-webui). As a result, this repo now solely contains the backend.
-
 tl;dr. It'll be an open source interface for a local LLM agent building utilizing long term memory for personalized requests. We are primarily focusing on targeting MIT students for the time being.
 
 ## Languages and dependencies
