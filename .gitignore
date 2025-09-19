@@ -8,7 +8,7 @@
 /frontend/.svelte-kit/*
 
 # neovim
-.nvimlog
+**/.nvimlog
 
 # Python
 **/__pycache__/
