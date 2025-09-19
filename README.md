@@ -1,16 +1,19 @@
-# ARK2.0
+# ARKOS
 
 ARK (Automated Resource Knowledgebase) revolutionizes resource management via automation. Using advanced algorithms, it streamlines collection, organization, and access to resource data, facilitating efficient decision-making.
+
 
 tl;dr. It'll be an open source interface for a local LLM app store utilizing long term memory for personalized requests.
 
 On [September 9, 2025](https://github.com/SGIARK/ARKOS/commit/38cace85d598ca59f2cfe525f358c8a76bb22f98), nmorgan eliminated the frontend code from this repo and moved it to [its own repo](https://github.com/SGIARK/arkos-webui). As a result, this repo now solely contains the backend.
 
+tl;dr. It'll be an open source interface for a local LLM agent building utilizing long term memory for personalized requests. We are primarily focusing on targeting MIT students for the time being.
+
 ## Languages and dependencies
 
 The entire codebase is in Python, except for a few shell scripts. We use the following four dependencies:
 
-* `openai` for interoperability (we do not use the OpenAI API though!)
+* `openai` (needed to standardize inference engine communication; we do not use the OpenAI API though!)
 * `pyyaml`
 * `pydantic` for defining schemas
 * `requests`
@@ -21,17 +24,20 @@ The entire codebase is in Python, except for a few shell scripts. We use the fol
 
 This repo is rather chaotic, but from a top-level point of view, here's each file or folder is for:
 
-* `agent_module/`
-* `base_module/` for MCP- and database-related code
+
+* `base_module/` for main interface
 * `config_module/` for YAML configuration files
-* `memory_module/` for memory-related code
-* `model_module/` for core LLM-related logic
+* `model_module/` for core LLM-inference logic
+* `agent_module/` for agentic structure 
+* `state_module/` for defining agent state graphs 
+* `tool_module/` for MCP compatibility 
+* `memory_module/` for long term memory and context management
 * `schemas/` for JSON schemas when communicating between frontend and backend
 * `state_module/`
 * `tool_module/`
 * `.gitignore`
 * `README.md` (this very file!)
-* `requirements.txt`
+* `requirements.txt` (Python dependencies)
 
 ## Instructions
 
