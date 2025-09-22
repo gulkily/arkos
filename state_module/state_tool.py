@@ -34,5 +34,5 @@ class StateTool(State):
 
         # return tool msg
         print("TOOL RESULT PLACEHOLDER")
-        return SystemMessage(content="Your tool result: 3*6 is 18")
+        return SystemMessage(content="Result: 3*6 is 18")
 

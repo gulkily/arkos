@@ -57,13 +57,16 @@ class Agent:
         """
 
         # Dynamically build an Enum of allowed states
-        enum_dict = {state: state for state, _ in options}
+        enum_dict = {state: state for state, desc in options}
+        
+        # add desc into enum dict
         NextStateEnum = Enum("NextStateEnum", enum_dict)
 
         # Build the model with a single constrained field
         NextStateModel = create_model(
             "NextState",
             next_state=(NextStateEnum, Field(..., description="The chosen next state"))
+
         )
 
         return NextStateModel
@@ -89,7 +92,7 @@ class Agent:
 
     def choose_transition(self, transitions_dict, messages):
 
-        prompt = "given the following state transitions, and the preceeding context. output the most reasonable next stat"
+        prompt = "given the following state transitions, and the preceeding context. output the most reasonable next state. do not use tool result to determine the next state"
         transition_tuples = list(zip(transitions_dict["tt"], transitions_dict["td"]))
 
         # creates pydantic class and a model dump 
@@ -146,6 +149,7 @@ class Agent:
                 else: 
 
                     next_state_name = self.choose_transition(transition_dict, self.context["messages"]) 
+
                     next_state  = self.flow.get_state(next_state_name)
 
                     self.current_state = next_state
