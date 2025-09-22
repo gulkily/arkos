@@ -9,3 +9,8 @@
 
 # neovim
 .nvimlog
+
+# Python
+**/__pycache__/
+**/*.pyc
+
