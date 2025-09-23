@@ -27,6 +27,9 @@ class UserMessage(Message):
 
     role: str = "user"
 
+class ToolMessage(Message):
+    """ Represents a message from a tool call"""
+    role: str = "tool"
 
 class AIMessage(Message):
     """
@@ -99,6 +102,12 @@ class ArkModelLink(BaseModel):
                     {"role": "system", "content": msg.content}
                 )
 
+            elif isinstance(msg, ToolMessage):
+                openai_messages_payload.append(
+                    {"role": "tool", "content": msg.content}
+                )
+
+
             elif isinstance(msg, AIMessage):
                 msg_dict = {"role": "assistant"}
                 # Always include 'content' key for assistant messages.
@@ -126,7 +135,7 @@ class ArkModelLink(BaseModel):
 
         except Exception as e:
             print(f"Error during LLM call: {e}")
-            return {"error": f"Error: An error occurred during LLM call: {e}"}
+            return f"Error: An error occurred during LLM call: {e}"
         if stream:
             raise NotImplementedError
 
