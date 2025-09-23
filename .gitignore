@@ -4,11 +4,8 @@
 /model_module/data/*
 /model_module/hub/* 
 
-/frontend/node_modules/*
-/frontend/.svelte-kit/*
-
 # neovim
-.nvimlog
+
 
 # Python
 **/__pycache__/
