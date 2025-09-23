@@ -16,9 +16,6 @@ from tool_module.tool import Tool
 from memory_module.memory import Memory
 
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-
 
 multiply_tool = {"url": "https://localhost:4040", "parameters": None}
 add_tool = {"url": "https://localhost:3030", "parameters": None}
