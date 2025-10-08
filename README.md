@@ -53,6 +53,7 @@ This repo is rather chaotic, but from a top-level point of view, here's each fil
 | Nathaniel Morgan      | Project leader | nmorgan         | MIT           |
 | Joshua Guo            | Frontend       | duck_master     | MIT           |
 | Ilya Gulko            | Backend        | gulkily         | MIT           |
-| Yeabkal Abeje         | (departed)     | Yebe-Abe        | MIT           |
 | Jack Luo              | Backend        | thejackluo      | Georgia Tech  |
 | Bryce Roberts         | Backend        | BryceRoberts13  | MIT           |
+| Angela Liu            | Backend        | angelaliu6      | MIT           |
+| Ishaana Misra         | Backend        | ishaanam        | MIT           |
