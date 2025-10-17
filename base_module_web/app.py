@@ -4,8 +4,9 @@ import logging
 import os
 import secrets
 import uuid
+from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse, PlainTextResponse
@@ -84,6 +85,8 @@ class MessageRequest(BaseModel):
 class ChatMessage(BaseModel):
     role: str
     content: str
+    render_type: Optional[str] = None
+    payload: Optional[Dict[str, Any]] = None
     error: Optional[str] = None
 
 
@@ -130,15 +133,139 @@ def _normalise_content(value) -> str:
         return str(value)
 
 
+def _extract_render_metadata(raw_content: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Optional[str]]:
+    if not isinstance(raw_content, str):
+        return None, None, None
+
+    try:
+        parsed = json.loads(raw_content)
+    except (TypeError, json.JSONDecodeError):
+        return None, None, None
+
+    if not isinstance(parsed, dict):
+        return None, None, None
+
+    render_type = parsed.get("render_type")
+    if render_type != "calendar_week":
+        return None, None, None
+
+    payload = parsed.get("payload")
+    if payload is None:
+        payload = {key: value for key, value in parsed.items() if key != "render_type"}
+
+    fallback = parsed.get("fallback_text") or parsed.get("text")
+
+    return render_type, payload if isinstance(payload, dict) else None, fallback
+
+
 def _serialise_history(history: List) -> List[ChatMessage]:
     serialised: List[ChatMessage] = []
     for item in history:
         if getattr(item, "role", "") == "system":
             continue
+        role = getattr(item, "role", "assistant")
+        raw_content = getattr(item, "content", "")
+        render_type, payload, fallback_text = _extract_render_metadata(raw_content)
         serialised.append(
-            ChatMessage(role=getattr(item, "role", "assistant"), content=_normalise_content(getattr(item, "content", "")))
+            ChatMessage(
+                role=role,
+                content=fallback_text or _normalise_content(raw_content),
+                render_type=render_type,
+                payload=payload,
+            )
         )
     return serialised
+
+
+def _should_mock_calendar(message: str) -> bool:
+    lowered = message.strip().lower()
+    if not lowered:
+        return False
+    triggers = (
+        "view calendar for this week",
+        "show calendar for this week",
+        "show my calendar for this week",
+        "view my calendar this week",
+    )
+    return any(trigger in lowered for trigger in triggers)
+
+
+def _generate_mock_calendar_payload() -> Dict[str, Any]:
+    today = datetime.now()
+    week_start = today - timedelta(days=today.weekday())
+    day_names = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+
+    sample_events: Dict[int, List[Dict[str, str]]] = {
+        0: [
+            {"time": "09:00", "title": "Team A sync"},
+            {"time": "11:30", "title": "Client presentation"},
+            {"time": "15:00", "title": "Lunch with Sarah", "note": "Downtown bistro"},
+        ],
+        1: [
+            {"time": "10:00", "title": "Client call"},
+            {"time": "14:30", "title": "Project review"},
+        ],
+        2: [
+            {"time": "08:30", "title": "Daily stand-up"},
+            {"time": "13:00", "title": "Design workshop"},
+            {"time": "17:30", "title": "Gym"},
+        ],
+        3: [
+            {"time": "09:30", "title": "Team B check-in"},
+            {"time": "16:00", "title": "Networking event", "note": "Downtown hub"},
+        ],
+        4: [
+            {"time": "12:00", "title": "Release go/no-go"},
+            {"time": "16:30", "title": "Weekly wrap-up"},
+        ],
+        5: [
+            {"time": "10:00", "title": "Personal appointment"},
+        ],
+        6: [
+            {"time": "14:00", "title": "Family gathering"},
+        ],
+    }
+
+    days: List[Dict[str, Any]] = []
+    for offset in range(7):
+        day_date = week_start + timedelta(days=offset)
+        label = f"{day_names[offset]} · {day_date.strftime('%b %d')}"
+        is_today = day_date.date() == today.date()
+        is_weekend = day_date.weekday() >= 5
+        meta = "Today" if is_today else ("Weekend" if is_weekend else "")
+
+        day_payload: Dict[str, Any] = {
+            "label": label,
+            "events": sample_events.get(offset, []),
+        }
+        if meta:
+            day_payload["meta"] = meta
+        if is_today:
+            day_payload["is_today"] = True
+
+        days.append(day_payload)
+
+    fallback_lines = [
+        f"Week of {week_start.strftime('%B %d, %Y')}",
+        "Monday: Team A sync, Client presentation, Lunch with Sarah",
+        "Tuesday: Client call, Project review",
+        "Wednesday: Daily stand-up, Design workshop, Gym",
+        "Thursday: Team B check-in, Networking event",
+        "Friday: Release go/no-go, Weekly wrap-up",
+        "Saturday: Personal appointment",
+        "Sunday: Family gathering",
+    ]
+
+    return {
+        "render_type": "calendar_week",
+        "payload": {
+            "week_label": f"Week of {week_start.strftime('%B %d, %Y')}",
+            "week_subtitle": "Sample agenda generated by ARK",
+            "days": days,
+            "call_to_action": "Link a calendar provider to refresh this view with live data.",
+        },
+        "fallback_text": "\n".join(fallback_lines),
+    }
 
 
 def _bootstrap_session(session_id: str) -> AgentSession:
@@ -206,12 +333,16 @@ async def send_message(session_id: str, payload: MessageRequest) -> SessionPaylo
     history.append(user_message)
 
     payload_status = "ok"
-    try:
-        response = session.agent.call_llm(context=history)
-    except Exception as exc:
-        payload_status = "error"
-        logger.exception("LLM call failed for session %s", session_id)
-        response = AIMessage(content=f"LLM call failed: {exc}")
+    if _should_mock_calendar(content):
+        mock_payload = _generate_mock_calendar_payload()
+        response = AIMessage(content=json.dumps(mock_payload))
+    else:
+        try:
+            response = session.agent.call_llm(context=history)
+        except Exception as exc:
+            payload_status = "error"
+            logger.exception("LLM call failed for session %s", session_id)
+            response = AIMessage(content=f"LLM call failed: {exc}")
 
     if isinstance(response, AIMessage):
         history.append(response)

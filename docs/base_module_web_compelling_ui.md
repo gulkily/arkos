@@ -37,6 +37,61 @@
 - Provide light/dark mode toggle using CSS variables.
 - Add onboarding microcopy (“ARK remembers past sessions stored securely on this device/server”).
 
+## Layout Blueprint
+### Core layout
+- **Header bar**: left-aligned ARK logotype, environment badge, and quick links (download transcript, open settings). Right side surfaces health status and user menu placeholder for future auth.
+- **Conversation column**: stack of message bubbles with subtle separators for day/session boundaries. Reserve space for tool cards inline with assistant messages.
+- **Context panel**: right column (collapsible on small screens) exposing memory summary, current system prompt, active tools, and latest tool outputs.
+- **Composer rail**: bottom dock with multiline input, slash command hints, prompt chips, and send/stop buttons. Include secondary actions (retry, reset) as icon buttons with tooltips.
+
+### Responsive behavior
+- **Desktop ≥1280px**: three-column grid (session sidebar, conversation, context). Conversation gets 60 percent width for readability.
+- **Tablet 768–1279px**: collapse context panel into tabs above the composer; session list becomes slide-out drawer.
+- **Mobile ≤767px**: focus on conversation and composer; header condenses into icon-only controls, persistent floating button toggles session list.
+- **High-contrast mode**: honor prefers-contrast media query and supply hardened tokens in CSS custom properties.
+
+## Interaction Flows
+### Message lifecycle
+1. User submits message (optimistic bubble + typing indicator).
+2. Frontend records a `message_sent` event and disables composer while awaiting response.
+3. Backend responds with updated `SessionPayload` including `latency_ms`, `status`, and any `tool_events`.
+4. UI swaps typing indicator for assistant bubble, renders tool cards inline, and re-enables composer with focus restoration.
+
+### Tool reveal
+1. When payload `tool_events` array is present, display accordion cards summarizing each tool call.
+2. Expand-on-demand to show arguments, raw result, log excerpt, and “Copy result” button.
+3. Surface errors with red accent, offer “Retry tool” action that resends the previous message with `force_tool` flag when supported.
+
+### Session management
+1. Session sidebar lists active sessions with `title`, `updated_at`, and status icon (active, archived, error).
+2. Selecting a session loads history via GET `/sessions/{id}` and scrolls to latest entry.
+3. “Reset session” triggers DELETE `/sessions/{id}`, confirms via modal, and clears conversation pane.
+4. “Archive” toggles metadata flag and moves session to separate list; persists to CSV index for quick lookup.
+
+### Settings and personalization
+1. Settings drawer opens from header or keyboard shortcut (`Cmd/Ctrl + ,`).
+2. Inputs for temperature, max tokens, top-p, and system prompt bind to local state with validation guard rails.
+3. On save, issue PATCH `/sessions/{id}/settings`; optimistic UI updates and show toast on success/failure.
+4. Tool toggles immediately send state update and annotate conversation with system message confirming change.
+
+## Component Inventory
+- `SessionSidebar`: searchable list, grouped into Active and Archived, with unread badges when assistant responded while closed.
+- `ConversationTimeline`: renders `MessageBubble` components, groups by day, and handles optimistic entries.
+- `MessageBubble`: variants for user/assistant/system/tool, supports markdown rendering, code copy buttons, and latency chip.
+- `ToolCard`: collapsible panel summarizing tool call metadata, raw result, and optional preview (table, link, visualization).
+- `Composer`: textarea with markdown toolbar, slash command parser, prompt template chips, and quick retry button.
+- `SettingsDrawer`: tabbed modal covering Model, Tools, Appearance, and Advanced (logging toggle, export settings).
+- `ToastCenter`: lightweight event bus powered toaster for success/error/info notifications.
+- `HealthIndicator`: badge polling `/healthz` and exposing tooltip timeline of recent checks.
+
+## Accessibility & Performance
+- Ensure semantic landmarks (`main`, `nav`, `aside`) and correct ARIA roles for lists, accordions, and toasts.
+- Meet WCAG 2.1 AA color contrast; provide focus outlines and skip-to-content link.
+- Support full keyboard navigation, including trap-free modals and composer shortcuts.
+- Respect prefers-reduced-motion by disabling animated gradients and easing heavy transitions accordingly.
+- Lazy-load heavy assets (syntax highlighter, chart libs) and defer telemetry script initialization until user consents.
+- Apply request coalescing to avoid duplicate fetches when users rapidly switch sessions.
+
 ## Implementation Roadmap
 1. **Payload enrichment**: extend `SessionPayload` (backend) to include `latency_ms`, `tool_events`, and server metadata; update `base_module_web/static/index.html` to render them.
 2. **UI scaffolding**: refactor SPA into modular JS (or migrate to lightweight framework if desired) to handle toasts, modals, and session sidebar.
@@ -55,3 +110,9 @@
 1. **OpenWebUI baseline**: mention we can deploy it quickly (see companion doc) for feature parity with market tools.
 2. **Custom UI advantages**: walk through branded experience, control panel, memory transparency, and lighter footprint.
 3. **Future hooks**: highlight roadmap items (streaming, multi-user auth, analytics), reassuring stakeholders we own the end-to-end UX.
+
+### Calendar HTML demo trigger
+- Start the web UI (`uvicorn base_module_web.app:app --host 0.0.0.0 --port 8100`) and open it in a browser.
+- Send the prompt “View calendar for this week” in the chat window.
+- ARK returns a structured weekly agenda rendered with the new calendar card; older clients fall back to the plain-text summary bundled in the same response.
+- Pair this with your SSH tunnel or reverse proxy to demo the polished calendar experience to stakeholders.
