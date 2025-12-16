@@ -19,7 +19,11 @@ app = FastAPI(title="ArkOS Agent API", version="1.0.0")
 
 # Initialize the agent and dependencies once
 flow = StateHandler(yaml_path="../state_module/state_graph.yaml")
-memory = Memory(agent_id="ark-agent")
+memory = Memory(
+    user_id="ark-agent",
+    session_id=None,
+    db_url="postgresql://postgres:your-super-secret-and-long-postgres-password@localhost:54322/postgres"
+)
 llm = ArkModelLink(base_url="http://localhost:30000/v1")  # Your already OAI-compatible model
 agent = Agent(agent_id="ark-agent", flow=flow, memory=memory, llm=llm)
 
@@ -38,14 +42,14 @@ async def chat_completions(request: Request):
     messages = payload.get("messages", [])
     model = payload.get("model", "ark-agent")
     response_format = payload.get("response_format")
-        
+    
 
-    if "messages" not in agent.context:
-        agent.context["messages"] = [
-            SystemMessage(content=SYSTEM_PROMPT)
-        ]
-    # Convert OAI messages into internal message objects
     context_msgs = []
+
+
+    context_msgs.append(SystemMessage(content=SYSTEM_PROMPT)
+                                )
+    # Convert OAI messages into internal message objects
     for msg in messages:
         role = msg["role"]
         content = msg["content"]
@@ -56,12 +60,10 @@ async def chat_completions(request: Request):
         elif role == "assistant":
             context_msgs.append(AIMessage(content=content))
 
-    agent.context["messages"].extend(context_msgs)
-    # Run one agent step (can loop internally based on state)
 
-
+    
     # Get the last assistant message
-    final_msg = agent.step() or AIMessage(content="(no response)")
+    final_msg = agent.step(context_msgs) or AIMessage(content="(no response)")
 
     # Format as OpenAI chat completion response
     completion = {
@@ -82,5 +84,5 @@ async def chat_completions(request: Request):
 
 
 if __name__ == "__main__":
-    uvicorn.run("base_module.app:app", host="0.0.0.0", port=1111, reload=True)
+    uvicorn.run("base_module.app:app", host="0.0.0.0", port=1112, reload=True)
 
