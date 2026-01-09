@@ -1,10 +1,10 @@
 .DS_Store
-.env 
+.env
 /tool_module/secrets
 
 /model_module/models/*
 /model_module/data/*
-/model_module/hub/* 
+/model_module/hub/*
 
 # neovim
 
@@ -14,4 +14,9 @@
 **/*.pyc
 
 /.idea/
+*.env
+!.env.example
+/scripts/*
 
+# cursor
+.cursor/*
