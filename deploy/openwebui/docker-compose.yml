@@ -1,0 +1,26 @@
+services:
+  openwebui:
+    image: ghcr.io/open-webui/open-webui:main
+    env_file: env/openwebui.env
+    volumes:
+      - ./data:/app/backend/data
+    ports:
+      - 127.0.0.1:4000:8080
+    restart: unless-stopped
+    extra_hosts:
+      - "ark-backend.internal:172.17.0.1"
+
+  caddy:
+    image: caddy:2
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy/certs:/certs:ro
+      - caddy_data:/data
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - openwebui
+
+volumes:
+  caddy_data:

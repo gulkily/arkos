@@ -1,0 +1,14 @@
+ark.mit.edu {
+    # Use org-issued certs when available; swap to `tls internal` for Caddy's local CA.
+    tls /certs/ark.mit.edu.crt /certs/ark.mit.edu.key
+    encode gzip
+
+    @ark path /v1/*
+    handle @ark {
+        reverse_proxy ark-backend.internal:30000
+    }
+
+    handle {
+        reverse_proxy openwebui:8080
+    }
+}
