@@ -1,0 +1,37 @@
+# Base Module Web UI – Atomic Change List
+
+- session-payload-latency: Time each agent turn in the backend and include an integer `latency_ms` field in every `SessionPayload` response.
+- conversation-latency-chip: Render a compact "ARK • {latency}s" chip beside assistant bubbles whenever `latency_ms` is present.
+- session-payload-tool-events: Capture tool call metadata during agent execution and append a `tool_events` array to the response payload.
+- tool-card-component: Display collapsible tool cards under assistant messages, showing tool name, arguments, result preview, and copy button.
+- transcript-export-button: Add a header action that serializes the in-memory conversation to CSV/JSON and triggers a client-side download.
+- optimistic-user-bubble: Immediately render the user message bubble and append a typing indicator entry while the request is in flight.
+- composer-send-state: Disable the composer controls during pending requests and restore focus when responses arrive.
+- backend-server-metadata: Enrich payloads with environment metadata (e.g., `instance_label`, `ARK_WEB_VERSION`) sourced from configuration.
+- environment-badge-ui: Surface the environment metadata as a colored badge in the header bar for staging/prod clarity.
+- sessions-get-endpoint: Implement `GET /sessions/{id}` to return stored history and metadata without sending a new message.
+- session-sidebar-list: Build a sidebar that lists sessions with title, last-updated timestamp, and selection handling using the new GET endpoint.
+- session-archive-flag: Persist an `archived` marker in the session index and expose an action to toggle it via API and UI.
+- session-reset-action: Confirm and invoke `DELETE /sessions/{id}` from the UI, then clear the conversation timeline.
+- settings-endpoint: Add `PATCH /sessions/{id}/settings` with validation for temperature, max tokens, top-p, system prompt, and tool toggles.
+- settings-drawer-shell: Implement the modal/drawer UI with tabs (Model, Tools, Appearance, Advanced) and controlled form inputs.
+- settings-save-flow: Wire the drawer save button to call the PATCH endpoint, show optimistic state, and surface success/error toasts.
+- slash-command-parser: Detect `/reset`, `/memory`, `/help` in the composer, prevent default send, and dispatch mapped backend actions.
+- prompt-template-chips: Render reusable prompt chips above the composer that inject predefined text when clicked.
+- toast-center-bus: Introduce a lightweight event bus and toast component for success, error, and info notifications.
+- retry-last-message: Record the last outbound payload and expose a "Retry" control that resends it on demand.
+- healthz-poller: Poll `/healthz` on an interval and drive a health indicator badge with tooltip for recent failures.
+- analytics-event-hooks: Emit structured events (message_sent, tool_used, retry_clicked) through the event bus for future analytics.
+- layout-grid-refactor: Restructure the main view into header, session sidebar, conversation column, context panel, and composer rail regions.
+- context-panel-surface: Populate the right panel with memory summary, active tools, system prompt snippet, and latest tool outputs.
+- composer-rail-upgrade: Convert the composer area into a dock with multiline input, slash hint, send/stop buttons, quick retry, and settings shortcut.
+- responsive-breakpoints: Define CSS breakpoints for desktop (3-column), tablet (tabbed context), and mobile (collapsed drawers) layouts.
+- high-contrast-support: Provide alternative CSS tokens activated via `prefers-contrast` to maintain AA contrast under high-contrast settings.
+- light-dark-toggle: Implement a user-facing toggle that swaps between light and dark themes by switching CSS custom properties.
+- ark-brand-tokens: Create ARK color palette, typography scale, gradient accents, and apply them to core components.
+- onboarding-microcopy: Insert brief onboarding text near the conversation start describing session persistence and privacy.
+- accessibility-landmarks: Add semantic landmarks (`header`, `nav`, `main`, `aside`) and ensure ARIA roles for lists, accordions, and toasts are correct.
+- focus-management: Guarantee focus outlines, trap-free modals, skip links, and keyboard sequences for switching panes and commands.
+- reduced-motion-mode: Honor `prefers-reduced-motion` by disabling non-essential transitions and animations.
+- lazy-asset-loading: Defer loading of heavy modules (syntax highlighter, chart libs) until their UI elements become visible.
+- request-coalescing: Debounce session-switch fetches so rapidly choosing multiple sessions results in a single in-flight request.
