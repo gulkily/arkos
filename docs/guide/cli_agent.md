@@ -1,57 +1,70 @@
 # CLI Agent Guide
 
-The CLI agent is the most complete way to interact with ARKOS today. This guide explains the required services, how the components fit together, and how to troubleshoot common issues.
+The CLI client is the simplest way to drive ARKOS today. It sends prompts to the FastAPI service, which runs the state machine, memory stack, and model calls.
 
 ## Prerequisites
 - Python 3.10+
 - Dependencies from `requirements.txt`
 - Docker (for the SGLang container)
 - Hugging Face token with access to `Qwen/Qwen2.5-7B-Instruct`
+- Postgres connection string in `DB_URL` (required by memory)
 - GPU with ~16 GB VRAM recommended (adjust `model_module/run.sh` if your setup differs)
+
+## Configuration
+Settings live in `config_module/config.yaml` and support `${ENV_VAR}` substitution via `config_module/loader.py`.
+
+1. Copy the env template:
+   ```bash
+   cp .env.example .env
+   ```
+2. Set `DB_URL` in `.env`.
+3. `OPENAI_API_KEY` is optional in the current codebase: `memory_module/memory.py` sets a dummy value on import. Only set it if you update the memory configuration to use a hosted OpenAI endpoint.
 
 ## Start the model server
 ```bash
 export HF_TOKEN="hf_xxx"
 bash model_module/run.sh
 ```
-This downloads the `lmsysorg/sglang:latest` image, binds it to GPU device `1` by default, and exposes an OpenAI-compatible API on `http://localhost:30000/v1`.
+If `model_module/run.sh` still contains `export HF_TOKEN=""`, set the token there or remove the blank export. The script downloads the `lmsysorg/sglang:latest` image and exposes an OpenAI-compatible API on `http://localhost:30000/v1`.
 
 Verify the server is healthy:
 ```bash
 curl http://localhost:30000/v1/models
 ```
 
-## Launch the CLI agent
+## Launch the API server
+```bash
+python base_module/app.py
+```
+The port comes from `config_module/config.yaml` (default `1112`). Keep this running while you use the CLI.
+
+## Launch the CLI client
 ```bash
 python -m base_module.main_interface
 ```
-You will see `=== Starting CLI Agent (type 'exit' to quit) ===` followed by repeated prompts of `You:`. Type your message and press Enter. The agent responds using the SGLang backend until you type `exit`.
+You will see repeated prompts of `You:`. Type your message and press Enter. The client POSTs to `/v1/chat/completions` and prints the response.
 
 ## How it works
-1. `base_module/main_interface.py` loads `state_module/state_graph.yaml` via `StateHandler`.
-2. `Memory(agent_id="cli-agent")` writes each turn to `memory.csv`.
-3. An `Agent` object keeps the conversation context (`context["messages"]`).
-4. `Agent.step(...)` walks the state graph:
-   - `StateUser` collects console input.
-   - `StateAI` calls `ArkModelLink` and prints the model result.
-   - `StateTool` currently returns a placeholder `SystemMessage`.
+1. `base_module/main_interface.py` sends requests to the FastAPI service using the configured `app.port`.
+2. `base_module/app.py` loads `state_module/state_graph.yaml` via `StateHandler` and wires `Agent`, `Memory`, and `ArkModelLink`.
+3. `Memory` persists conversation context to Postgres and Mem0 using `DB_URL`.
+4. The state graph can route through:
+   - `StateUser` (`state_module/state_user.py`) as a terminal placeholder to yield control back to the client.
+   - `StateAI` (`state_module/state_ai.py`) for LLM calls.
+   - `StateCal` and `StateSearch` (`state_module/state_calendar.py`, `state_module/state_search.py`) for MCP-based tool calls.
+   - `StateTool` (`state_module/state_tool.py`) if you re-enable it in the graph.
 
-The initial system prompt is defined inline in `run_cli_agent()`; edit it to change the agent persona or available tools.
-
-## Customization tips
-- **State flow**: Edit `state_module/state_graph.yaml` to add states or re-order the loop. Register new state classes with `@register_state` in `state_module/`.
-- **Model endpoint**: Pass a different `base_url` to `ArkModelLink` if the SGLang server runs on another host or port.
-- **Memory file**: Provide `filename="/tmp/my_memory.csv"` when creating `Memory` to isolate sessions.
-- **Tool behavior**: Implement real tool logic in `state_module/state_tool.py` and create helper functions in `tool_module/`.
+The system prompt is configurable in `config_module/config.yaml` (`app.system_prompt`).
 
 ## Troubleshooting
 | Symptom | Likely cause | Fix |
 | ------- | ------------ | --- |
-| `openai.AuthenticationError` or HTTP 401 | `HF_TOKEN` missing or invalid | Re-export `HF_TOKEN` and restart `run.sh`. |
-| CLI hangs after user input | SGLang container not reachable | Check `docker ps` and ensure port `30000` is exposed. |
-| `memory.csv` permission denied | Repository directory not writable | Run from a writable location or change `Memory` filename. |
-| Tool placeholder keeps printing | `state_tool.py` still stubbed | Replace placeholder with actual tool invocation logic. |
+| `Environment variable 'DB_URL' not found` | `.env` missing or incomplete | Copy `.env.example` and set `DB_URL`. |
+| CLI returns connection errors | API server not running or wrong `app.port` | Start `python base_module/app.py` and verify the port. |
+| `openai.AuthenticationError` or HTTP 401 | `HF_TOKEN` missing or invalid | Set `HF_TOKEN` in `model_module/run.sh` (or export it after removing the blank export) and restart `run.sh`. |
+| Tool state fails immediately | MCP server not installed or missing env vars | Install Node.js, set MCP credentials, and retry. |
 
 ## Next steps
 - Consult `docs/reference/state_and_memory.md` for lower-level details about the state machine and memory stack.
-- Review `plans/ai/` for the roadmap toward richer tooling and web interfaces.
+- Review `docs/guide/tools.md` for MCP tool setup and examples.
+- Review `docs/guide/web_ui.md` for the experimental web UI prototype.
