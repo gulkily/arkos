@@ -54,7 +54,7 @@ Create a clean documentation-focused branch that starts from the upstream `main`
 | Root | `README.md` | Updated overview, setup, CLI usage. Needs review against dependency list. |
 | Root | `FEATURE_DEVELOPMENT_PROCESS.md` | Process doc; confirm if this belongs in `plans/` or operational docs. |
 | `.github` | `PULL_REQUEST_GUIDELINES.md`, `PULL_REQUEST_TEMPLATE/pr_template.md` | Up to date; cross-link from Mintlify contribution section. |
-| Docs – Guides | `docs/guide/cli_agent.md`, `docs/guide/tools.md`, `docs/guide/web_ui.md` | Populated with current behavior, customization tips, and troubleshooting notes. |
+| Docs – Guides | `docs/guide/cli_agent.md`, `docs/guide/tools.md`, `docs/guide/web_ui.md` | Populated with current behavior, customization tips, and troubleshooting notes (note: `base_module_web/` is not tracked in this repo, so the web UI guide is prototype-only). |
 | Docs – Reference | `docs/reference/state_and_memory.md` | Documents state graph, handlers, and memory helper with examples. |
 | Docs – Ops | `docs/ops/openwebui_*`, `docs/ops/base_module_web_ubuntu_hosting.md`, `docs/ops/README.md` | Verified existing ops docs moved here. |
 | Plans | `plans/ai/*` | Planning documents relocated; add metadata and archive plan states later. |
