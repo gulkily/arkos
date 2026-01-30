@@ -100,6 +100,18 @@ memory = Memory(user_id="ark-agent", session_id=None, db_url=os.environ["DB_URL"
 - Stores the message in Mem0 for long-term retrieval.
 - Writes the serialized message into the `conversation_context` table in Postgres.
 
+### Required Postgres schema
+The code assumes a `conversation_context` table with an auto-incrementing `id` column for ordering:
+```sql
+CREATE TABLE conversation_context (
+    id SERIAL PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    session_id TEXT NOT NULL,
+    role TEXT NOT NULL,
+    message TEXT NOT NULL
+);
+```
+
 ### Retrieving context
 - `retrieve_short_memory(turns)` returns the latest messages from Postgres.
 - `retrieve_long_memory(context, mem0_limit)` uses Mem0 similarity search to retrieve related memories.

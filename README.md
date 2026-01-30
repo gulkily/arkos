@@ -99,6 +99,18 @@ You need to create a .env and set DB_URL before starting the application
    DB_URL=postgresql://postgres:your-super-secret-and-long-postgres-password@localhost:54322/postgres
    ```
 
+### Database schema
+The memory layer expects a Postgres table named `conversation_context` with an auto-incrementing `id` column:
+```sql
+CREATE TABLE conversation_context (
+    id SERIAL PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    session_id TEXT NOT NULL,
+    role TEXT NOT NULL,
+    message TEXT NOT NULL
+);
+```
+
 ## Running the CLI Agent
 Once the SGLang backend is healthy:
 ```bash
