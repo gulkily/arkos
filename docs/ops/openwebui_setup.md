@@ -1,6 +1,6 @@
 # OpenWebUI Setup Runbook
 
-This runbook walks through installing and operating OpenWebUI on Ubuntu 24.04, wired into the ARK base module API. 
+This runbook walks through installing and operating OpenWebUI on Ubuntu 24.04, wired into the ARK base module API (the FastAPI service in `base_module/`, not the raw LLM port).
 It complements the higher-level plan in `openwebui_deployment_plan.md` by focusing on actionable steps.
 
 ## 1. Host Preparation
@@ -51,7 +51,7 @@ volumes:
 ## 3. Environment Variables
 Create `/srv/openwebui/env/openwebui.env`:
 ```
-OPENAI_API_BASE=http://ark-backend.internal:30000/v1
+OPENAI_API_BASE=http://ark-backend.internal:1112/v1
 OPENAI_API_KEY=ark-placeholder-key
 DEFAULT_MODEL=ark
 ENABLE_LOGIN=true
@@ -67,7 +67,7 @@ arkui.example.com {
 
     @ark path /v1/*
     handle @ark {
-        reverse_proxy ark-backend.internal:30000
+        reverse_proxy ark-backend.internal:1112
     }
 
     handle {
@@ -103,7 +103,7 @@ Browse to `https://arkui.example.com` and follow onboarding to create the first 
 | ------- | ------------ | ------ |
 | 502 from browser | Caddy can’t reach OpenWebUI | Check container status, confirm port mapping `127.0.0.1:4000:8080`. |
 | Login loop | Cookies blocked or time skew | Ensure HTTPS, correct system time (`chrony`). |
-| “Failed to reach OpenAI backend” | ARK endpoint unreachable | Validate `OPENAI_API_BASE`, ensure backend allows traffic from OpenWebUI host. |
+| “Failed to reach OpenAI backend” | ARK endpoint unreachable | Validate `OPENAI_API_BASE`, ensure base_module allows traffic from OpenWebUI host. |
 | Large uploads fail | Default body size limits | Add `header_up` and `request_body` adjustments in Caddyfile if needed. |
 
 ## 8. Teardown
