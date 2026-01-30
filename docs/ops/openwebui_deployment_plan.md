@@ -6,7 +6,7 @@ Stand up OpenWebUI alongside the ARK stack so stakeholders get a polished interf
 ## Prerequisites
 - Ubuntu 24.04 server with sudo access, outbound network, and ≥16GB RAM (OpenWebUI + LLM backend).
 - Docker 24.x and Docker Compose 2.x installed.
-- Accessible ARK base module API (OpenAI-compatible endpoint, e.g., `http://ark-backend.internal:30000/v1`).
+- Accessible ARK base module API (OpenAI-compatible endpoint, e.g., `http://ark-backend.internal:1112/v1`).
 - TLS certificate (Let's Encrypt via Caddy/NGINX or internal CA) if external access required.
 
 ## Architecture Overview
@@ -65,7 +65,7 @@ volumes:
 
 ### 4. Environment Variables (`env/openwebui.env`)
 ```
-OPENAI_API_BASE=http://ark-backend.internal:30000/v1
+OPENAI_API_BASE=http://ark-backend.internal:1112/v1
 OPENAI_API_KEY=ark-placeholder-key
 DEFAULT_MODEL=ark
 ```
@@ -78,7 +78,7 @@ ark.example.com {
 
     @ark path /v1/*
     handle @ark {
-        reverse_proxy ark-backend.internal:30000
+        reverse_proxy ark-backend.internal:1112
     }
 
     handle {
