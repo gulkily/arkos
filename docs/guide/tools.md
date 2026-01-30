@@ -10,7 +10,7 @@ ARKOS uses the Model Context Protocol (MCP) to connect to external tools. The cu
 - `tool_module/tool_call.py` – MCP client + manager (`MCPClient`, `MCPToolManager`).
 - `tool_module/auth_once.py` – helper to create Google Calendar OAuth tokens.
 - `tool_module/test_tool_call.py` – pytest-based MCP smoke tests.
-- `state_module/state_calendar.py` – placeholder calendar state wired for the Google Calendar MCP server.
+- `state_module/state_calendar.py` – placeholder calendar state wired for the Google Calendar MCP server (returns stub output by default).
 - `state_module/state_search.py` – state that calls the Brave Search MCP server.
 - `state_module/state_tool.py` – placeholder state for custom tool logic.
 
@@ -51,6 +51,7 @@ await manager.shutdown()
 3. Update `state_module/state_calendar.py` or your MCP config to pass:
    - `GOOGLE_OAUTH_CREDENTIALS` (path to OAuth client JSON)
    - `GOOGLE_CALENDAR_MCP_TOKEN_PATH` (path to generated token JSON)
+4. Enable real calendar calls in `state_module/state_calendar.py` by replacing the placeholder output with the actual MCP call (uncomment the `calendar_retrieval()` invocation and return its result as a `ToolMessage`). Keep the method async and ensure the env vars above point to real files.
 
 ### Brave Search MCP
 Set `BRAVE_API_KEY` in `.env` or in the MCP server config passed to `MCPToolManager`.
