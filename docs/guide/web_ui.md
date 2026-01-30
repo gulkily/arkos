@@ -1,27 +1,18 @@
 # Base Module Web UI Overview
 
-`base_module_web/` contains an experimental FastAPI application that wraps the same agent used by the CLI. It is not production-ready yet, but this guide documents the current behavior so you can evaluate or extend it.
+`base_module_web/` contains an experimental FastAPI application that wraps the same agent used by the CLI. That module is not tracked in this repository right now, so this guide only applies if you have a local prototype copy (for example, from an internal branch or working directory). Treat the details below as best-effort notes that may drift from your local version.
 
-## Entry points
-- `base_module_web/app.py` – FastAPI app with routes for session creation and message handling.
+## Entry points (prototype only)
+- `base_module_web/app.py` – FastAPI app with routes for message handling.
 - `base_module_web/static/index.html` – Single-page frontend consuming the REST endpoints.
 - `base_module_web/data/` – Directory where session transcripts are stored if persistence is enabled.
 
 ## FastAPI application
-- Adds basic auth middleware (`_BasicAuthMiddleware`) with credentials set via `ARK_BASIC_USER` and `ARK_BASIC_PASS` (default `ark/arkos`).
-- Exposes session endpoints returning `SessionPayload` objects:
-  - `POST /sessions` – Create a session.
-  - `POST /sessions/{id}/message` – Send a user message and receive updated history.
-  - `DELETE /sessions/{id}` – Remove a session and clean up the associated memory file.
 - Uses the same `Agent`, `Memory`, and `ArkModelLink` classes from the CLI, so the backend behavior is consistent.
+- Endpoint shapes, auth middleware, and response payloads depend on the specific prototype version you are running. Confirm routes and schemas in your local `base_module_web/app.py`.
 
 ## Response model
-`SessionPayload` contains:
-- `session_id`
-- `messages` – list of message dicts (`role`, `content`, optional `render_type`/`payload`).
-- `status` – defaults to `"ok"`.
-
-Tool metadata is not yet captured; the `tool_events` array mentioned in planning documents remains a TODO.
+Tool metadata is not yet captured; the `tool_events` array mentioned in planning documents remains a TODO in the prototype.
 
 ## Static frontend
 - Renders a basic chat transcript using vanilla JavaScript.
