@@ -8,6 +8,9 @@ This directory gathers deployment and operations guidance for ARKOS services.
 - `openwebui_tls_setup.md` – TLS troubleshooting guide for Caddy and OpenWebUI.
 - `base_module_web_ubuntu_hosting.md` – systemd and reverse-proxy setup for the bespoke FastAPI web UI.
 
-## TODO
-- Add runbooks for model backend operations (SGLang), backups, and monitoring practices.
+## Deferred items
+The following runbooks are deferred and tracked in the documentation checklist: [`docs/documentation_update_checklist.md`](../documentation_update_checklist.md).
+- Model backend operations (SGLang) runbook.
+- Backup procedures for state and memory data.
+- Monitoring and alerting practices.
 - Link to Mintlify operations pages once they are updated.
