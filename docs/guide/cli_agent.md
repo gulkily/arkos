@@ -19,6 +19,7 @@ Settings live in `config_module/config.yaml` and support `${ENV_VAR}` substituti
    ```
 2. Set `DB_URL` in `.env`.
 3. `OPENAI_API_KEY` is optional in the current codebase: `memory_module/memory.py` sets a dummy value on import. Only set it if you update the memory configuration to use a hosted OpenAI endpoint.
+4. Note: `memory.short_term_turns` and `memory.long_term_limit` exist in `config_module/config.yaml`, but the current agent code does not read them (`Agent.get_context()` uses a hard-coded `turns=5`, and `Memory.retrieve_long_memory` defaults to `mem0_limit=50`).
 
 ## Start the model server
 ```bash
