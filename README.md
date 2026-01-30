@@ -47,6 +47,7 @@ pip install -r requirements.txt
 - (Optional but recommended) a virtual environment for isolating dependencies.
 - Access to a GPU-capable host for running an SGLang container (the default `run.sh` launches Qwen2.5-7B).
 - A Hugging Face access token exported as `HF_TOKEN` before starting the inference server.
+- An embeddings service at `http://localhost:4444/v1` (used by Mem0), or update `memory_module/memory.py` to point at your embedding endpoint.
 
 ## Environment Setup
 ```bash
