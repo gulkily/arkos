@@ -1,13 +1,13 @@
 # State and Memory Reference
 
-This document dives into two subsystems that power the CLI agent: the YAML-driven state machine and the CSV-backed memory helper.
+This document covers the YAML-driven state machine and the Postgres + Mem0 memory stack used by ARKOS.
 
 ## State machine overview
 
-`state_module/state_graph.yaml` determines the order of execution. The default configuration is:
+`state_module/state_graph.yaml` determines the order of execution. The current default configuration is:
 
 ```yaml
-initial: ask_user
+initial: agent_reply
 
 states:
   ask_user:
@@ -20,11 +20,17 @@ states:
     description: "state used for your reasoning"
     type: agent
     transition:
-      next: [ask_user, use_tool]
+      next: [agent_reply, ask_user]
 
-  use_tool:
-    description: "state used for tool use"
-    type: tool
+  cal_tool:
+    description: "state used for querying users calendar"
+    type: calendar
+    transition:
+      next: [agent_reply]
+
+  search_tool:
+    description: "state used for searching the internet"
+    type: search
     transition:
       next: [agent_reply]
 ```
@@ -37,9 +43,11 @@ states:
 ### Built-in states
 | State | File | Behavior |
 | ----- | ---- | -------- |
-| `StateUser` | `state_module/state_user.py` | Prompts for console input. Typing `exit` sets `is_terminal = True`. |
-| `StateAI` | `state_module/state_ai.py` | Calls `agent.call_llm`, prints the reply, and returns an `AIMessage`. |
-| `StateTool` | `state_module/state_tool.py` | Placeholder that prints a stub result and returns a `SystemMessage`. |
+| `StateUser` | `state_module/state_user.py` | Terminal placeholder used to yield control back to the client; user input is collected outside the state graph. |
+| `StateAI` | `state_module/state_ai.py` | Calls `agent.call_llm` and returns an `AIMessage`. |
+| `StateCal` | `state_module/state_calendar.py` | Placeholder calendar flow that can call the Google Calendar MCP server. |
+| `StateSearch` | `state_module/state_search.py` | MCP-powered search flow using the Brave Search server. |
+| `StateTool` | `state_module/state_tool.py` | Placeholder for custom tool routing (not enabled by default). |
 
 ### Custom states
 1. Create a new class in `state_module/` and decorate it with `@register_state`.
@@ -65,46 +73,48 @@ class StateLogging(State):
         return None
 ```
 
-## Memory helper
+## Memory stack
 
-`memory_module/memory.py` captures each state transition so you can inspect sessions after the fact.
+`memory_module/memory.py` persists conversation context in Postgres and uses Mem0 for vector-based retrieval.
+
+### Configuration
+- `DB_URL` must be set in `.env` or the shell environment.
+- Mem0 expects `OPENAI_API_KEY` to be present; a placeholder value is acceptable if you are using a local LLM.
+- The Mem0 configuration lives in `memory_module/memory.py` (not `config_module/config.yaml`):
+  - Vector store provider: `supabase` (collection `memories`).
+  - LLM provider: `vllm` with `vllm_base_url` at `http://localhost:30000/v1`.
+  - Embedder provider: `huggingface` with `huggingface_base_url` at `http://localhost:4444/v1`.
 
 ### Initialization
 ```python
-memory = Memory(agent_id="cli-agent", filename="memory.csv")
-```
-- Creates the file if it does not exist and writes headers: `agent_id,state,intent,tool,scratchpad`.
-- Keeps an in-memory stack (`self.state_stack`) for quick access to the latest entry.
+from memory_module.memory import Memory
 
-### Recording state changes
-```python
-memory.push_state({
-    "state": "agent_reply",
-    "intent": "answer_question",
-    "tool": None,
-    "scratchpad": {"latency_ms": 1840}
-})
+memory = Memory(user_id="ark-agent", session_id=None, db_url=os.environ["DB_URL"])
 ```
-- Validates that `state` is a string.
-- Serializes dictionary scratchpads to JSON before appending to the CSV.
-- Stores the original dict in `state_stack` so you can modify it later with `update_scratchpad`.
+- Creates a new session ID when `session_id` is `None`.
+- Uses `Mem0Memory.from_config` for vector storage.
 
-### Inspecting the stack
-- `peek_state()` returns the most recent entry.
-- `pop_state()` removes and returns the last entry (does not delete CSV rows).
-- `update_scratchpad(updates)` merges fields into the latest scratchpad dict.
+### Recording messages
+`Memory.add_memory(message)`:
+- Infers the role (`system`, `user`, `assistant`, `tool`).
+- Stores the message in Mem0 for long-term retrieval.
+- Writes the serialized message into the `conversation_context` table in Postgres.
+
+### Retrieving context
+- `retrieve_short_memory(turns)` returns the latest messages from Postgres.
+- `retrieve_long_memory(context, mem0_limit)` uses Mem0 similarity search to retrieve related memories.
 
 ### Tips for extension
-- Provide a different filename if you want per-run memory files.
-- Add timestamps or additional columns by editing `_write_to_csv` and the header definition.
-- Replace the CSV writer with a database or object store when you need persistence across services.
+- Update the Mem0 config to use a different vector store or embedding endpoint.
+- Add timestamps or metadata to the Postgres table if you need richer analytics.
+- Keep the state graph and memory usage in sync; tool states should log outputs consistently.
 
 ## Putting it together
 
-During a CLI session:
-1. `StateHandler` fetches `StateUser`.
-2. `StateUser.run` returns a `UserMessage`; the agent appends it to `context["messages"]`.
-3. `StateAI.run` calls the model and returns an `AIMessage`; the agent appends it and may call `memory.push_state`.
-4. `StateTool.run` is invoked only when the transition list contains `use_tool`. Extend this to call real tools and log outputs via `Memory`.
+During a request:
+1. The agent runs the current state (`agent_reply`, `cal_tool`, `search_tool`, etc.).
+2. The state returns an `AIMessage` or `ToolMessage` that the agent stores in memory.
+3. The agent uses `StateHandler.get_transitions` plus `choose_transition` to pick the next state.
+4. The loop ends when the next state is terminal, and the API/CLI returns the last AI message.
 
-Keep this reference handy while you work through the documentation audit—any doc updates about control flow or memory should align with these details.
+Keep this reference handy while you update the docs and state graphs to match the latest tool or memory work.
