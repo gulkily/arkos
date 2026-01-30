@@ -1,7 +1,7 @@
 # Base Module Web UI – Ubuntu Hosting Guide
 
 ## Overview
-Deploy the bespoke FastAPI UI (`base_module_web`) on Ubuntu 24.04, ensure it runs under systemd, and front it with a TLS-enabled reverse proxy so teammates can access it securely.
+Deploy the bespoke FastAPI UI (`base_module_web`) on Ubuntu 24.04, ensure it runs under systemd, and front it with a TLS-enabled reverse proxy so teammates can access it securely. Note: `base_module_web/` is not tracked in this repo, so verify endpoints and env vars against your local prototype before following these steps.
 
 ## 1. Prepare Server
 1. **Create service account and directories**
@@ -25,12 +25,9 @@ sudo -u arkweb /opt/arkos/.venv/bin/pip install -r /opt/arkos/requirements.txt u
 ```
 
 ## 3. Environment Configuration
-Set values in `/etc/ark-base-web.env` (readable by `arkweb`):
+Set values in `/etc/ark-base-web.env` (readable by `arkweb`). These are example keys; confirm the actual names in your local `base_module_web/app.py`:
 ```
-ARK_BASIC_USER=ark
-ARK_BASIC_PASS=arkos
 ARK_LLM_BASE_URL=http://127.0.0.1:30000/v1
-ARK_WEB_VERSION=0.2.0
 ```
 You can extend this file as new settings land in `base_module_web/app.py`.
 
@@ -77,17 +74,13 @@ server {
 
     # TLS config here (certbot or internal CA)
 
-    location /healthz {
-        proxy_pass http://127.0.0.1:8100/healthz;
-    }
-
     location / {
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         auth_basic "Restricted";
-        auth_basic_user_file /etc/nginx/.htpasswd; # optional if middleware handles auth
+        auth_basic_user_file /etc/nginx/.htpasswd; # optional if your prototype does not handle auth
         proxy_pass http://127.0.0.1:8100/;
     }
 }
@@ -97,7 +90,7 @@ server {
 5. If using Let’s Encrypt: `sudo certbot --nginx -d ark.example.com`.
 
 ## 6. Monitoring & Maintenance
-- **Health checks**: `curl -fsS http://127.0.0.1:8100/healthz` (hook into uptime robot/Zabbix).
+- **Health checks**: prefer whatever health endpoint your prototype exposes (if any).
 - **Logs**: `journalctl -u ark-base-web`. Pipe into centralized logging if available.
 - **Backups**: archive `/opt/arkos/base_module_web/data/` since it contains session memories.
 - **Updates**: pull repo, reinstall dependencies, and restart service (`sudo systemctl restart ark-base-web`).
@@ -107,4 +100,4 @@ server {
 - 502/504 errors: check `nginx` logs (`/var/log/nginx/error.log`) and service logs.
 - Permission denied on memory files: verify directory ownership (`sudo chown arkweb:arkweb base_module_web/data`).
 - Proxy auth conflicts: disable middleware auth by setting empty `ARK_BASIC_USER/PASS` or remove nginx `auth_basic`.
-- LLM unavailable: `/sessions` payload shows `status="error"`; confirm `ARK_LLM_BASE_URL` and backend availability.
+- LLM unavailable: confirm `ARK_LLM_BASE_URL` and backend availability.
