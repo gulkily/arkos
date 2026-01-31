@@ -7,6 +7,7 @@ This directory gathers deployment and operations guidance for ARKOS services.
 - `openwebui_deployment_plan.md` – high-level deployment plan and risk log for OpenWebUI.
 - `openwebui_tls_setup.md` – TLS troubleshooting guide for Caddy and OpenWebUI.
 - `base_module_web_ubuntu_hosting.md` – systemd and reverse-proxy setup for the bespoke FastAPI web UI.
+- `docker_images.md` – reference for Docker images used in the repo and what they do.
 
 ## Deferred items
 The following runbooks are deferred and tracked in the documentation checklist: [`docs/documentation_update_checklist.md`](../documentation_update_checklist.md).
