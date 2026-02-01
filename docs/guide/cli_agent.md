@@ -58,6 +58,11 @@ You will see repeated prompts of `You:`. Type your message and press Enter. The 
 
 The system prompt is configurable in `config_module/config.yaml` (`app.system_prompt`).
 
+## API note (per-user tools)
+`/v1/chat/completions` accepts a per-user identifier for tool auth. You can set either:
+- `X-User-ID` header, or
+- `user` / `user_id` fields in the JSON payload.
+
 ## Troubleshooting
 | Symptom | Likely cause | Fix |
 | ------- | ------------ | --- |
