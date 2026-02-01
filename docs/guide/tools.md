@@ -1,6 +1,6 @@
 # Tool Integration Guide
 
-ARKOS uses the Model Context Protocol (MCP) to connect to external tools. The current implementation focuses on launching MCP servers locally and routing tool calls over JSON-RPC 2.0 via stdio.
+ARKOS uses the Model Context Protocol (MCP) to connect to external tools. The current implementation supports stdio and HTTP transports and loads MCP server definitions from `config_module/config.yaml`.
 
 ## Requirements
 - Node.js with `npx` (used to launch MCP servers)
@@ -15,9 +15,37 @@ ARKOS uses the Model Context Protocol (MCP) to connect to external tools. The cu
 - `state_module/state_tool.py` – placeholder state for custom tool logic.
 
 ## Current execution flow
-1. A state (calendar/search/tool) constructs a server config dictionary with `command`, `args`, and optional `env`.
-2. `MCPToolManager.initialize_servers()` starts each MCP server and builds a tool registry.
-3. The state calls `MCPToolManager.call_tool(...)` and returns a `ToolMessage` to the agent.
+1. MCP servers are defined under `mcp_servers` in `config_module/config.yaml`.
+2. `base_module/app.py` constructs `MCPToolManager` from that config and initializes servers on startup.
+3. `MCPToolManager.initialize_servers()` starts each server and builds a tool registry.
+4. States call `MCPToolManager.call_tool(...)` and return a `ToolMessage` to the agent.
+
+## MCP server configuration
+`config_module/config.yaml` controls tool connectivity via the `mcp_servers` map. Each entry can use a `transport` of `stdio` or `http`:
+
+```yaml
+mcp_servers:
+  brave-search:
+    transport: stdio
+    command: npx
+    args: ["-y", "@brave/brave-search-mcp-server", "--transport", "stdio"]
+    env:
+      BRAVE_API_KEY: "${BRAVE_API_KEY}"
+
+  google-calendar:
+    transport: stdio
+    command: npx
+    args: ["-y", "@cocal/google-calendar-mcp"]
+    env:
+      GOOGLE_OAUTH_CREDENTIALS: "${GOOGLE_OAUTH_CREDENTIALS}"
+
+  filesystem:
+    transport: stdio
+    command: npx
+    args: ["-y", "@modelcontextprotocol/server-filesystem", "/tmp"]
+```
+
+For HTTP servers, set `transport: http` and provide `url` plus optional `auth` settings (see `tool_module/transports/http.py` for OAuth/bearer options). Environment variables in the YAML (e.g., `${BRAVE_API_KEY}`) are resolved by `config_module/loader.py` using `.env`.
 
 ## Quickstart: filesystem MCP server
 ```python
@@ -66,6 +94,6 @@ Set `BRAVE_API_KEY` in `.env` or in the MCP server config passed to `MCPToolMana
 `pytest tool_module/test_tool_call.py` exercises the MCP client and sample tool servers. These tests require Node.js and, for Google Calendar or Brave Search, the corresponding credentials. Treat them as optional smoke tests until CI coverage is formalized.
 
 ## Roadmap
-- Move MCP server configuration into `config_module/config.yaml`.
+- Expand HTTP transport examples and document OAuth token caching behavior.
 - Add structured tool call payloads for richer UI rendering.
 - Centralize tool auth flows and secrets management.

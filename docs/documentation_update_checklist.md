@@ -18,7 +18,7 @@ Derived from repo/code vs current docs.
 - [x] Document Docker images used by the repo (see `docs/ops/docker_images.md`).
 
 ## New items from recent tool/auth commits
-- [ ] Document `mcp_servers` config in `config_module/config.yaml` (transport, stdio/HTTP fields, env vars) and update `docs/guide/tools.md` accordingly.
+- [x] Document `mcp_servers` config in `config_module/config.yaml` (transport, stdio/HTTP fields, env vars) and update `docs/guide/tools.md` accordingly.
 - [ ] Document per-user MCP OAuth flow: `base_module/auth.py` endpoints (`/auth/google/login`, `/auth/google/callback`, `/auth/google/status`, `/auth/google/disconnect`) and required env vars (`GOOGLE_OAUTH_CREDENTIALS`).
 - [ ] Document `tool_module/token_store.py` and the `user_oauth_tokens` Postgres table schema; note token file export to `~/.arkos/user_tokens/`.
 - [ ] Document `tool_module/transports/*` (stdio + HTTP transport, OAuth PKCE flow, token cache at `~/.arkos/mcp_tokens.json`).
