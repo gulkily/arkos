@@ -15,3 +15,11 @@ Derived from repo/code vs current docs.
 - [x] `README.md` and `docs/guide/cli_agent.md`: clarify whether the embedding service at `:4444` is required for Mem0 and how to run it (or mark as optional/stub).
 - [x] `docs/documentation_audit_plan.md`: update inventory to reflect that `base_module_web/` is untracked in this repo.
 - [x] `docs/ops/README.md`: fill the TODO items (model backend ops, backups, monitoring) or explicitly defer them with links/tickets.
+
+## New items from recent tool/auth commits
+- [ ] Document `mcp_servers` config in `config_module/config.yaml` (transport, stdio/HTTP fields, env vars) and update `docs/guide/tools.md` accordingly.
+- [ ] Document per-user MCP OAuth flow: `base_module/auth.py` endpoints (`/auth/google/login`, `/auth/google/callback`, `/auth/google/status`, `/auth/google/disconnect`) and required env vars (`GOOGLE_OAUTH_CREDENTIALS`).
+- [ ] Document `tool_module/token_store.py` and the `user_oauth_tokens` Postgres table schema; note token file export to `~/.arkos/user_tokens/`.
+- [ ] Document `tool_module/transports/*` (stdio + HTTP transport, OAuth PKCE flow, token cache at `~/.arkos/mcp_tokens.json`).
+- [ ] Update API docs to mention `X-User-ID` header or `user_id` payload field for per-user tool auth in `/v1/chat/completions`.
+- [ ] Update dependencies list in `README.md` to include `aiohttp` and `google-auth-oauthlib` (used by HTTP transport and Google OAuth).
