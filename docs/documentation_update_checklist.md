@@ -15,6 +15,7 @@ Derived from repo/code vs current docs.
 - [x] `README.md` and `docs/guide/cli_agent.md`: clarify whether the embedding service at `:4444` is required for Mem0 and how to run it (or mark as optional/stub).
 - [x] `docs/documentation_audit_plan.md`: update inventory to reflect that `base_module_web/` is untracked in this repo.
 - [x] `docs/ops/README.md`: fill the TODO items (model backend ops, backups, monitoring) or explicitly defer them with links/tickets.
+- [x] Document Docker images used by the repo (see `docs/ops/docker_images.md`).
 
 ## New items from recent tool/auth commits
 - [ ] Document `mcp_servers` config in `config_module/config.yaml` (transport, stdio/HTTP fields, env vars) and update `docs/guide/tools.md` accordingly.
