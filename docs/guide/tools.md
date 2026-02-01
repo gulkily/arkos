@@ -81,6 +81,20 @@ await manager.shutdown()
    - `GOOGLE_CALENDAR_MCP_TOKEN_PATH` (path to generated token JSON)
 4. Enable real calendar calls in `state_module/state_calendar.py` by replacing the placeholder output with the actual MCP call (uncomment the `calendar_retrieval()` invocation and return its result as a `ToolMessage`). Keep the method async and ensure the env vars above point to real files.
 
+### Per-user OAuth (base_module)
+The API server exposes OAuth endpoints for Google Calendar in `base_module/auth.py`:
+1. Ensure `GOOGLE_OAUTH_CREDENTIALS` points to a Google OAuth client JSON file (set it in `.env` or the shell).
+2. Start the API server (`python base_module/app.py`).
+3. Initiate auth in a browser:
+   - `GET /auth/google/login?user_id=<your-user-id>`
+4. The callback endpoint (`/auth/google/callback`) stores tokens for that user.
+5. Check connection status:
+   - `GET /auth/google/status?user_id=<your-user-id>`
+6. Disconnect a user:
+   - `DELETE /auth/google/disconnect?user_id=<your-user-id>`
+
+Tokens are stored in Postgres via the per-user token store; see `tool_module/token_store.py`.
+
 ### Brave Search MCP
 Set `BRAVE_API_KEY` in `.env` or in the MCP server config passed to `MCPToolManager`.
 
