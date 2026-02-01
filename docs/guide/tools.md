@@ -47,6 +47,14 @@ mcp_servers:
 
 For HTTP servers, set `transport: http` and provide `url` plus optional `auth` settings (see `tool_module/transports/http.py` for OAuth/bearer options). Environment variables in the YAML (e.g., `${BRAVE_API_KEY}`) are resolved by `config_module/loader.py` using `.env`.
 
+## Transports
+ARKOS ships two MCP transport implementations in `tool_module/transports/`:
+- **stdio** (`stdio.py`): launches a subprocess and speaks JSON-RPC over stdin/stdout.
+- **http** (`http.py`): uses Streamable HTTP with optional OAuth 2.1 (PKCE) or bearer token auth.
+
+When OAuth is enabled for HTTP transport, the client caches tokens in:
+`~/.arkos/mcp_tokens.json`.
+
 ## Quickstart: filesystem MCP server
 ```python
 from tool_module.tool_call import MCPToolManager
