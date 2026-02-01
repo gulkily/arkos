@@ -23,4 +23,4 @@ Derived from repo/code vs current docs.
 - [x] Document `tool_module/token_store.py` and the `user_oauth_tokens` Postgres table schema; note token file export to `~/.arkos/user_tokens/`.
 - [x] Document `tool_module/transports/*` (stdio + HTTP transport, OAuth PKCE flow, token cache at `~/.arkos/mcp_tokens.json`).
 - [x] Update API docs to mention `X-User-ID` header or `user_id` payload field for per-user tool auth in `/v1/chat/completions`.
-- [ ] Update dependencies list in `README.md` to include `aiohttp` and `google-auth-oauthlib` (used by HTTP transport and Google OAuth).
+- [x] Update dependencies list in `README.md` to include `aiohttp` and `google-auth-oauthlib` (used by HTTP transport and Google OAuth).

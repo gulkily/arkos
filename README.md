@@ -24,6 +24,8 @@ The entire codebase is in Python, except for a few shell scripts.
 * **`pyyaml>=6.0.2`** - YAML parser for configuration files (state graphs, etc.)
 * **`pydantic>=2.10.6`** - Data validation and schema definition using Python type annotations
 * **`requests>=2.32.3`** - HTTP library for making API requests to external services and tools
+* **`aiohttp>=3.9.0`** - Async HTTP client used by the MCP HTTP transport
+* **`google-auth-oauthlib>=1.2.0`** - OAuth flow for Google Calendar per-user auth
 
 ### Web Framework
 * **`fastapi>=0.115.0`** - Modern, fast web framework for building the API server with automatic OpenAPI documentation
