@@ -95,6 +95,28 @@ The API server exposes OAuth endpoints for Google Calendar in `base_module/auth.
 
 Tokens are stored in Postgres via the per-user token store; see `tool_module/token_store.py`.
 
+### Token storage (user_oauth_tokens)
+`tool_module/token_store.py` stores per-user OAuth tokens in Postgres and exports token files for MCP subprocesses.
+
+Expected table schema:
+```sql
+CREATE TABLE IF NOT EXISTS user_oauth_tokens (
+    id SERIAL PRIMARY KEY,
+    user_id VARCHAR(255) NOT NULL,
+    service VARCHAR(255) NOT NULL,
+    access_token TEXT NOT NULL,
+    refresh_token TEXT,
+    expires_at TIMESTAMP,
+    token_data JSONB,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    UNIQUE(user_id, service)
+);
+```
+
+When a tool call requires per-user auth, the token store writes a service-specific token file into:
+`~/.arkos/user_tokens/` (used by MCP subprocesses).
+
 ### Brave Search MCP
 Set `BRAVE_API_KEY` in `.env` or in the MCP server config passed to `MCPToolManager`.
 
